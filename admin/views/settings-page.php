@@ -34,45 +34,58 @@ $floating_offset_y      = get_option( 'fas_floating_offset_y' . $suffix, 24 );
 
 $popup_width            = get_option( 'fas_popup_width' . $suffix, 750 );
 $popup_max_height       = get_option( 'fas_popup_max_height' . $suffix, 600 );
-$tabs_order             = get_option( 'fas_tabs_order' . $suffix, 'all,products,posts,docs' );
+
+// Fixed Sortable Loading Bug: Check if empty or corrupted, fall back to core tabs
+$tabs_order             = get_option( 'fas_tabs_order' . $suffix );
+if ( empty( $tabs_order ) || strpos( $tabs_order, 'all' ) === false ) {
+    $tabs_order = 'all,products,posts,docs';
+}
 $tabs_order_arr         = array_map( 'trim', explode( ',', $tabs_order ) );
 
 $tab_all_title          = get_option( 'fas_tab_all_title' . $suffix, 'All Results' );
 $tab_all_color          = get_option( 'fas_tab_all_color' . $suffix, '#0066cc' );
 $tab_all_icon           = get_option( 'fas_tab_all_icon' . $suffix, 'dashicons-grid-view' );
+$tab_all_custom_icon    = get_option( 'fas_tab_all_custom_icon' . $suffix, '' );
 
 $tab_products_title     = get_option( 'fas_tab_products_title' . $suffix, 'Products' );
 $tab_products_color     = get_option( 'fas_tab_products_color' . $suffix, '#10b981' );
 $tab_products_icon      = get_option( 'fas_tab_products_icon' . $suffix, 'dashicons-cart' );
+$tab_products_custom_icon = get_option( 'fas_tab_products_custom_icon' . $suffix, '' );
 
 $tab_posts_title        = get_option( 'fas_tab_posts_title' . $suffix, 'News & Articles' );
 $tab_posts_color        = get_option( 'fas_tab_posts_color' . $suffix, '#f59e0b' );
 $tab_posts_icon         = get_option( 'fas_tab_posts_icon' . $suffix, 'dashicons-welcome-write-blog' );
+$tab_posts_custom_icon  = get_option( 'fas_tab_posts_custom_icon' . $suffix, '' );
 
 $tab_docs_title         = get_option( 'fas_tab_docs_title' . $suffix, 'Documentation' );
 $tab_docs_color         = get_option( 'fas_tab_docs_color' . $suffix, '#6366f1' );
 $tab_docs_icon          = get_option( 'fas_tab_docs_icon' . $suffix, 'dashicons-book-alt' );
+$tab_docs_custom_icon   = get_option( 'fas_tab_docs_custom_icon' . $suffix, '' );
 
 $tab_details = array(
     'all' => array(
-        'title' => $tab_all_title,
-        'color' => $tab_all_color,
-        'icon'  => $tab_all_icon,
+        'title'       => $tab_all_title,
+        'color'       => $tab_all_color,
+        'icon'        => $tab_all_icon,
+        'custom_icon' => $tab_all_custom_icon,
     ),
     'products' => array(
-        'title' => $tab_products_title,
-        'color' => $tab_products_color,
-        'icon'  => $tab_products_icon,
+        'title'       => $tab_products_title,
+        'color'       => $tab_products_color,
+        'icon'        => $tab_products_icon,
+        'custom_icon' => $tab_products_custom_icon,
     ),
     'posts' => array(
-        'title' => $tab_posts_title,
-        'color' => $tab_posts_color,
-        'icon'  => $tab_posts_icon,
+        'title'       => $tab_posts_title,
+        'color'       => $tab_posts_color,
+        'icon'        => $tab_posts_icon,
+        'custom_icon' => $tab_posts_custom_icon,
     ),
     'docs' => array(
-        'title' => $tab_docs_title,
-        'color' => $tab_docs_color,
-        'icon'  => $tab_docs_icon,
+        'title'       => $tab_docs_title,
+        'color'       => $tab_docs_color,
+        'icon'        => $tab_docs_icon,
+        'custom_icon' => $tab_docs_custom_icon,
     ),
 );
 
@@ -85,6 +98,7 @@ $i18n = array(
     'configure_lang' => $is_rtl ? 'تنظیم زبان فعال:' : 'Configure Active Language:',
     'title' => $is_rtl ? 'موتور جستجوی پیشرفته فراموج' : 'Faramoj Advanced Search',
     'save_changes' => $is_rtl ? 'ذخیره تغییرات' : 'Save Changes',
+    'save_success' => $is_rtl ? 'تنظیمات با موفقیت ذخیره شد ✓' : 'Settings saved successfully ✓',
     'engine_performance' => $is_rtl ? 'موتور جستجو و کارایی' : 'Search Engine & Performance',
     'cache_duration' => $is_rtl ? 'مدت زمان حافظه پنهان (ترنزینت)' : 'Cache Duration (Transient)',
     'cache_duration_desc' => $is_rtl ? 'مدت زمان به ثانیه برای کش کردن نتایج. برای ۱ ساعت از ۳۶۰۰ استفاده کنید. برای غیرفعال کردن کش عدد ۰ را قرار دهید.' : 'Time in seconds to cache results. Use 3600 for 1 hour. Set 0 to disable cache.',
@@ -121,17 +135,29 @@ $i18n = array(
     'tab_prod_cust' => $is_rtl ? 'شخصی‌سازی تب [محصولات]' : '[Products] Customization',
     'tab_post_cust' => $is_rtl ? 'شخصی‌سازی تب [اخبار و مقالات]' : '[News & Articles] Customization',
     'tab_doc_cust' => $is_rtl ? 'شخصی‌سازی تب [مستندات و آموزش]' : '[Documentation] Customization',
+    'upload_lbl' => $is_rtl ? 'آیکون دلخواه PNG یا SVG:' : 'Custom SVG or PNG Icon:',
+    'upload_btn' => $is_rtl ? 'انتخاب آیکون' : 'Upload',
     'live' => $is_rtl ? 'زنده' : 'Live',
     'live_preview' => $is_rtl ? 'پیش‌نمایش زنده چیدمان پاپ‌آپ' : 'Modal Overlay Live Preview',
     'live_preview_desc' => $is_rtl ? 'پیش‌نمایش تعاملی زیر به طور زنده تغییرات چیدمان پاپ‌آپ، ابعاد پیکسل، و حالت‌های تیره/روشن تنظیم شده در بالا را نمایش می‌دهد.' : 'The live preview below renders without any layout constraints. Resize your popup width and max-height freely using the dimension controls above to see the layout changes in real-time.',
     'type_search' => $is_rtl ? 'عبارتی را برای جستجو تایپ کنید...' : 'Type to search...',
 );
+
+$settings_saved = isset( $_GET['settings-updated'] ) && 'true' === $_GET['settings-updated'];
+$btn_text = $settings_saved ? $i18n['save_success'] : $i18n['save_changes'];
+$btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
 ?>
 <div class="wrap fas-admin-wrap" style="max-width: 1200px; margin: 20px auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif; <?php echo $dir_style; ?>">
 
     <style>
         .fas-admin-wrap .wp-picker-container {
             direction: ltr !important;
+        }
+        .fas-card {
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+        .fas-card:hover {
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.06), 0 8px 10px -6px rgba(0,0,0,0.06) !important;
         }
         <?php if ($is_rtl) : ?>
         .fas-admin-wrap .fas-form-table td,
@@ -154,10 +180,10 @@ $i18n = array(
 
         <!-- Lower row: Save Changes Button on the left, Active Language Selector on the right -->
         <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; flex-direction: row; gap: 16px; box-sizing: border-box;">
-            <!-- Save changes button on the left (or opposite depending on LTR/RTL) -->
+            <!-- Save changes button on the left (with conditional green color on success) -->
             <div>
-                <button type="submit" form="fas-settings-form" class="button button-primary button-large" style="background: #0066cc; border: none; font-weight: 700; padding: 12px 28px; height: auto; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,102,204,0.3); cursor: pointer; transition: transform 0.2s;">
-                    <?php echo esc_html( $i18n['save_changes'] ); ?>
+                <button type="submit" form="fas-settings-form" class="button button-primary button-large" style="background: <?php echo esc_attr( $btn_bg ); ?>; border: none; font-weight: 700; padding: 12px 28px; height: auto; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,102,204,0.3); cursor: pointer; transition: background 0.3s ease, transform 0.2s;">
+                    <?php echo esc_html( $btn_text ); ?>
                 </button>
             </div>
 
@@ -303,9 +329,10 @@ $i18n = array(
 
             </div>
 
-            <!-- Right Column: Reordering & Tabs Customization -->
+            <!-- Right Column: Reordering & Tabs Customization + Interactive Live Preview underneath -->
             <div class="fas-settings-column-right" style="display: flex; flex-direction: column; gap: 24px;">
 
+                <!-- Category customization card -->
                 <div class="fas-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
                     <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
                         <span class="dashicons dashicons-move" style="color: #0066cc;"></span>
@@ -326,7 +353,11 @@ $i18n = array(
                             $tab = $tab_details[ $tab_key ];
                             ?>
                             <div class="fas-sortable-item" data-key="<?php echo esc_attr( $tab_key ); ?>" style="padding: 10px 16px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; cursor: move; display: flex; align-items: center; gap: 8px; font-weight: 600; color: #475569; box-shadow: 0 1px 2px rgba(0,0,0,0.03); transition: transform 0.2s;">
-                                <span class="dashicons <?php echo esc_attr( $tab['icon'] ); ?>" style="font-size: 16px; width: 16px; height:16px; color: <?php echo esc_attr( $tab['color'] ); ?>;"></span>
+                                <?php if ( ! empty( $tab['custom_icon'] ) ) : ?>
+                                    <img src="<?php echo esc_url( $tab['custom_icon'] ); ?>" style="width:16px; height:16px; object-fit:contain; flex-shrink:0;">
+                                <?php else : ?>
+                                    <span class="dashicons <?php echo esc_attr( $tab['icon'] ); ?>" style="font-size: 16px; width: 16px; height:16px; color: <?php echo esc_attr( $tab['color'] ); ?>;"></span>
+                                <?php endif; ?>
                                 <span><?php echo esc_html( $tab['title'] ); ?></span>
                             </div>
                             <?php
@@ -336,50 +367,91 @@ $i18n = array(
                     <input type="hidden" name="fas_tabs_order<?php echo esc_attr( $suffix ); ?>" id="fas_tabs_order" value="<?php echo esc_attr( $tabs_order ); ?>">
 
                     <div style="display: flex; flex-direction: column; gap: 16px;">
+
                         <!-- Tab 1: All -->
-                        <div style="background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            <span style="font-weight: 700; color: #334155; font-size: 13px;"><?php echo esc_html( $i18n['tab_all_cust'] ); ?></span>
-                            <div style="display: flex; gap: 10px; margin-top: 8px;">
-                                <input type="text" name="fas_tab_all_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_all_title" value="<?php echo esc_attr( $tab_all_title ); ?>" class="regular-text" placeholder="All Results" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                <input type="text" name="fas_tab_all_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_all_icon" value="<?php echo esc_attr( $tab_all_icon ); ?>" class="regular-text" placeholder="dashicons-grid-view" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);">
+                            <span style="font-weight: 700; color: #1e293b; font-size: 13px;"><?php echo esc_html( $i18n['tab_all_cust'] ); ?></span>
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <input type="text" name="fas_tab_all_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_all_title" value="<?php echo esc_attr( $tab_all_title ); ?>" class="regular-text" placeholder="All Results" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
+                                <input type="text" name="fas_tab_all_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_all_icon" value="<?php echo esc_attr( $tab_all_icon ); ?>" class="regular-text" placeholder="dashicons-grid-view" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
                             </div>
-                            <div style="margin-top: 8px;">
+
+                            <!-- Custom SVG/PNG Icon Row -->
+                            <div style="margin-top: 10px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
+                                <span style="font-size: 11px; color: #64748b; font-weight: 700; display: block; margin-bottom: 4px;"><?php echo esc_html( $i18n['upload_lbl'] ); ?></span>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" name="fas_tab_all_custom_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_all_custom_icon" value="<?php echo esc_attr( $tab_all_custom_icon ); ?>" style="flex: 1; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px; padding: 6px 12px;" placeholder="https://example.com/icon.svg">
+                                    <button type="button" class="button fas-upload-btn" data-target="fas_tab_all_custom_icon" style="border-radius: 6px; font-weight: 700; height: auto; padding: 6px 14px;"><?php echo esc_html( $i18n['upload_btn'] ); ?></button>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 10px;">
                                 <input type="text" name="fas_tab_all_color<?php echo esc_attr( $suffix ); ?>" id="fas_tab_all_color" value="<?php echo esc_attr( $tab_all_color ); ?>" class="fas-color-picker">
                             </div>
                         </div>
 
                         <!-- Tab 2: Products -->
-                        <div style="background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            <span style="font-weight: 700; color: #334155; font-size: 13px;"><?php echo esc_html( $i18n['tab_prod_cust'] ); ?></span>
-                            <div style="display: flex; gap: 10px; margin-top: 8px;">
-                                <input type="text" name="fas_tab_products_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_products_title" value="<?php echo esc_attr( $tab_products_title ); ?>" class="regular-text" placeholder="Products" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                <input type="text" name="fas_tab_products_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_products_icon" value="<?php echo esc_attr( $tab_products_icon ); ?>" class="regular-text" placeholder="dashicons-cart" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);">
+                            <span style="font-weight: 700; color: #1e293b; font-size: 13px;"><?php echo esc_html( $i18n['tab_prod_cust'] ); ?></span>
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <input type="text" name="fas_tab_products_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_products_title" value="<?php echo esc_attr( $tab_products_title ); ?>" class="regular-text" placeholder="Products" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
+                                <input type="text" name="fas_tab_products_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_products_icon" value="<?php echo esc_attr( $tab_products_icon ); ?>" class="regular-text" placeholder="dashicons-cart" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
                             </div>
-                            <div style="margin-top: 8px;">
+
+                            <!-- Custom SVG/PNG Icon Row -->
+                            <div style="margin-top: 10px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
+                                <span style="font-size: 11px; color: #64748b; font-weight: 700; display: block; margin-bottom: 4px;"><?php echo esc_html( $i18n['upload_lbl'] ); ?></span>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" name="fas_tab_products_custom_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_products_custom_icon" value="<?php echo esc_attr( $tab_products_custom_icon ); ?>" style="flex: 1; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px; padding: 6px 12px;" placeholder="https://example.com/icon.svg">
+                                    <button type="button" class="button fas-upload-btn" data-target="fas_tab_products_custom_icon" style="border-radius: 6px; font-weight: 700; height: auto; padding: 6px 14px;"><?php echo esc_html( $i18n['upload_btn'] ); ?></button>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 10px;">
                                 <input type="text" name="fas_tab_products_color<?php echo esc_attr( $suffix ); ?>" id="fas_tab_products_color" value="<?php echo esc_attr( $tab_products_color ); ?>" class="fas-color-picker">
                             </div>
                         </div>
 
                         <!-- Tab 3: Posts -->
-                        <div style="background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            <span style="font-weight: 700; color: #334155; font-size: 13px;"><?php echo esc_html( $i18n['tab_post_cust'] ); ?></span>
-                            <div style="display: flex; gap: 10px; margin-top: 8px;">
-                                <input type="text" name="fas_tab_posts_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_posts_title" value="<?php echo esc_attr( $tab_posts_title ); ?>" class="regular-text" placeholder="News & Articles" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                <input type="text" name="fas_tab_posts_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_posts_icon" value="<?php echo esc_attr( $tab_posts_icon ); ?>" class="regular-text" placeholder="dashicons-welcome-write-blog" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);">
+                            <span style="font-weight: 700; color: #1e293b; font-size: 13px;"><?php echo esc_html( $i18n['tab_post_cust'] ); ?></span>
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <input type="text" name="fas_tab_posts_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_posts_title" value="<?php echo esc_attr( $tab_posts_title ); ?>" class="regular-text" placeholder="News & Articles" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
+                                <input type="text" name="fas_tab_posts_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_posts_icon" value="<?php echo esc_attr( $tab_posts_icon ); ?>" class="regular-text" placeholder="dashicons-welcome-write-blog" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
                             </div>
-                            <div style="margin-top: 8px;">
+
+                            <!-- Custom SVG/PNG Icon Row -->
+                            <div style="margin-top: 10px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
+                                <span style="font-size: 11px; color: #64748b; font-weight: 700; display: block; margin-bottom: 4px;"><?php echo esc_html( $i18n['upload_lbl'] ); ?></span>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" name="fas_tab_posts_custom_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_posts_custom_icon" value="<?php echo esc_attr( $tab_posts_custom_icon ); ?>" style="flex: 1; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px; padding: 6px 12px;" placeholder="https://example.com/icon.svg">
+                                    <button type="button" class="button fas-upload-btn" data-target="fas_tab_posts_custom_icon" style="border-radius: 6px; font-weight: 700; height: auto; padding: 6px 14px;"><?php echo esc_html( $i18n['upload_btn'] ); ?></button>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 10px;">
                                 <input type="text" name="fas_tab_posts_color<?php echo esc_attr( $suffix ); ?>" id="fas_tab_posts_color" value="<?php echo esc_attr( $tab_posts_color ); ?>" class="fas-color-picker">
                             </div>
                         </div>
 
                         <!-- Tab 4: Docs -->
-                        <div style="background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            <span style="font-weight: 700; color: #334155; font-size: 13px;"><?php echo esc_html( $i18n['tab_doc_cust'] ); ?></span>
-                            <div style="display: flex; gap: 10px; margin-top: 8px;">
-                                <input type="text" name="fas_tab_docs_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_docs_title" value="<?php echo esc_attr( $tab_docs_title ); ?>" class="regular-text" placeholder="Documentation" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                <input type="text" name="fas_tab_docs_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_docs_icon" value="<?php echo esc_attr( $tab_docs_icon ); ?>" class="regular-text" placeholder="dashicons-book-alt" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);">
+                            <span style="font-weight: 700; color: #1e293b; font-size: 13px;"><?php echo esc_html( $i18n['tab_doc_cust'] ); ?></span>
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <input type="text" name="fas_tab_docs_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_docs_title" value="<?php echo esc_attr( $tab_docs_title ); ?>" class="regular-text" placeholder="Documentation" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
+                                <input type="text" name="fas_tab_docs_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_docs_icon" value="<?php echo esc_attr( $tab_docs_icon ); ?>" class="regular-text" placeholder="dashicons-book-alt" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
                             </div>
-                            <div style="margin-top: 8px;">
+
+                            <!-- Custom SVG/PNG Icon Row -->
+                            <div style="margin-top: 10px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
+                                <span style="font-size: 11px; color: #64748b; font-weight: 700; display: block; margin-bottom: 4px;"><?php echo esc_html( $i18n['upload_lbl'] ); ?></span>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" name="fas_tab_docs_custom_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_docs_custom_icon" value="<?php echo esc_attr( $tab_docs_custom_icon ); ?>" style="flex: 1; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px; padding: 6px 12px;" placeholder="https://example.com/icon.svg">
+                                    <button type="button" class="button fas-upload-btn" data-target="fas_tab_docs_custom_icon" style="border-radius: 6px; font-weight: 700; height: auto; padding: 6px 14px;"><?php echo esc_html( $i18n['upload_btn'] ); ?></button>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 10px;">
                                 <input type="text" name="fas_tab_docs_color<?php echo esc_attr( $suffix ); ?>" id="fas_tab_docs_color" value="<?php echo esc_attr( $tab_docs_color ); ?>" class="fas-color-picker">
                             </div>
                         </div>
@@ -387,64 +459,64 @@ $i18n = array(
 
                 </div>
 
-            </div>
+                <!-- Requirement 1: Centered Interactive Live Preview placed beautifully under the Category sorting/customization cards -->
+                <div class="fas-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
+                    <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+                        <span style="background: #e11d48; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 12px; font-weight: 800; text-transform: uppercase;"><?php echo esc_html( $i18n['live'] ); ?></span>
+                        <span><?php echo esc_html( $i18n['live_preview'] ); ?></span>
+                    </h3>
 
-        </div>
+                    <p style="font-size: 13px; color: #64748b; margin-bottom: 24px;">
+                        <?php echo esc_html( $i18n['live_preview_desc'] ); ?>
+                    </p>
 
-    </form>
+                    <!-- Centered live preview container wrapper with generous workspace -->
+                    <div id="fas-mock-modal-wrapper" style="background: radial-gradient(circle, #f8fafc 0%, #f1f5f9 100%); padding: 40px 10px; border-radius: 12px; display: flex; justify-content: center; overflow: auto; min-height: 250px; border: 1px solid #cbd5e1;">
 
-    <!-- Full Width Card for Live Preview -->
-    <div class="fas-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); margin-top: 30px; width: 100%; box-sizing: border-box; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-        <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
-            <span style="background: #e11d48; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 12px; font-weight: 800; text-transform: uppercase;"><?php echo esc_html( $i18n['live'] ); ?></span>
-            <span><?php echo esc_html( $i18n['live_preview'] ); ?></span>
-        </h3>
+                        <div id="fas-preview-container" class="fas-search-container" style="width: 100%; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; <?php echo $dir_style; ?>">
 
-        <p style="font-size: 13px; color: #64748b; margin-bottom: 24px;">
-            <?php echo esc_html( $i18n['live_preview_desc'] ); ?>
-        </p>
+                            <!-- Input wrapper -->
+                            <div class="fas-search-input-wrapper" style="display: flex; align-items: center; padding: 18px 24px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+                                <span class="dashicons dashicons-search" style="color: #64748b; margin: <?php echo $is_rtl ? '0 0 0 12px' : '0 12px 0 0'; ?>; font-size: 20px; width: 20px; height: 20px;"></span>
+                                <input type="text" placeholder="<?php echo esc_attr( $i18n['type_search'] ); ?>" style="border:none; outline:none; background:transparent; width:100%; font-size:18px; color:#1e293b; font-weight:500; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;" disabled>
 
-        <!-- Centered live preview container wrapper with generous workspace -->
-        <div id="fas-mock-modal-wrapper" style="background: radial-gradient(circle, #f8fafc 0%, #f1f5f9 100%); padding: 60px 20px; border-radius: 12px; display: flex; justify-content: center; overflow: auto; min-height: 250px; border: 1px solid #cbd5e1;">
+                                <!-- Close button in preview -->
+                                <button class="fas-modal-close" style="background: rgba(100, 116, 139, 0.1); border: none !important; color: #64748b; width: 34px; height: 34px; border-radius: 50% !important; margin: <?php echo $is_rtl ? '0 14px 0 0' : '0 0 0 14px'; ?>; display: flex; align-items: center; justify-content: center;" disabled>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
 
-            <div id="fas-preview-container" class="fas-search-container" style="width: 100%; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; <?php echo $dir_style; ?>">
+                            <!-- Tabs (Dynamic pills layout) -->
+                            <div id="fas-preview-tabs" class="fas-search-tabs" style="flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+                                <!-- Loaded dynamically via javascript -->
+                            </div>
 
-                <!-- Input wrapper -->
-                <div class="fas-search-input-wrapper" style="display: flex; align-items: center; padding: 18px 24px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
-                    <span class="dashicons dashicons-search" style="color: #64748b; margin: <?php echo $is_rtl ? '0 0 0 12px' : '0 12px 0 0'; ?>; font-size: 20px; width: 20px; height: 20px;"></span>
-                    <input type="text" placeholder="<?php echo esc_attr( $i18n['type_search'] ); ?>" style="border:none; outline:none; background:transparent; width:100%; font-size:18px; color:#1e293b; font-weight:500; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;" disabled>
+                            <!-- Results box mock -->
+                            <div id="fas-preview-results" style="padding: 20px 24px; min-height: 140px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
+                                <div class="fas-result-item" style="display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; margin-bottom: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+                                    <div style="width: 48px; height: 48px; border-radius: 8px; background: rgba(100,116,139,0.1); display:flex; align-items:center; justify-content:center; color:#64748b;">
+                                        <span class="dashicons dashicons-cart" style="font-size: 22px; width:22px; height:22px;"></span>
+                                    </div>
+                                    <div style="text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
+                                        <h4 style="margin: 0 0 4px 0; font-size: 15px; font-weight:600;"><?php echo $is_rtl ? 'آنتن فوق پیشرفته Phase-30ISO' : 'Phase-30ISO Antenna'; ?></h4>
+                                        <p style="margin:0; font-size:13px; color:#64748b; line-height:1.4;"><?php echo $is_rtl ? 'محصول مخابراتی دو بانده فوق پیشرفته با مشخصات فنی عالی...' : 'Premium dual-band technical telecommunication product spec...'; ?></p>
+                                    </div>
+                                </div>
+                            </div>
 
-                    <!-- Close button in preview -->
-                    <button class="fas-modal-close" style="background: rgba(100, 116, 139, 0.1); border: none !important; color: #64748b; width: 34px; height: 34px; border-radius: 50% !important; margin: <?php echo $is_rtl ? '0 14px 0 0' : '0 0 0 14px'; ?>; display: flex; align-items: center; justify-content: center;" disabled>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Tabs (Dynamic pills layout) -->
-                <div id="fas-preview-tabs" class="fas-search-tabs" style="flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
-                    <!-- Loaded dynamically via javascript -->
-                </div>
-
-                <!-- Results box mock -->
-                <div id="fas-preview-results" style="padding: 20px 24px; min-height: 140px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                    <div class="fas-result-item" style="display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; margin-bottom: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
-                        <div style="width: 48px; height: 48px; border-radius: 8px; background: rgba(100,116,139,0.1); display:flex; align-items:center; justify-content:center; color:#64748b;">
-                            <span class="dashicons dashicons-cart" style="font-size: 22px; width:22px; height:22px;"></span>
                         </div>
-                        <div style="text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                            <h4 style="margin: 0 0 4px 0; font-size: 15px; font-weight:600;"><?php echo $is_rtl ? 'آنتن فوق پیشرفته Phase-30ISO' : 'Phase-30ISO Antenna'; ?></h4>
-                            <p style="margin:0; font-size:13px; color:#64748b; line-height:1.4;"><?php echo $is_rtl ? 'محصول مخابراتی دو بانده فوق پیشرفته با مشخصات فنی عالی...' : 'Premium dual-band technical telecommunication product spec...'; ?></p>
-                        </div>
+
                     </div>
                 </div>
 
             </div>
 
         </div>
-    </div>
+
+    </form>
 
 </div>
 
@@ -469,6 +541,24 @@ jQuery(document).ready(function($) {
             // Update Live Preview immediately
             updateLivePreview();
         }
+    });
+
+    // Media library uploader script for SVG/PNG icon uploads
+    $('.fas-upload-btn').on('click', function(e) {
+        e.preventDefault();
+        var button = $(this);
+        var target_id = button.data('target');
+        var uploader = wp.media({
+            title: '<?php echo esc_js( $is_rtl ? 'انتخاب آیکون' : 'Choose Icon' ); ?>',
+            button: {
+                text: '<?php echo esc_js( $is_rtl ? 'تایید و درج آیکون' : 'Select Icon' ); ?>'
+            },
+            multiple: false
+        }).on('select', function() {
+            var attachment = uploader.state().get('selection').first().toJSON();
+            $('#' + target_id).val(attachment.url).trigger('change');
+            updateLivePreview();
+        }).open();
     });
 
     // Handle Page Display Select changes
@@ -535,23 +625,28 @@ jQuery(document).ready(function($) {
             var title = '';
             var color = '';
             var icon  = '';
+            var customIcon = '';
 
             if (key === 'all') {
                 title = $('#fas_tab_all_title').val() || 'All Results';
                 color = $('#fas_tab_all_color').val() || '#0066cc';
                 icon  = $('#fas_tab_all_icon').val() || 'dashicons-grid-view';
+                customIcon = $('#fas_tab_all_custom_icon').val() || '';
             } else if (key === 'products') {
                 title = $('#fas_tab_products_title').val() || 'Products';
                 color = $('#fas_tab_products_color').val() || '#10b981';
                 icon  = $('#fas_tab_products_icon').val() || 'dashicons-cart';
+                customIcon = $('#fas_tab_products_custom_icon').val() || '';
             } else if (key === 'posts') {
                 title = $('#fas_tab_posts_title').val() || 'News & Articles';
                 color = $('#fas_tab_posts_color').val() || '#f59e0b';
                 icon  = $('#fas_tab_posts_icon').val() || 'dashicons-welcome-write-blog';
+                customIcon = $('#fas_tab_posts_custom_icon').val() || '';
             } else if (key === 'docs') {
                 title = $('#fas_tab_docs_title').val() || 'Documentation';
                 color = $('#fas_tab_docs_color').val() || '#6366f1';
                 icon  = $('#fas_tab_docs_icon').val() || 'dashicons-book-alt';
+                customIcon = $('#fas_tab_docs_custom_icon').val() || '';
             } else {
                 return; // skip unknown keys
             }
@@ -560,8 +655,16 @@ jQuery(document).ready(function($) {
             activeClassAdded = true;
 
             var tabStyle = 'display: flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1px solid '+(isActive ? color : 'transparent')+'; background: '+(isActive ? color : 'rgba(100, 116, 139, 0.05)')+'; font-weight: 600; font-size:13px; cursor: pointer; color: ' + (isActive ? '#ffffff' : '#64748b') + '; border-radius: 20px; transition: all 0.3s ease; white-space: nowrap;';
+
+            var iconHtml = '';
+            if (customIcon) {
+                iconHtml = '<img src="' + customIcon + '" style="width:16px; height:16px; object-fit:contain; flex-shrink:0;">';
+            } else {
+                iconHtml = '<span class="dashicons ' + icon + '" style="font-size:18px; width:18px; height:18px; color:' + (isActive ? '#ffffff' : '#64748b') + ';"></span>';
+            }
+
             tabsHtml += '<button type="button" style="' + tabStyle + '">' +
-                        '<span class="dashicons ' + icon + '" style="font-size:18px; width:18px; height:18px; color:' + (isActive ? '#ffffff' : '#64748b') + ';"></span>' +
+                        iconHtml +
                         '<span>' + title + '</span>' +
                         '</button>';
         });

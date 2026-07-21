@@ -114,27 +114,46 @@
     font-weight: 500;
 }
 
+/* Hardened Close Search Button styling to prevent any theme resets */
 .fas-modal-close {
-    background: rgba(100, 116, 139, 0.1);
-    border: none;
-    color: var(--fas-text-muted);
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    margin-left: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s, color 0.2s;
-    box-sizing: border-box;
+    background-color: rgba(100, 116, 139, 0.1) !important;
+    background: rgba(100, 116, 139, 0.1) !important;
+    border: none !important;
+    outline: none !important;
+    color: var(--fas-text-muted) !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    cursor: pointer !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    border-radius: 50% !important;
+    margin: 0 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: background 0.2s, color 0.2s !important;
+    box-sizing: border-box !important;
+    box-shadow: none !important;
+    line-height: 1 !important;
 }
 
 .fas-modal-close:hover {
-    background: #e11d48;
-    color: #ffffff;
+    background-color: #e11d48 !important;
+    background: #e11d48 !important;
+    color: #ffffff !important;
+}
+
+.fas-modal-close svg {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 14px !important;
+    height: 14px !important;
+    color: currentColor !important;
 }
 
 /* Category Tab Header styling (Beautiful Glassmorphism pills layout) */

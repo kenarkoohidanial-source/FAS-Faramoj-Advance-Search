@@ -8,33 +8,39 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+$suffix = FAS_Core::get_lang_suffix();
+
 $theme_mode    = FAS_Core::get_option( 'fas_theme_mode', 'dark' );
 $overlay_class = ( 'light' === $theme_mode ) ? 'fas-theme-light' : 'fas-theme-dark';
 
 $tabs_order     = FAS_Core::get_option( 'fas_tabs_order', 'all,products,posts,docs' );
 $tabs_order_arr = array_map( 'trim', explode( ',', $tabs_order ) );
 
-// Fetch individual tab titles, colors, and icons via unified FAS_Core::get_option
+// Fetch individual tab titles, colors, icons, and custom uploaded SVG/PNG icons
 $tab_details = array(
     'all' => array(
-        'title' => FAS_Core::get_option( 'fas_tab_all_title', 'All Results' ),
-        'color' => FAS_Core::get_option( 'fas_tab_all_color', '#0066cc' ),
-        'icon'  => FAS_Core::get_option( 'fas_tab_all_icon', 'dashicons-grid-view' ),
+        'title'       => FAS_Core::get_option( 'fas_tab_all_title', 'All Results' ),
+        'color'       => FAS_Core::get_option( 'fas_tab_all_color', '#0066cc' ),
+        'icon'        => FAS_Core::get_option( 'fas_tab_all_icon', 'dashicons-grid-view' ),
+        'custom_icon' => FAS_Core::get_option( 'fas_tab_all_custom_icon', '' ),
     ),
     'products' => array(
-        'title' => FAS_Core::get_option( 'fas_tab_products_title', 'Products' ),
-        'color' => FAS_Core::get_option( 'fas_tab_products_color', '#10b981' ),
-        'icon'  => FAS_Core::get_option( 'fas_tab_products_icon', 'dashicons-cart' ),
+        'title'       => FAS_Core::get_option( 'fas_tab_products_title', 'Products' ),
+        'color'       => FAS_Core::get_option( 'fas_tab_products_color', '#10b981' ),
+        'icon'        => FAS_Core::get_option( 'fas_tab_products_icon', 'dashicons-cart' ),
+        'custom_icon' => FAS_Core::get_option( 'fas_tab_products_custom_icon', '' ),
     ),
     'posts' => array(
-        'title' => FAS_Core::get_option( 'fas_tab_posts_title', 'News & Articles' ),
-        'color' => FAS_Core::get_option( 'fas_tab_posts_color', '#f59e0b' ),
-        'icon'  => FAS_Core::get_option( 'fas_tab_posts_icon', 'dashicons-welcome-write-blog' ),
+        'title'       => FAS_Core::get_option( 'fas_tab_posts_title', 'News & Articles' ),
+        'color'       => FAS_Core::get_option( 'fas_tab_posts_color', '#f59e0b' ),
+        'icon'        => FAS_Core::get_option( 'fas_tab_posts_icon', 'dashicons-welcome-write-blog' ),
+        'custom_icon' => FAS_Core::get_option( 'fas_tab_posts_custom_icon', '' ),
     ),
     'docs' => array(
-        'title' => FAS_Core::get_option( 'fas_tab_docs_title', 'Documentation' ),
-        'color' => FAS_Core::get_option( 'fas_tab_docs_color', '#6366f1' ),
-        'icon'  => FAS_Core::get_option( 'fas_tab_docs_icon', 'dashicons-book-alt' ),
+        'title'       => FAS_Core::get_option( 'fas_tab_docs_title', 'Documentation' ),
+        'color'       => FAS_Core::get_option( 'fas_tab_docs_color', '#6366f1' ),
+        'icon'        => FAS_Core::get_option( 'fas_tab_docs_icon', 'dashicons-book-alt' ),
+        'custom_icon' => FAS_Core::get_option( 'fas_tab_docs_custom_icon', '' ),
     ),
 );
 ?>
@@ -71,7 +77,11 @@ $tab_details = array(
                         data-tab="<?php echo esc_attr( $tab_key ); ?>"
                         data-accent-color="<?php echo esc_attr( $tab['color'] ); ?>"
                         style="--tab-accent: <?php echo esc_attr( $tab['color'] ); ?>;">
-                    <span class="dashicons <?php echo esc_attr( $tab['icon'] ); ?>"></span>
+                    <?php if ( ! empty( $tab['custom_icon'] ) ) : ?>
+                        <img src="<?php echo esc_url( $tab['custom_icon'] ); ?>" class="fas-custom-tab-icon" style="width: 16px; height: 16px; object-fit: contain; flex-shrink: 0;" alt="<?php echo esc_attr( $tab['title'] ); ?>">
+                    <?php else : ?>
+                        <span class="dashicons <?php echo esc_attr( $tab['icon'] ); ?>"></span>
+                    <?php endif; ?>
                     <span><?php echo esc_html( $tab['title'] ); ?></span>
                 </button>
             <?php endforeach; ?>

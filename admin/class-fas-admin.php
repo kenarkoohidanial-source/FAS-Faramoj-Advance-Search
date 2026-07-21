@@ -214,7 +214,7 @@ class FAS_Admin {
                 'default'           => 'all,products,posts,docs',
             ) );
 
-            // All Results
+            // All Results Settings
             register_setting( $group_name, 'fas_tab_all_title' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
@@ -230,8 +230,13 @@ class FAS_Admin {
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'dashicons-grid-view',
             ) );
+            register_setting( $group_name, 'fas_tab_all_custom_icon' . $suffix, array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default'           => '',
+            ) );
 
-            // Products
+            // Products Settings
             register_setting( $group_name, 'fas_tab_products_title' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
@@ -247,8 +252,13 @@ class FAS_Admin {
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'dashicons-cart',
             ) );
+            register_setting( $group_name, 'fas_tab_products_custom_icon' . $suffix, array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default'           => '',
+            ) );
 
-            // Posts
+            // Posts Settings
             register_setting( $group_name, 'fas_tab_posts_title' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
@@ -264,8 +274,13 @@ class FAS_Admin {
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'dashicons-welcome-write-blog',
             ) );
+            register_setting( $group_name, 'fas_tab_posts_custom_icon' . $suffix, array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default'           => '',
+            ) );
 
-            // Docs
+            // Docs Settings
             register_setting( $group_name, 'fas_tab_docs_title' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
@@ -280,6 +295,11 @@ class FAS_Admin {
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'dashicons-book-alt',
+            ) );
+            register_setting( $group_name, 'fas_tab_docs_custom_icon' . $suffix, array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default'           => '',
             ) );
         }
 
@@ -366,6 +386,9 @@ class FAS_Admin {
         wp_enqueue_style( 'wp-color-picker' );
         wp_enqueue_script( 'wp-color-picker' );
         wp_enqueue_script( 'jquery-ui-sortable' );
+
+        // Enqueue WP Media Library so we can upload custom SVG/PNG icons natively!
+        wp_enqueue_media();
 
         // Enqueue an empty stylesheet handle so we can safely add inline styles to it
         wp_register_style( 'fas-admin-css', false );
