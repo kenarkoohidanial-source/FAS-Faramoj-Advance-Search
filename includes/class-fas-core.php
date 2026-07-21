@@ -32,6 +32,32 @@ class FAS_Core {
     }
 
     /**
+     * Safely retrieve a plugin option with dynamic language suffix and multifold fallback logic.
+     */
+    public static function get_option( $key, $default = '' ) {
+        $suffix = self::get_lang_suffix();
+        $val = get_option( $key . $suffix );
+
+        // If not found, try fallback to no suffix
+        if ( false === $val || '' === $val ) {
+            $val = get_option( $key );
+        }
+
+        // If still not found, try common suffix fallbacks (fa or en)
+        if ( false === $val || '' === $val ) {
+            $alt_suffix = ( '_fa' === $suffix ) ? '_en' : '_fa';
+            $val = get_option( $key . $alt_suffix );
+        }
+
+        // Return default if everything is empty
+        if ( false === $val || '' === $val ) {
+            return $default;
+        }
+
+        return $val;
+    }
+
+    /**
      * Run the orchestrator.
      */
     public function run() {
@@ -93,10 +119,8 @@ class FAS_Core {
             $current_lang = ICL_LANGUAGE_CODE;
         }
 
-        $suffix = self::get_lang_suffix();
-
-        // Fetch custom tabs sequence
-        $tabs_order = get_option( 'fas_tabs_order' . $suffix, 'all,products,posts,docs' );
+        // Fetch custom tabs sequence via unified get_option
+        $tabs_order = self::get_option( 'fas_tabs_order', 'all,products,posts,docs' );
         $tabs_order_arr = array_map( 'trim', explode( ',', $tabs_order ) );
 
         wp_localize_script( 'fas-public-js', 'fas_params', array(
@@ -111,12 +135,12 @@ class FAS_Core {
             )
         ) );
 
-        // Inject custom floating brand color and popup dimensions dynamically with active language suffix
-        $floating_bg       = get_option( 'fas_floating_bg' . $suffix, '#0066cc' );
-        $popup_width       = get_option( 'fas_popup_width' . $suffix, 750 );
-        $popup_max_height  = get_option( 'fas_popup_max_height' . $suffix, 600 );
-        $floating_offset_x = get_option( 'fas_floating_offset_x' . $suffix, 24 );
-        $floating_offset_y = get_option( 'fas_floating_offset_y' . $suffix, 24 );
+        // Inject custom floating brand color and popup dimensions dynamically with active language suffix fallbacks
+        $floating_bg       = self::get_option( 'fas_floating_bg', '#0066cc' );
+        $popup_width       = self::get_option( 'fas_popup_width', 750 );
+        $popup_max_height  = self::get_option( 'fas_popup_max_height', 600 );
+        $floating_offset_x = self::get_option( 'fas_floating_offset_x', 24 );
+        $floating_offset_y = self::get_option( 'fas_floating_offset_y', 24 );
 
         $custom_inline_css = "
             :root {
@@ -168,21 +192,19 @@ class FAS_Core {
      * Conditionally inject the floating search button into wp_footer.
      */
     public function maybe_inject_floating_trigger() {
-        $suffix = self::get_lang_suffix();
-
-        $enable_floating = get_option( 'fas_enable_floating' . $suffix, 'yes' );
+        $enable_floating = self::get_option( 'fas_enable_floating', 'yes' );
         if ( 'yes' !== $enable_floating ) {
             return;
         }
 
-        $display_type = get_option( 'fas_display_pages_type' . $suffix, 'all' );
+        $display_type = self::get_option( 'fas_display_pages_type', 'all' );
         if ( 'none' === $display_type ) {
             return;
         }
 
         // Handle Page Visibility conditions
         if ( 'specific' === $display_type ) {
-            $specific_input = get_option( 'fas_display_specific_pages' . $suffix, '' );
+            $specific_input = self::get_option( 'fas_display_specific_pages', '' );
             if ( empty( $specific_input ) ) {
                 return;
             }
@@ -210,7 +232,7 @@ class FAS_Core {
             }
         }
 
-        $position = get_option( 'fas_floating_position' . $suffix, 'bottom-right' );
+        $position = self::get_option( 'fas_floating_position', 'bottom-right' );
         ?>
         <button class="fas-search-trigger fas-floating-trigger fas-position-<?php echo esc_attr( $position ); ?>" aria-label="<?php esc_attr_e( 'Search', 'faramoj-search' ); ?>">
             <svg class="fas-search-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block !important; width: 22px !important; height: 22px !important; visibility: visible !important;">

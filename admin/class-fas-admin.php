@@ -16,30 +16,87 @@ class FAS_Admin {
         $langs = array();
 
         if ( function_exists( 'pll_languages_list' ) ) {
-            // Polylang
-            $raw_langs = pll_languages_list( array( 'fields' => 'all' ) );
-            if ( ! empty( $raw_langs ) ) {
+            // Polylang: try to get language objects by passing empty fields
+            $raw_langs = pll_languages_list( array( 'hide_empty' => 0, 'fields' => '' ) );
+            if ( ! empty( $raw_langs ) && is_array( $raw_langs ) ) {
                 foreach ( $raw_langs as $l ) {
-                    $langs[ $l->slug ] = $l->name;
+                    if ( is_object( $l ) && ! empty( $l->slug ) ) {
+                        $langs[ $l->slug ] = ! empty( $l->name ) ? $l->name : strtoupper( $l->slug );
+                    } elseif ( is_string( $l ) && ! empty( $l ) ) {
+                        $name = ( 'fa' === $l ) ? 'فارسی (Persian)' : ( ( 'en' === $l ) ? 'English' : strtoupper( $l ) );
+                        $langs[ $l ] = $name;
+                    }
+                }
+            }
+
+            // Fallback check if pll_languages_list returned simple slugs
+            if ( empty( $langs ) ) {
+                $slugs = pll_languages_list( array( 'hide_empty' => 0 ) );
+                if ( ! empty( $slugs ) && is_array( $slugs ) ) {
+                    foreach ( $slugs as $slug ) {
+                        if ( is_string( $slug ) && ! empty( $slug ) ) {
+                            $name = ( 'fa' === $slug ) ? 'فارسی (Persian)' : ( ( 'en' === $slug ) ? 'English' : strtoupper( $slug ) );
+                            $langs[ $slug ] = $name;
+                        }
+                    }
                 }
             }
         } elseif ( function_exists( 'icl_get_languages' ) ) {
             // WPML
             $raw_langs = icl_get_languages();
-            if ( ! empty( $raw_langs ) ) {
+            if ( ! empty( $raw_langs ) && is_array( $raw_langs ) ) {
                 foreach ( $raw_langs as $l ) {
-                    $langs[ $l['language_code'] ] = $l['translated_name'];
+                    if ( is_array( $l ) && isset( $l['language_code'] ) ) {
+                        $code = $l['language_code'];
+                        $name = isset( $l['translated_name'] ) ? $l['translated_name'] : ( isset( $l['english_name'] ) ? $l['english_name'] : strtoupper( $code ) );
+                        $langs[ $code ] = $name;
+                    }
                 }
             }
         }
 
-        // Fallback Farsi and English standard configurations if no plugins active
+        // Clean any empty keys or values just in case
+        $langs = array_filter( $langs );
+        foreach ( $langs as $k => $v ) {
+            if ( empty( $k ) || empty( $v ) ) {
+                unset( $langs[ $k ] );
+            }
+        }
+
+        // Fallback Farsi and English standard configurations if no plugins active or detection failed
         if ( empty( $langs ) ) {
             $langs['fa'] = 'فارسی (Persian)';
             $langs['en'] = 'English';
         }
 
         return $langs;
+    }
+
+    /**
+     * Helper to determine current admin display locale (fa or en)
+     */
+    public function get_admin_display_locale() {
+        if ( isset( $_GET['fas_lang'] ) ) {
+            return ( 'fa' === $_GET['fas_lang'] ) ? 'fa' : 'en';
+        }
+
+        if ( function_exists( 'pll_current_language' ) ) {
+            $lang = pll_current_language();
+            if ( 'fa' === $lang ) {
+                return 'fa';
+            }
+        } elseif ( defined( 'ICL_LANGUAGE_CODE' ) ) {
+            if ( 'fa' === ICL_LANGUAGE_CODE ) {
+                return 'fa';
+            }
+        }
+
+        $locale = get_locale();
+        if ( strpos( $locale, 'fa' ) === 0 || is_rtl() ) {
+            return 'fa';
+        }
+
+        return 'en';
     }
 
     /**
@@ -239,6 +296,9 @@ class FAS_Admin {
     public function flush_search_cache() {
         global $wpdb;
         $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_fas_search_%' OR option_name LIKE '_transient_timeout_fas_search_%'" );
+        if ( function_exists( 'wp_cache_flush' ) ) {
+            wp_cache_flush();
+        }
     }
 
     /**

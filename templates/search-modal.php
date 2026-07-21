@@ -8,35 +8,33 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-$suffix = FAS_Core::get_lang_suffix();
-
-$theme_mode    = get_option( 'fas_theme_mode' . $suffix, 'dark' );
+$theme_mode    = FAS_Core::get_option( 'fas_theme_mode', 'dark' );
 $overlay_class = ( 'light' === $theme_mode ) ? 'fas-theme-light' : 'fas-theme-dark';
 
-$tabs_order     = get_option( 'fas_tabs_order' . $suffix, 'all,products,posts,docs' );
+$tabs_order     = FAS_Core::get_option( 'fas_tabs_order', 'all,products,posts,docs' );
 $tabs_order_arr = array_map( 'trim', explode( ',', $tabs_order ) );
 
-// Fetch individual tab titles, colors, and icons
+// Fetch individual tab titles, colors, and icons via unified FAS_Core::get_option
 $tab_details = array(
     'all' => array(
-        'title' => get_option( 'fas_tab_all_title' . $suffix, 'All Results' ),
-        'color' => get_option( 'fas_tab_all_color' . $suffix, '#0066cc' ),
-        'icon'  => get_option( 'fas_tab_all_icon' . $suffix, 'dashicons-grid-view' ),
+        'title' => FAS_Core::get_option( 'fas_tab_all_title', 'All Results' ),
+        'color' => FAS_Core::get_option( 'fas_tab_all_color', '#0066cc' ),
+        'icon'  => FAS_Core::get_option( 'fas_tab_all_icon', 'dashicons-grid-view' ),
     ),
     'products' => array(
-        'title' => get_option( 'fas_tab_products_title' . $suffix, 'Products' ),
-        'color' => get_option( 'fas_tab_products_color' . $suffix, '#10b981' ),
-        'icon'  => get_option( 'fas_tab_products_icon' . $suffix, 'dashicons-cart' ),
+        'title' => FAS_Core::get_option( 'fas_tab_products_title', 'Products' ),
+        'color' => FAS_Core::get_option( 'fas_tab_products_color', '#10b981' ),
+        'icon'  => FAS_Core::get_option( 'fas_tab_products_icon', 'dashicons-cart' ),
     ),
     'posts' => array(
-        'title' => get_option( 'fas_tab_posts_title' . $suffix, 'News & Articles' ),
-        'color' => get_option( 'fas_tab_posts_color' . $suffix, '#f59e0b' ),
-        'icon'  => get_option( 'fas_tab_posts_icon' . $suffix, 'dashicons-welcome-write-blog' ),
+        'title' => FAS_Core::get_option( 'fas_tab_posts_title', 'News & Articles' ),
+        'color' => FAS_Core::get_option( 'fas_tab_posts_color', '#f59e0b' ),
+        'icon'  => FAS_Core::get_option( 'fas_tab_posts_icon', 'dashicons-welcome-write-blog' ),
     ),
     'docs' => array(
-        'title' => get_option( 'fas_tab_docs_title' . $suffix, 'Documentation' ),
-        'color' => get_option( 'fas_tab_docs_color' . $suffix, '#6366f1' ),
-        'icon'  => get_option( 'fas_tab_docs_icon' . $suffix, 'dashicons-book-alt' ),
+        'title' => FAS_Core::get_option( 'fas_tab_docs_title', 'Documentation' ),
+        'color' => FAS_Core::get_option( 'fas_tab_docs_color', '#6366f1' ),
+        'icon'  => FAS_Core::get_option( 'fas_tab_docs_icon', 'dashicons-book-alt' ),
     ),
 );
 ?>

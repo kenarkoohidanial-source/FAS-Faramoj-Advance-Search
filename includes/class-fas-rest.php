@@ -38,10 +38,8 @@ class FAS_Rest {
             PLL()->curlang = PLL()->model->get_language( $lang );
         }
 
-        // Custom Transient Cache Duration from Settings (default 1 hour)
-        // Detect suffix
-        $suffix = '_' . $lang;
-        $cache_duration = get_option( 'fas_cache_duration' . $suffix, HOUR_IN_SECONDS );
+        // Custom Transient Cache Duration from Settings (default 1 hour) via unified get_option
+        $cache_duration = FAS_Core::get_option( 'fas_cache_duration', HOUR_IN_SECONDS );
         if ( empty( $cache_duration ) && $cache_duration !== '0' ) {
             $cache_duration = HOUR_IN_SECONDS;
         }
