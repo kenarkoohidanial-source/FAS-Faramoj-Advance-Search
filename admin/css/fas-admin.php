@@ -4,10 +4,6 @@
  * Outputs CSS dynamic content
  */
 
-if ( ! headers_sent() ) {
-    header("Content-type: text/css; charset=UTF-8");
-}
-
 // Define basic style tokens for the settings dashboard
 ?>
 .fas-admin-wrap {

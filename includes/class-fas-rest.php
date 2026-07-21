@@ -76,30 +76,59 @@ class FAS_Rest {
     }
 
     private function execute_db_query( $term ) {
-        // Querying Products with Title, Content, and ACF Technical Specs
-        // Example: Searching 'VHF-04E' antenna specifications
-        $args = array(
+        // Query 1: standard search matching title, content, or excerpt
+        $args1 = array(
             'post_type'      => array( 'product', 'post', 'page' ),
-            'posts_per_page' => 20,
+            'posts_per_page' => 50,
             's'              => $term,
             'post_status'    => 'publish',
+            'fields'         => 'ids',
+        );
+        $query1 = new WP_Query( $args1 );
+        $ids1 = ! empty( $query1->posts ) ? $query1->posts : array();
+
+        // Query 2: ACF metadata search matching specific fields
+        $args2 = array(
+            'post_type'      => array( 'product', 'post', 'page' ),
+            'posts_per_page' => 50,
+            'post_status'    => 'publish',
+            'fields'         => 'ids',
             'meta_query'     => array(
                 'relation' => 'OR',
                 array(
-                    'key'     => 'technical_specifications', // Target ACF field
+                    'key'     => 'technical_specifications',
                     'value'   => $term,
                     'compare' => 'LIKE',
                 ),
                 array(
-                    'key'     => 'frequency_range', // Target ACF field
+                    'key'     => 'frequency_range',
                     'value'   => $term,
                     'compare' => 'LIKE',
                 )
             )
         );
+        $query2 = new WP_Query( $args2 );
+        $ids2 = ! empty( $query2->posts ) ? $query2->posts : array();
 
-        $query = new WP_Query( $args );
+        // Merge standard matches and custom ACF matches cleanly (using standard UNION behavior)
+        $merged_ids = array_unique( array_merge( $ids1, $ids2 ) );
+
         $formatted_results = array( 'products' => [], 'posts' => [], 'docs' => [] );
+
+        if ( empty( $merged_ids ) ) {
+            return $formatted_results;
+        }
+
+        // Limit results to top 20 items overall
+        $final_ids = array_slice( $merged_ids, 0, 20 );
+
+        $args3 = array(
+            'post_type' => array( 'product', 'post', 'page' ),
+            'post__in'  => $final_ids,
+            'orderby'   => 'post__in',
+        );
+
+        $query = new WP_Query( $args3 );
 
         if ( $query->have_posts() ) {
             // Find overridable template path
