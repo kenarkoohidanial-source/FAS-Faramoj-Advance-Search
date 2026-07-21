@@ -13,12 +13,14 @@ class FAS_Admin {
      * Add options page to the WordPress menu.
      */
     public function add_admin_menu() {
-        add_options_page(
+        add_menu_page(
             __( 'Faramoj Advanced Search Settings', 'faramoj-search' ),
             __( 'Faramoj Search', 'faramoj-search' ),
             'manage_options',
             'faramoj-search',
-            array( $this, 'render_settings_page' )
+            array( $this, 'render_settings_page' ),
+            'dashicons-search', // Beautiful search dashicon
+            80 // Placement in menu
         );
     }
 
@@ -69,7 +71,7 @@ class FAS_Admin {
             'default'           => '#0066cc',
         ) );
 
-        // Correct enqueue hook registration
+        // Correct enqueue hook registration during settings initialization
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
     }
 
@@ -90,7 +92,7 @@ class FAS_Admin {
      */
     public function enqueue_admin_assets( $hook ) {
         // Only load on our settings page to avoid style conflicts
-        if ( 'settings_page_faramoj-search' !== $hook ) {
+        if ( 'toplevel_page_faramoj-search' !== $hook ) {
             return;
         }
 
