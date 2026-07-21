@@ -280,71 +280,107 @@
     line-height: 1.4;
 }
 
-/* Search Trigger Shortcode Button */
+/* Search Trigger Button Overrides with absolute maximum priority */
 .fas-search-trigger {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--fas-primary);
-    color: #ffffff;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background-color: var(--fas-primary) !important;
+    background: var(--fas-primary) !important;
+    color: #ffffff !important;
+    border: none !important;
+    outline: none !important;
+    padding: 10px 18px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+    text-transform: none !important;
+    text-decoration: none !important;
+    line-height: normal !important;
+    height: auto !important;
+    min-height: 0 !important;
+    width: auto !important;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease !important;
 }
 
 .fas-search-trigger:hover {
-    background: var(--fas-primary);
-    opacity: 0.95;
+    background-color: var(--fas-primary) !important;
+    background: var(--fas-primary) !important;
+    opacity: 0.95 !important;
+    color: #ffffff !important;
 }
 
 /* Floating quick search button trigger with high-priority customizable offsets */
 .fas-floating-trigger {
     position: fixed !important;
-    z-index: 9999 !important;
+    z-index: 999999 !important; /* Ensure it is on top of everything! */
     width: 56px !important;
     height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+    min-width: 56px !important;
+    max-width: 56px !important;
     border-radius: 50% !important;
     padding: 0 !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
     justify-content: center !important;
+    background-color: var(--fas-primary) !important;
+    background: var(--fas-primary) !important;
+    color: #ffffff !important;
+    border: none !important;
+    outline: none !important;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+    cursor: pointer !important;
 }
 
 .fas-floating-trigger:hover {
     transform: translateY(-3px) !important;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
+    background-color: var(--fas-primary) !important;
+    background: var(--fas-primary) !important;
+    color: #ffffff !important;
+    opacity: 0.95 !important;
 }
 
 .fas-position-bottom-right {
     bottom: var(--fas-offset-y, 24px) !important;
     right: var(--fas-offset-x, 24px) !important;
+    left: auto !important;
+    top: auto !important;
 }
 
 .fas-position-bottom-left {
     bottom: var(--fas-offset-y, 24px) !important;
     left: var(--fas-offset-x, 24px) !important;
+    right: auto !important;
+    top: auto !important;
 }
 
 .fas-position-top-right {
     top: var(--fas-offset-y, 24px) !important;
     right: var(--fas-offset-x, 24px) !important;
+    left: auto !important;
+    bottom: auto !important;
 }
 
 .fas-position-top-left {
     top: var(--fas-offset-y, 24px) !important;
     left: var(--fas-offset-x, 24px) !important;
+    right: auto !important;
+    bottom: auto !important;
 }
 
 /* Elementor Widget specific triggers */
 .fas-elementor-icon-trigger {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    padding: 0;
-    justify-content: center;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    justify-content: center !important;
 }
 
 /* Status Message */

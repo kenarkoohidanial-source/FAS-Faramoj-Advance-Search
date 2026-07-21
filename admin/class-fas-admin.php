@@ -140,142 +140,143 @@ class FAS_Admin {
 
         foreach ( array_keys( $langs ) as $lang_code ) {
             $suffix = '_' . $lang_code;
+            $group_name = 'fas_settings_group_' . $lang_code;
 
-            register_setting( 'fas_settings_group', 'fas_cache_duration' . $suffix, array(
+            register_setting( $group_name, 'fas_cache_duration' . $suffix, array(
                 'type'              => 'integer',
                 'sanitize_callback' => 'intval',
                 'default'           => HOUR_IN_SECONDS,
             ) );
 
-            register_setting( 'fas_settings_group', 'fas_theme_mode' . $suffix, array(
+            register_setting( $group_name, 'fas_theme_mode' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'dark',
             ) );
 
-            register_setting( 'fas_settings_group', 'fas_enable_floating' . $suffix, array(
+            register_setting( $group_name, 'fas_enable_floating' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'yes',
             ) );
 
-            register_setting( 'fas_settings_group', 'fas_floating_position' . $suffix, array(
+            register_setting( $group_name, 'fas_floating_position' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'bottom-right',
             ) );
 
-            register_setting( 'fas_settings_group', 'fas_display_pages_type' . $suffix, array(
+            register_setting( $group_name, 'fas_display_pages_type' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'all',
             ) );
 
-            register_setting( 'fas_settings_group', 'fas_display_specific_pages' . $suffix, array(
+            register_setting( $group_name, 'fas_display_specific_pages' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => '',
             ) );
 
-            register_setting( 'fas_settings_group', 'fas_floating_bg' . $suffix, array(
+            register_setting( $group_name, 'fas_floating_bg' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => '#0066cc',
             ) );
 
-            register_setting( 'fas_settings_group', 'fas_floating_offset_x' . $suffix, array(
+            register_setting( $group_name, 'fas_floating_offset_x' . $suffix, array(
                 'type'              => 'integer',
                 'sanitize_callback' => 'intval',
                 'default'           => 24,
             ) );
 
-            register_setting( 'fas_settings_group', 'fas_floating_offset_y' . $suffix, array(
+            register_setting( $group_name, 'fas_floating_offset_y' . $suffix, array(
                 'type'              => 'integer',
                 'sanitize_callback' => 'intval',
                 'default'           => 24,
             ) );
 
-            register_setting( 'fas_settings_group', 'fas_popup_width' . $suffix, array(
+            register_setting( $group_name, 'fas_popup_width' . $suffix, array(
                 'type'              => 'integer',
                 'sanitize_callback' => 'intval',
                 'default'           => 750,
             ) );
 
-            register_setting( 'fas_settings_group', 'fas_popup_max_height' . $suffix, array(
+            register_setting( $group_name, 'fas_popup_max_height' . $suffix, array(
                 'type'              => 'integer',
                 'sanitize_callback' => 'intval',
                 'default'           => 600,
             ) );
 
-            register_setting( 'fas_settings_group', 'fas_tabs_order' . $suffix, array(
+            register_setting( $group_name, 'fas_tabs_order' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'all,products,posts,docs',
             ) );
 
             // All Results
-            register_setting( 'fas_settings_group', 'fas_tab_all_title' . $suffix, array(
+            register_setting( $group_name, 'fas_tab_all_title' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'All Results',
             ) );
-            register_setting( 'fas_settings_group', 'fas_tab_all_color' . $suffix, array(
+            register_setting( $group_name, 'fas_tab_all_color' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => '#0066cc',
             ) );
-            register_setting( 'fas_settings_group', 'fas_tab_all_icon' . $suffix, array(
+            register_setting( $group_name, 'fas_tab_all_icon' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'dashicons-grid-view',
             ) );
 
             // Products
-            register_setting( 'fas_settings_group', 'fas_tab_products_title' . $suffix, array(
+            register_setting( $group_name, 'fas_tab_products_title' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'Products',
             ) );
-            register_setting( 'fas_settings_group', 'fas_tab_products_color' . $suffix, array(
+            register_setting( $group_name, 'fas_tab_products_color' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => '#10b981',
             ) );
-            register_setting( 'fas_settings_group', 'fas_tab_products_icon' . $suffix, array(
+            register_setting( $group_name, 'fas_tab_products_icon' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'dashicons-cart',
             ) );
 
             // Posts
-            register_setting( 'fas_settings_group', 'fas_tab_posts_title' . $suffix, array(
+            register_setting( $group_name, 'fas_tab_posts_title' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'News & Articles',
             ) );
-            register_setting( 'fas_settings_group', 'fas_tab_posts_color' . $suffix, array(
+            register_setting( $group_name, 'fas_tab_posts_color' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => '#f59e0b',
             ) );
-            register_setting( 'fas_settings_group', 'fas_tab_posts_icon' . $suffix, array(
+            register_setting( $group_name, 'fas_tab_posts_icon' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'dashicons-welcome-write-blog',
             ) );
 
             // Docs
-            register_setting( 'fas_settings_group', 'fas_tab_docs_title' . $suffix, array(
+            register_setting( $group_name, 'fas_tab_docs_title' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'Documentation',
             ) );
-            register_setting( 'fas_settings_group', 'fas_tab_docs_color' . $suffix, array(
+            register_setting( $group_name, 'fas_tab_docs_color' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => '#6366f1',
             ) );
-            register_setting( 'fas_settings_group', 'fas_tab_docs_icon' . $suffix, array(
+            register_setting( $group_name, 'fas_tab_docs_icon' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => 'dashicons-book-alt',

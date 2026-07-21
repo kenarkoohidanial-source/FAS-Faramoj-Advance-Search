@@ -18,6 +18,7 @@ if ( ! isset( $langs[ $active_lang ] ) ) {
 }
 
 $suffix = '_' . $active_lang;
+$group_name = 'fas_settings_group_' . $active_lang;
 
 // Retrieve options specific to the selected language context
 $cache_duration         = get_option( 'fas_cache_duration' . $suffix, HOUR_IN_SECONDS );
@@ -81,7 +82,7 @@ $is_rtl = ( 'fa' === $admin_locale );
 $dir_style = $is_rtl ? 'direction: rtl; text-align: right;' : 'direction: ltr; text-align: left;';
 
 $i18n = array(
-    'configure_lang' => $is_rtl ? 'تنظیمات زبان فعال در پنل:' : 'Configure Active Language:',
+    'configure_lang' => $is_rtl ? 'تنظیم زبان فعال:' : 'Configure Active Language:',
     'title' => $is_rtl ? 'موتور جستجوی پیشرفته فراموج' : 'Faramoj Advanced Search',
     'save_changes' => $is_rtl ? 'ذخیره تغییرات' : 'Save Changes',
     'engine_performance' => $is_rtl ? 'موتور جستجو و کارایی' : 'Search Engine & Performance',
@@ -143,33 +144,40 @@ $i18n = array(
         <?php endif; ?>
     </style>
 
-    <!-- Top-bar Header Box -->
-    <div class="fas-top-bar" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
-        <div style="text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-            <div style="display: flex; align-items: center; gap: 8px; justify-content: <?php echo $is_rtl ? 'flex-end' : 'flex-start'; ?>;">
-                <label for="fas_lang_switcher" style="font-weight: 700; color: #475569; font-size: 13px;"><?php echo esc_html( $i18n['configure_lang'] ); ?></label>
-                <select id="fas_lang_switcher" onchange="location = this.value;" style="border-radius: 6px; border: 1px solid #cbd5e1; padding: 4px 10px; font-weight: 600; color: #0f172a; outline: none;">
+    <!-- Redesigned Top-bar Header Box -->
+    <div class="fas-top-bar" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); gap: 20px;">
+
+        <!-- Center aligned Title -->
+        <div style="text-align: center; width: 100%;">
+            <h2 style="margin: 0; font-size: 26px; font-weight: 850; color: #0066cc;"><?php echo esc_html( $i18n['title'] ); ?> <span style="font-size: 14px; color: #64748b; font-weight: 500;">(<?php echo esc_html( $langs[ $active_lang ] ); ?>)</span></h2>
+        </div>
+
+        <!-- Lower row: Save Changes Button on the left, Active Language Selector on the right -->
+        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; flex-direction: row; gap: 16px; box-sizing: border-box;">
+            <!-- Save changes button on the left (or opposite depending on LTR/RTL) -->
+            <div>
+                <button type="submit" form="fas-settings-form" class="button button-primary button-large" style="background: #0066cc; border: none; font-weight: 700; padding: 12px 28px; height: auto; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,102,204,0.3); cursor: pointer; transition: transform 0.2s;">
+                    <?php echo esc_html( $i18n['save_changes'] ); ?>
+                </button>
+            </div>
+
+            <!-- Active language selection dropdown on the right -->
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label for="fas_lang_switcher" style="font-weight: 700; color: #475569; font-size: 14px;"><?php echo esc_html( $i18n['configure_lang'] ); ?></label>
+                <select id="fas_lang_switcher" onchange="location = this.value;" style="border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px; font-weight: 600; color: #0f172a; outline: none; background: #f8fafc; cursor: pointer;">
                     <?php foreach ( $langs as $code => $name ) : ?>
                         <option value="<?php echo esc_url( add_query_arg( 'fas_lang', $code ) ); ?>" <?php selected( $active_lang, $code ); ?>><?php echo esc_html( $name ); ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <h2 style="margin: 12px 0 0 0; font-size: 22px; font-weight: 800; color: #0066cc;"><?php echo esc_html( $i18n['title'] ); ?> <span style="font-size: 13px; color: #64748b; font-weight: 500;">(<?php echo esc_html( $langs[ $active_lang ] ); ?>)</span></h2>
-        </div>
-
-        <div>
-            <!-- Save Changes button placed neatly in the top bar box -->
-            <button type="submit" form="fas-settings-form" class="button button-primary button-large" style="background: #0066cc; border: none; font-weight: 700; padding: 10px 24px; height: auto; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,102,204,0.3); cursor: pointer; transition: transform 0.2s;">
-                <?php echo esc_html( $i18n['save_changes'] ); ?>
-            </button>
         </div>
     </div>
 
     <!-- Main Settings Form -->
     <form method="post" action="options.php" id="fas-settings-form">
         <?php
-        settings_fields( 'fas_settings_group' );
-        do_settings_sections( 'fas_settings_group' );
+        settings_fields( $group_name );
+        do_settings_sections( $group_name );
         ?>
 
         <div class="fas-settings-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">

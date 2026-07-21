@@ -100,14 +100,14 @@ class FAS_Core {
             'fas-public-css',
             plugins_url( 'public/css/fas-public.css', dirname( __FILE__ ) ),
             array(),
-            '1.1.1'
+            '1.1.0'
         );
 
         wp_enqueue_script(
             'fas-public-js',
             plugins_url( 'public/js/fas-public.js', dirname( __FILE__ ) ),
             array(),
-            '1.1.1',
+            '1.1.0',
             true
         );
 
@@ -118,6 +118,8 @@ class FAS_Core {
         } elseif ( defined( 'ICL_LANGUAGE_CODE' ) ) {
             $current_lang = ICL_LANGUAGE_CODE;
         }
+
+        $suffix = self::get_lang_suffix();
 
         // Fetch custom tabs sequence via unified get_option
         $tabs_order = self::get_option( 'fas_tabs_order', 'all,products,posts,docs' );
