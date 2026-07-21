@@ -71,6 +71,94 @@ class FAS_Admin {
             'default'           => '#0066cc',
         ) );
 
+        // Popup dimensions
+        register_setting( 'fas_settings_group', 'fas_popup_width', array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'intval',
+            'default'           => 750,
+        ) );
+
+        register_setting( 'fas_settings_group', 'fas_popup_max_height', array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'intval',
+            'default'           => 600,
+        ) );
+
+        // Tabs Customization
+        register_setting( 'fas_settings_group', 'fas_tabs_order', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'all,products,posts,docs',
+        ) );
+
+        // All Results Tab
+        register_setting( 'fas_settings_group', 'fas_tab_all_title', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'All Results',
+        ) );
+        register_setting( 'fas_settings_group', 'fas_tab_all_color', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '#0066cc',
+        ) );
+        register_setting( 'fas_settings_group', 'fas_tab_all_icon', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'dashicons-grid-view',
+        ) );
+
+        // Products Tab
+        register_setting( 'fas_settings_group', 'fas_tab_products_title', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Products',
+        ) );
+        register_setting( 'fas_settings_group', 'fas_tab_products_color', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '#10b981',
+        ) );
+        register_setting( 'fas_settings_group', 'fas_tab_products_icon', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'dashicons-cart',
+        ) );
+
+        // Posts/News Tab
+        register_setting( 'fas_settings_group', 'fas_tab_posts_title', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'News & Articles',
+        ) );
+        register_setting( 'fas_settings_group', 'fas_tab_posts_color', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '#f59e0b',
+        ) );
+        register_setting( 'fas_settings_group', 'fas_tab_posts_icon', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'dashicons-welcome-write-blog',
+        ) );
+
+        // Documentation/Pages Tab
+        register_setting( 'fas_settings_group', 'fas_tab_docs_title', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Documentation',
+        ) );
+        register_setting( 'fas_settings_group', 'fas_tab_docs_color', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '#6366f1',
+        ) );
+        register_setting( 'fas_settings_group', 'fas_tab_docs_icon', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'dashicons-book-alt',
+        ) );
+
         // Correct enqueue hook registration during settings initialization
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
     }
@@ -95,6 +183,10 @@ class FAS_Admin {
         if ( 'toplevel_page_faramoj-search' !== $hook ) {
             return;
         }
+
+        // Enqueue WP Color Picker styles and scripts
+        wp_enqueue_style( 'wp-color-picker' );
+        wp_enqueue_script( 'wp-color-picker' );
 
         // Enqueue an empty stylesheet handle so we can safely add inline styles to it
         wp_register_style( 'fas-admin-css', false );

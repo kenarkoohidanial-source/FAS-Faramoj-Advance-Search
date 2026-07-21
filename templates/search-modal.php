@@ -8,14 +8,41 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-$theme_mode = get_option( 'fas_theme_mode', 'dark' );
+$theme_mode     = get_option( 'fas_theme_mode', 'dark' );
 $overlay_class = ( 'light' === $theme_mode ) ? 'fas-theme-light' : 'fas-theme-dark';
+
+$tabs_order     = get_option( 'fas_tabs_order', 'all,products,posts,docs' );
+$tabs_order_arr = array_map( 'trim', explode( ',', $tabs_order ) );
+
+// Fetch individual tab titles, colors, and icons
+$tab_details = array(
+    'all' => array(
+        'title' => get_option( 'fas_tab_all_title', 'All Results' ),
+        'color' => get_option( 'fas_tab_all_color', '#0066cc' ),
+        'icon'  => get_option( 'fas_tab_all_icon', 'dashicons-grid-view' ),
+    ),
+    'products' => array(
+        'title' => get_option( 'fas_tab_products_title', 'Products' ),
+        'color' => get_option( 'fas_tab_products_color', '#10b981' ),
+        'icon'  => get_option( 'fas_tab_products_icon', 'dashicons-cart' ),
+    ),
+    'posts' => array(
+        'title' => get_option( 'fas_tab_posts_title', 'News & Articles' ),
+        'color' => get_option( 'fas_tab_posts_color', '#f59e0b' ),
+        'icon'  => get_option( 'fas_tab_posts_icon', 'dashicons-welcome-write-blog' ),
+    ),
+    'docs' => array(
+        'title' => get_option( 'fas_tab_docs_title', 'Documentation' ),
+        'color' => get_option( 'fas_tab_docs_color', '#6366f1' ),
+        'icon'  => get_option( 'fas_tab_docs_icon', 'dashicons-book-alt' ),
+    ),
+);
 ?>
 <div class="fas-search-overlay <?php echo esc_attr( $overlay_class ); ?>">
     <div class="fas-search-container">
         <!-- Input Wrapper -->
         <div class="fas-search-input-wrapper">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
@@ -23,18 +50,38 @@ $overlay_class = ( 'light' === $theme_mode ) ? 'fas-theme-light' : 'fas-theme-da
             <button class="fas-modal-close" aria-label="<?php esc_attr_e( 'Close Search', 'faramoj-search' ); ?>">&times;</button>
         </div>
 
-        <!-- Category Tabs -->
+        <!-- Category Tabs (Dynamically Ordered & Styled) -->
         <div class="fas-search-tabs">
-            <button class="fas-tab-btn is-active" data-tab="products"><?php esc_html_e( 'Products', 'faramoj-search' ); ?></button>
-            <button class="fas-tab-btn" data-tab="posts"><?php esc_html_e( 'News & Articles', 'faramoj-search' ); ?></button>
-            <button class="fas-tab-btn" data-tab="docs"><?php esc_html_e( 'Documentation', 'faramoj-search' ); ?></button>
+            <?php
+            $first = true;
+            foreach ( $tabs_order_arr as $tab_key ) :
+                if ( ! isset( $tab_details[ $tab_key ] ) ) {
+                    continue;
+                }
+                $tab  = $tab_details[ $tab_key ];
+                $active_class = $first ? 'is-active' : '';
+                $first = false;
+                ?>
+                <button class="fas-tab-btn <?php echo esc_attr( $active_class ); ?>"
+                        data-tab="<?php echo esc_attr( $tab_key ); ?>"
+                        data-accent-color="<?php echo esc_attr( $tab['color'] ); ?>"
+                        style="--tab-accent: <?php echo esc_attr( $tab['color'] ); ?>;">
+                    <span class="dashicons <?php echo esc_attr( $tab['icon'] ); ?>"></span>
+                    <span><?php echo esc_html( $tab['title'] ); ?></span>
+                </button>
+            <?php endforeach; ?>
         </div>
 
         <!-- Results Panel -->
         <div class="fas-results-panel">
-            <div id="fas-tab-products" class="fas-tab-content is-active"></div>
-            <div id="fas-tab-posts" class="fas-tab-content"></div>
-            <div id="fas-tab-docs" class="fas-tab-content"></div>
+            <?php
+            $first = true;
+            foreach ( $tabs_order_arr as $tab_key ) :
+                $active_class = $first ? 'is-active' : '';
+                $first = false;
+                ?>
+                <div id="fas-tab-<?php echo esc_attr( $tab_key ); ?>" class="fas-tab-content <?php echo esc_attr( $active_class ); ?>"></div>
+            <?php endforeach; ?>
         </div>
     </div>
 </div>

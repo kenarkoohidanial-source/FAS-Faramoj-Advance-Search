@@ -60,6 +60,28 @@ class FAS_Rest {
     }
 
     /**
+     * Convert Persian and Arabic numbers to English digits.
+     */
+    private function convert_persian_to_english_digits( $string ) {
+        $persian = array( '۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹' );
+        $arabic  = array( '٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩' );
+        $english = array( '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' );
+
+        $string = str_replace( $persian, $english, $string );
+        return str_replace( $arabic, $english, $string );
+    }
+
+    /**
+     * Convert English numbers to Persian digits.
+     */
+    private function convert_english_to_persian_digits( $string ) {
+        $persian = array( '۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹' );
+        $english = array( '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' );
+
+        return str_replace( $english, $persian, $string );
+    }
+
+    /**
      * Helper to highlight the query in a text safely.
      */
     private function highlight_text( $text, $term ) {
@@ -67,116 +89,165 @@ class FAS_Rest {
         if ( empty( $term ) ) {
             return $escaped;
         }
-        $quoted_term = preg_quote( $term, '/' );
-        return preg_replace(
-            '/(' . $quoted_term . ')/i',
-            '<mark class="fas-highlight">$1</mark>',
-            $escaped
-        );
+
+        // Generate highlight patterns for raw, English, and Persian digit normalized variations
+        $terms = array_unique( array_filter( array(
+            $term,
+            $this->convert_persian_to_english_digits( $term ),
+            $this->convert_english_to_persian_digits( $term )
+        ) ) );
+
+        foreach ( $terms as $t ) {
+            $quoted_term = preg_quote( $t, '/' );
+            $escaped = preg_replace(
+                '/(' . $quoted_term . ')/i',
+                '<mark class="fas-highlight">$1</mark>',
+                $escaped
+            );
+        }
+
+        return $escaped;
+    }
+
+    /**
+     * Fetch all unique post IDs matching search terms in content or metadata.
+     */
+    private function get_matched_post_ids( $post_type, $search_terms, $meta_keys = [] ) {
+        $all_ids = array();
+
+        foreach ( $search_terms as $t ) {
+            // 1. Keyword search
+            $args1 = array(
+                'post_type'      => $post_type,
+                'posts_per_page' => 50,
+                's'              => $t,
+                'post_status'    => 'publish',
+                'fields'         => 'ids',
+            );
+            $query1 = new WP_Query( $args1 );
+            if ( ! empty( $query1->posts ) ) {
+                $all_ids = array_merge( $all_ids, $query1->posts );
+            }
+
+            // 2. Custom metadata fields search (ACF)
+            if ( ! empty( $meta_keys ) ) {
+                $meta_query = array( 'relation' => 'OR' );
+                foreach ( $meta_keys as $key ) {
+                    $meta_query[] = array(
+                        'key'     => $key,
+                        'value'   => $t,
+                        'compare' => 'LIKE',
+                    );
+                }
+
+                $args2 = array(
+                    'post_type'      => $post_type,
+                    'posts_per_page' => 50,
+                    'post_status'    => 'publish',
+                    'fields'         => 'ids',
+                    'meta_query'     => $meta_query,
+                );
+                $query2 = new WP_Query( $args2 );
+                if ( ! empty( $query2->posts ) ) {
+                    $all_ids = array_merge( $all_ids, $query2->posts );
+                }
+            }
+        }
+
+        return array_unique( $all_ids );
     }
 
     private function execute_db_query( $term ) {
-        // Query 1: standard search matching title, content, or excerpt
-        $args1 = array(
-            'post_type'      => array( 'product', 'post', 'page' ),
-            'posts_per_page' => 50,
-            's'              => $term,
-            'post_status'    => 'publish',
-            'fields'         => 'ids',
-        );
-        $query1 = new WP_Query( $args1 );
-        $ids1 = ! empty( $query1->posts ) ? $query1->posts : array();
+        $normalized_terms = array_unique( array_filter( array(
+            $term,
+            $this->convert_persian_to_english_digits( $term ),
+            $this->convert_english_to_persian_digits( $term )
+        ) ) );
 
-        // Query 2: ACF metadata search matching specific fields
-        $args2 = array(
-            'post_type'      => array( 'product', 'post', 'page' ),
-            'posts_per_page' => 50,
-            'post_status'    => 'publish',
-            'fields'         => 'ids',
-            'meta_query'     => array(
-                'relation' => 'OR',
-                array(
-                    'key'     => 'technical_specifications',
-                    'value'   => $term,
-                    'compare' => 'LIKE',
-                ),
-                array(
-                    'key'     => 'frequency_range',
-                    'value'   => $term,
-                    'compare' => 'LIKE',
-                )
-            )
-        );
-        $query2 = new WP_Query( $args2 );
-        $ids2 = ! empty( $query2->posts ) ? $query2->posts : array();
+        // Split queries exactly by post type to isolate products (WooCommerce) vs posts vs pages
+        $product_ids = $this->get_matched_post_ids( 'product', $normalized_terms, array( 'technical_specifications', 'frequency_range' ) );
+        $post_ids    = $this->get_matched_post_ids( 'post', $normalized_terms );
+        $page_ids    = $this->get_matched_post_ids( 'page', $normalized_terms );
 
-        // Merge standard matches and custom ACF matches cleanly (using standard UNION behavior)
-        $merged_ids = array_unique( array_merge( $ids1, $ids2 ) );
-
-        $formatted_results = array( 'products' => [], 'posts' => [], 'docs' => [] );
-
-        if ( empty( $merged_ids ) ) {
-            return $formatted_results;
-        }
-
-        // Limit results to top 20 items overall
-        $final_ids = array_slice( $merged_ids, 0, 20 );
-
-        $args3 = array(
-            'post_type' => array( 'product', 'post', 'page' ),
-            'post__in'  => $final_ids,
-            'orderby'   => 'post__in',
+        $formatted_results = array(
+            'all'      => [], // Combined list of all matches
+            'products' => [],
+            'posts'    => [],
+            'docs'     => []
         );
 
-        $query = new WP_Query( $args3 );
+        // Limit each specific tab results to top 15 items
+        $final_product_ids = array_slice( $product_ids, 0, 15 );
+        $final_post_ids    = array_slice( $post_ids, 0, 15 );
+        $final_page_ids    = array_slice( $page_ids, 0, 15 );
 
-        if ( $query->have_posts() ) {
-            // Find overridable template path
-            $template_path = locate_template( 'faramoj-advanced-search/search-result-item.php' );
-            if ( ! $template_path ) {
-                $template_path = plugin_dir_path( dirname( __FILE__ ) ) . 'templates/search-result-item.php';
+        // Combine all top matched IDs to render in the 'all' tab (capped to 20 overall)
+        $all_matched_ids = array_slice( array_unique( array_merge( $product_ids, $post_ids, $page_ids ) ), 0, 20 );
+
+        // Render function helper
+        $render_items = function( $ids, $default_category ) use ( $term ) {
+            $items = array();
+            if ( empty( $ids ) ) {
+                return $items;
             }
 
-            while ( $query->have_posts() ) {
-                $query->the_post();
-                $id = get_the_ID();
-                $type = get_post_type();
+            $query = new WP_Query( array(
+                'post_type' => array( 'product', 'post', 'page' ),
+                'post__in'  => $ids,
+                'orderby'   => 'post__in',
+            ) );
 
-                $title   = get_the_title();
-                $excerpt = wp_trim_words( get_the_excerpt(), 15, '...' );
-
-                $item = array(
-                    'title'        => $title,
-                    'permalink'    => get_permalink(),
-                    'image'        => get_the_post_thumbnail_url( $id, 'thumbnail' ) ?: '',
-                    'excerpt'      => $excerpt,
-                    'title_html'   => $this->highlight_text( $title, $term ),
-                    'excerpt_html' => $this->highlight_text( $excerpt, $term ),
-                );
-
-                $category = 'docs';
-                if ( $type === 'product' ) {
-                    $category = 'products';
-                } elseif ( $type === 'post' ) {
-                    $category = 'posts';
+            if ( $query->have_posts() ) {
+                $template_path = locate_template( 'faramoj-advanced-search/search-result-item.php' );
+                if ( ! $template_path ) {
+                    $template_path = plugin_dir_path( dirname( __FILE__ ) ) . 'templates/search-result-item.php';
                 }
 
-                // Render item through standard overridable templates
-                ob_start();
-                $args = array( 'item' => $item, 'category' => $category );
-                include $template_path;
-                $rendered_html = ob_get_clean();
+                while ( $query->have_posts() ) {
+                    $query->the_post();
+                    $id = get_the_ID();
+                    $type = get_post_type();
 
-                if ( $category === 'products' ) {
-                    $formatted_results['products'][] = array( 'html' => $rendered_html );
-                } elseif ( $category === 'posts' ) {
-                    $formatted_results['posts'][] = array( 'html' => $rendered_html );
-                } else {
-                    $formatted_results['docs'][] = array( 'html' => $rendered_html );
+                    $title   = get_the_title();
+                    $excerpt = wp_trim_words( get_the_excerpt(), 15, '...' );
+
+                    $item = array(
+                        'title'        => $title,
+                        'permalink'    => get_permalink(),
+                        'image'        => get_the_post_thumbnail_url( $id, 'thumbnail' ) ?: '',
+                        'excerpt'      => $excerpt,
+                        'title_html'   => $this->highlight_text( $title, $term ),
+                        'excerpt_html' => $this->highlight_text( $excerpt, $term ),
+                    );
+
+                    $category = $default_category;
+                    if ( 'all' === $default_category ) {
+                        if ( $type === 'product' ) {
+                            $category = 'products';
+                        } elseif ( $type === 'post' ) {
+                            $category = 'posts';
+                        } else {
+                            $category = 'docs';
+                        }
+                    }
+
+                    ob_start();
+                    $args = array( 'item' => $item, 'category' => $category );
+                    include $template_path;
+                    $rendered_html = ob_get_clean();
+
+                    $items[] = array( 'html' => $rendered_html );
                 }
+                wp_reset_postdata();
             }
-            wp_reset_postdata();
-        }
+
+            return $items;
+        };
+
+        $formatted_results['products'] = $render_items( $final_product_ids, 'products' );
+        $formatted_results['posts']    = $render_items( $final_post_ids, 'posts' );
+        $formatted_results['docs']     = $render_items( $final_page_ids, 'docs' );
+        $formatted_results['all']      = $render_items( $all_matched_ids, 'all' );
 
         return $formatted_results;
     }

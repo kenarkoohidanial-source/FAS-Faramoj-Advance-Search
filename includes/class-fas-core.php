@@ -45,6 +45,9 @@ class FAS_Core {
      * Enqueue CSS & Javascript assets.
      */
     public function enqueue_assets() {
+        // Enqueue Dashicons for beautiful tab icons in the frontend
+        wp_enqueue_style( 'dashicons' );
+
         wp_enqueue_style(
             'fas-public-css',
             plugins_url( 'public/css/fas-public.css', dirname( __FILE__ ) ),
@@ -68,23 +71,34 @@ class FAS_Core {
             $current_lang = ICL_LANGUAGE_CODE;
         }
 
+        // Fetch custom tabs sequence
+        $tabs_order = get_option( 'fas_tabs_order', 'all,products,posts,docs' );
+        $tabs_order_arr = array_map( 'trim', explode( ',', $tabs_order ) );
+
         wp_localize_script( 'fas-public-js', 'fas_params', array(
-            'ajax_url' => esc_url_raw( rest_url( 'fas/v1/search' ) ),
-            'lang'     => sanitize_text_field( $current_lang ),
-            'nonce'    => wp_create_nonce( 'wp_rest' ),
-            'i18n'     => array(
+            'ajax_url'   => esc_url_raw( rest_url( 'fas/v1/search' ) ),
+            'lang'       => sanitize_text_field( $current_lang ),
+            'nonce'      => wp_create_nonce( 'wp_rest' ),
+            'tabs_order' => $tabs_order_arr,
+            'i18n'       => array(
                 'placeholder' => __( 'Search products, articles, docs...', 'faramoj-search' ),
                 'no_results'  => __( 'No results found', 'faramoj-search' ),
-                'products'    => __( 'Products', 'faramoj-search' ),
-                'posts'       => __( 'News & Articles', 'faramoj-search' ),
-                'docs'        => __( 'Documentation', 'faramoj-search' ),
                 'searching'   => __( 'Searching...', 'faramoj-search' ),
             )
         ) );
 
-        // Inject custom floating brand color CSS variable dynamically
-        $floating_bg = get_option( 'fas_floating_bg', '#0066cc' );
-        $custom_inline_css = ":root { --fas-primary: " . esc_attr( $floating_bg ) . "; }";
+        // Inject custom floating brand color and popup dimensions dynamically
+        $floating_bg      = get_option( 'fas_floating_bg', '#0066cc' );
+        $popup_width      = get_option( 'fas_popup_width', 750 );
+        $popup_max_height = get_option( 'fas_popup_max_height', 600 );
+
+        $custom_inline_css = "
+            :root {
+                --fas-primary: " . esc_attr( $floating_bg ) . ";
+                --fas-popup-width: " . esc_attr( $popup_width ) . "px;
+                --fas-popup-max-height: " . esc_attr( $popup_max_height ) . "px;
+            }
+        ";
         wp_add_inline_style( 'fas-public-css', $custom_inline_css );
     }
 

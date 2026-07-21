@@ -4,21 +4,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const searchOverlay = document.querySelector('.fas-search-overlay');
     const searchInput = document.querySelector('.fas-search-input');
+
+    // Read dynamic settings passed from PHP via wp_localize_script
     const currentLang = (typeof fas_params !== 'undefined' && fas_params.lang) ? fas_params.lang : (document.documentElement.lang || 'fa');
     const ajaxUrl = (typeof fas_params !== 'undefined' && fas_params.ajax_url) ? fas_params.ajax_url : '/wp-json/fas/v1/search';
+    const tabsOrder = (typeof fas_params !== 'undefined' && fas_params.tabs_order) ? fas_params.tabs_order : ['all', 'products', 'posts', 'docs'];
     const i18n = (typeof fas_params !== 'undefined' && fas_params.i18n) ? fas_params.i18n : {
         placeholder: 'Search products, articles, docs...',
         no_results: 'No results found',
-        products: 'Products',
-        posts: 'News & Articles',
-        docs: 'Documentation',
         searching: 'Searching...'
     };
 
     // Modal Interaction
     const triggerButtons = document.querySelectorAll('.fas-search-trigger');
     const closeButton = document.querySelector('.fas-modal-close');
-    const resultsPanel = document.querySelector('.fas-results-panel');
     const tabButtons = document.querySelectorAll('.fas-tab-btn');
     const tabContents = document.querySelectorAll('.fas-tab-content');
 
@@ -50,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (searchOverlay) {
         searchOverlay.addEventListener('click', (e) => {
-            // Close when clicking outside container
             if (e.target === searchOverlay) {
                 closeModal();
             }
@@ -63,15 +61,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Tab Switching Logic
+    // Tab Switching Logic (supporting custom accent colors dynamically)
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const targetTab = btn.getAttribute('data-tab');
+            const accentColor = btn.getAttribute('data-accent-color') || '#0066cc';
 
-            tabButtons.forEach(b => b.classList.remove('is-active'));
+            tabButtons.forEach(b => {
+                b.classList.remove('is-active');
+                // Reset text/border colors for inactive tabs
+                b.style.color = '';
+                b.style.borderBottomColor = '';
+                const subIcon = b.querySelector('.dashicons');
+                if (subIcon) subIcon.style.color = '';
+            });
+
             tabContents.forEach(c => c.classList.remove('is-active'));
 
             btn.classList.add('is-active');
+            btn.style.color = accentColor;
+            btn.style.borderBottomColor = accentColor;
+            const activeIcon = btn.querySelector('.dashicons');
+            if (activeIcon) activeIcon.style.color = accentColor;
+
             const targetContent = document.getElementById(`fas-tab-${targetTab}`);
             if (targetContent) {
                 targetContent.classList.add('is-active');
@@ -121,7 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .catch(err => {
                     if (err.name === 'AbortError') {
-                        // Suppress abort logs
                         return;
                     }
                     console.error('Search failed:', err);
@@ -149,10 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderFasResults(data) {
-        // Categories to map
-        const categories = ['products', 'posts', 'docs'];
-
-        categories.forEach(cat => {
+        // Populate results under each custom ordered tab
+        tabsOrder.forEach(cat => {
             const container = document.getElementById(`fas-tab-${cat}`);
             if (!container) return;
 
