@@ -91,12 +91,16 @@ class FAS_Core {
         $floating_bg      = get_option( 'fas_floating_bg', '#0066cc' );
         $popup_width      = get_option( 'fas_popup_width', 750 );
         $popup_max_height = get_option( 'fas_popup_max_height', 600 );
+        $floating_offset_x = get_option( 'fas_floating_offset_x', 24 );
+        $floating_offset_y = get_option( 'fas_floating_offset_y', 24 );
 
         $custom_inline_css = "
             :root {
                 --fas-primary: " . esc_attr( $floating_bg ) . ";
                 --fas-popup-width: " . esc_attr( $popup_width ) . "px;
                 --fas-popup-max-height: " . esc_attr( $popup_max_height ) . "px;
+                --fas-offset-x: " . esc_attr( $floating_offset_x ) . "px;
+                --fas-offset-y: " . esc_attr( $floating_offset_y ) . "px;
             }
         ";
         wp_add_inline_style( 'fas-public-css', $custom_inline_css );
@@ -114,11 +118,11 @@ class FAS_Core {
         ob_start();
         ?>
         <button class="fas-search-trigger <?php echo esc_attr( $atts['class'] ); ?>">
-            <svg class="fas-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="fas-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block !important; vertical-align: middle !important; width: 16px !important; height: 16px !important; visibility: visible !important;">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <span><?php echo esc_html( $atts['label'] ); ?></span>
+            <span style="vertical-align: middle !important;"><?php echo esc_html( $atts['label'] ); ?></span>
         </button>
         <?php
         return ob_get_clean();
@@ -183,7 +187,7 @@ class FAS_Core {
         $position = get_option( 'fas_floating_position', 'bottom-right' );
         ?>
         <button class="fas-search-trigger fas-floating-trigger fas-position-<?php echo esc_attr( $position ); ?>" aria-label="<?php esc_attr_e( 'Search', 'faramoj-search' ); ?>">
-            <svg class="fas-search-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="fas-search-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block !important; width: 22px !important; height: 22px !important; visibility: visible !important;">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>

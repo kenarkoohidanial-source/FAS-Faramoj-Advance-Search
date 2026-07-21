@@ -71,7 +71,20 @@ class FAS_Admin {
             'default'           => '#0066cc',
         ) );
 
-        // Popup dimensions
+        // Offsets
+        register_setting( 'fas_settings_group', 'fas_floating_offset_x', array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'intval',
+            'default'           => 24,
+        ) );
+
+        register_setting( 'fas_settings_group', 'fas_floating_offset_y', array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'intval',
+            'default'           => 24,
+        ) );
+
+        // Popup dimensions (updated bounds: width up to 2000px, height up to 1500px)
         register_setting( 'fas_settings_group', 'fas_popup_width', array(
             'type'              => 'integer',
             'sanitize_callback' => 'intval',
@@ -184,9 +197,10 @@ class FAS_Admin {
             return;
         }
 
-        // Enqueue WP Color Picker styles and scripts
+        // Enqueue WP Color Picker and standard jQuery UI Sortable scripts/styles
         wp_enqueue_style( 'wp-color-picker' );
         wp_enqueue_script( 'wp-color-picker' );
+        wp_enqueue_script( 'jquery-ui-sortable' );
 
         // Enqueue an empty stylesheet handle so we can safely add inline styles to it
         wp_register_style( 'fas-admin-css', false );

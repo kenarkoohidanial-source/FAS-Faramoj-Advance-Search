@@ -181,9 +181,6 @@ class FAS_Rest {
         $final_post_ids    = array_slice( $post_ids, 0, 15 );
         $final_page_ids    = array_slice( $page_ids, 0, 15 );
 
-        // Combine all top matched IDs to render in the 'all' tab (capped to 20 overall)
-        $all_matched_ids = array_slice( array_unique( array_merge( $product_ids, $post_ids, $page_ids ) ), 0, 20 );
-
         // Render function helper
         $render_items = function( $ids, $default_category ) use ( $term ) {
             $items = array();
@@ -247,7 +244,15 @@ class FAS_Rest {
         $formatted_results['products'] = $render_items( $final_product_ids, 'products' );
         $formatted_results['posts']    = $render_items( $final_post_ids, 'posts' );
         $formatted_results['docs']     = $render_items( $final_page_ids, 'docs' );
-        $formatted_results['all']      = $render_items( $all_matched_ids, 'all' );
+
+        // Merge pre-rendered results directly in PHP for the combined 'all' tab.
+        // This is 100% reliable, uses zero extra SQL queries, and avoids WPML/Polylang multi-CPT filter conflicts.
+        $all_items = array_merge(
+            $formatted_results['products'],
+            $formatted_results['posts'],
+            $formatted_results['docs']
+        );
+        $formatted_results['all'] = array_slice( $all_items, 0, 20 );
 
         return $formatted_results;
     }

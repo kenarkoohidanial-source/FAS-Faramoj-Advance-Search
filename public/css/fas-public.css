@@ -1,29 +1,32 @@
 :root {
     --fas-primary: #0066cc;       /* Tech blue accent */
-    --fas-dark-bg: rgba(15, 23, 42, 0.9);      /* Sleek dark slate overlay */
-    --fas-surface: #ffffff;
-    --fas-text-main: #1e293b;
+    --fas-dark-bg: rgba(15, 23, 42, 0.45);      /* Gorgeous Glassmorphism Overlay background */
+    --fas-surface: rgba(255, 255, 255, 0.7);
+    --fas-text-main: #0f172a;
     --fas-text-muted: #64748b;
-    --fas-border: #e2e8f0;
-    --fas-radius: 16px;
+    --fas-border: rgba(255, 255, 255, 0.25);
+    --fas-radius: 20px;
     --fas-popup-width: 750px;
     --fas-popup-max-height: 600px;
+    --fas-offset-x: 24px;
+    --fas-offset-y: 24px;
 }
 
-/* Base Modal Styling */
+/* Base Modal Styling (Ultra-premium Glassmorphism) */
 .fas-search-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
     background: var(--fas-dark-bg);
-    backdrop-filter: blur(12px);
-    z-index: 999999;
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    z-index: 999999 !important;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     padding-top: 8vh;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .fas-search-overlay.is-open {
@@ -36,11 +39,13 @@
     width: 92%;
     max-width: var(--fas-popup-width);
     border-radius: var(--fas-radius);
-    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 30px 70px -10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
     overflow: hidden;
-    transform: translateY(-30px) scale(0.98);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform: translateY(-25px) scale(0.97);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     border: 1px solid var(--fas-border);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
 }
 
 .fas-search-overlay.is-open .fas-search-container {
@@ -49,27 +54,39 @@
 
 /* Dark Theme Overlay adjustments */
 .fas-search-overlay.fas-theme-dark {
-    --fas-surface: #0f172a;
+    --fas-dark-bg: rgba(15, 23, 42, 0.55);
+    --fas-surface: rgba(15, 23, 42, 0.65);
     --fas-text-main: #f8fafc;
     --fas-text-muted: #94a3b8;
-    --fas-border: #1e293b;
-}
-
-.fas-search-overlay.fas-theme-dark .fas-search-tabs {
-    background: #0b0f19;
+    --fas-border: rgba(255, 255, 255, 0.08);
 }
 
 .fas-search-overlay.fas-theme-dark .fas-result-item:hover {
-    background: #1e293b;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 /* Light overlay design modifier class */
 .fas-search-overlay.fas-theme-light {
-    background: rgba(255, 255, 255, 0.85);
-    --fas-surface: #ffffff;
+    --fas-dark-bg: rgba(255, 255, 255, 0.45);
+    --fas-surface: rgba(255, 255, 255, 0.75);
     --fas-text-main: #0f172a;
     --fas-text-muted: #64748b;
-    --fas-border: #e2e8f0;
+    --fas-border: rgba(0, 0, 0, 0.06);
+}
+
+.fas-search-overlay.fas-theme-light .fas-result-item:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+/* Explicit high-priority styles for the search icon to prevent theme resets or loading failures */
+.fas-search-icon, .fas-search-trigger svg {
+    display: inline-block !important;
+    width: 20px !important;
+    height: 20px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: currentColor !important;
+    flex-shrink: 0 !important;
 }
 
 /* Search Input Form styling */
@@ -78,22 +95,22 @@
     border-bottom: 1px solid var(--fas-border);
     display: flex;
     align-items: center;
-    padding: 18px 24px;
+    padding: 20px 24px;
 }
 
 .fas-search-input-wrapper svg {
     color: var(--fas-text-muted);
     margin-right: 14px;
-    flex-shrink: 0;
 }
 
 .fas-search-input {
     width: 100%;
-    border: none;
-    outline: none;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
     font-size: 18px;
     color: var(--fas-text-main);
-    background: transparent;
+    background: transparent !important;
     font-weight: 500;
 }
 
@@ -101,7 +118,7 @@
     background: rgba(100, 116, 139, 0.1);
     border: none;
     color: var(--fas-text-muted);
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
     cursor: pointer;
     width: 32px;
@@ -112,6 +129,7 @@
     align-items: center;
     justify-content: center;
     transition: background 0.2s, color 0.2s;
+    box-sizing: border-box;
 }
 
 .fas-modal-close:hover {
@@ -119,13 +137,15 @@
     color: #ffffff;
 }
 
-/* Category Tab Header styling */
+/* Category Tab Header styling (Beautiful Glassmorphism pills layout) */
 .fas-search-tabs {
     display: flex;
     border-bottom: 1px solid var(--fas-border);
-    background: #f8fafc;
+    background: transparent;
     overflow-x: auto;
     scrollbar-width: none;
+    padding: 10px 16px;
+    gap: 12px;
 }
 
 .fas-search-tabs::-webkit-scrollbar {
@@ -133,51 +153,44 @@
 }
 
 .fas-tab-btn {
-    padding: 14px 24px;
-    border: none;
-    background: none;
+    padding: 8px 18px;
+    border: 1px solid transparent !important;
+    background: rgba(100, 116, 139, 0.05) !important;
     cursor: pointer;
-    color: var(--fas-text-muted);
+    color: var(--fas-text-muted) !important;
     font-weight: 600;
-    font-size: 14px;
-    position: relative;
+    font-size: 13px;
+    border-radius: 20px !important;
     display: flex;
     align-items: center;
-    gap: 8px;
-    transition: color 0.2s;
+    gap: 6px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     white-space: nowrap;
+    box-shadow: none !important;
 }
 
 .fas-tab-btn .dashicons {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
     color: var(--fas-text-muted);
-    transition: color 0.2s;
+    transition: color 0.3s;
 }
 
 .fas-tab-btn:hover {
-    color: var(--fas-text-main);
+    background: rgba(100, 116, 139, 0.1) !important;
+    color: var(--fas-text-main) !important;
 }
 
 .fas-tab-btn.is-active {
-    color: var(--tab-accent, var(--fas-primary));
+    background: var(--tab-accent, var(--fas-primary)) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
+    border-color: var(--tab-accent, var(--fas-primary)) !important;
 }
 
 .fas-tab-btn.is-active .dashicons {
-    color: var(--tab-accent, var(--fas-primary));
-}
-
-.fas-tab-btn.is-active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--tab-accent, var(--fas-primary));
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
+    color: #ffffff !important;
 }
 
 /* Results Section */
@@ -189,7 +202,7 @@
 
 .fas-tab-content {
     display: none;
-    animation: fasFadeIn 0.25s ease-out;
+    animation: fasFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .fas-tab-content.is-active {
@@ -197,7 +210,7 @@
 }
 
 @keyframes fasFadeIn {
-    from { opacity: 0; transform: translateY(4px); }
+    from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
@@ -219,13 +232,12 @@
     border-radius: 12px;
     text-decoration: none;
     color: inherit;
-    transition: background 0.2s ease, transform 0.2s ease;
+    transition: background 0.2s, transform 0.2s;
     margin-bottom: 8px;
     border: 1px solid transparent;
 }
 
 .fas-result-item:hover {
-    background: #f1f5f9;
     transform: translateX(4px);
 }
 
@@ -289,41 +301,41 @@
     opacity: 0.95;
 }
 
-/* Floating quick search button trigger */
+/* Floating quick search button trigger with high-priority customizable offsets */
 .fas-floating-trigger {
-    position: fixed;
-    z-index: 9999;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    padding: 0;
-    justify-content: center;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    position: fixed !important;
+    z-index: 9999 !important;
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
 }
 
 .fas-floating-trigger:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
 }
 
 .fas-position-bottom-right {
-    bottom: 24px;
-    right: 24px;
+    bottom: var(--fas-offset-y, 24px) !important;
+    right: var(--fas-offset-x, 24px) !important;
 }
 
 .fas-position-bottom-left {
-    bottom: 24px;
-    left: 24px;
+    bottom: var(--fas-offset-y, 24px) !important;
+    left: var(--fas-offset-x, 24px) !important;
 }
 
 .fas-position-top-right {
-    top: 24px;
-    right: 24px;
+    top: var(--fas-offset-y, 24px) !important;
+    right: var(--fas-offset-x, 24px) !important;
 }
 
 .fas-position-top-left {
-    top: 24px;
-    left: 24px;
+    top: var(--fas-offset-y, 24px) !important;
+    left: var(--fas-offset-x, 24px) !important;
 }
 
 /* Elementor Widget specific triggers */
