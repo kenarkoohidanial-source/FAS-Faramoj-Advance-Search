@@ -1,0 +1,411 @@
+:root {
+    --fas-primary: #0066cc;       /* Tech blue accent */
+    --fas-dark-bg: rgba(15, 23, 42, 0.45);      /* Gorgeous Glassmorphism Overlay background */
+    --fas-surface: rgba(255, 255, 255, 0.7);
+    --fas-text-main: #0f172a;
+    --fas-text-muted: #64748b;
+    --fas-border: rgba(255, 255, 255, 0.25);
+    --fas-radius: 20px;
+    --fas-popup-width: 750px;
+    --fas-popup-max-height: 600px;
+    --fas-offset-x: 24px;
+    --fas-offset-y: 24px;
+}
+
+/* Base Modal Styling (Ultra-premium Glassmorphism) */
+.fas-search-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--fas-dark-bg);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    z-index: 999999 !important;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 8vh;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fas-search-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.fas-search-container {
+    background: var(--fas-surface);
+    width: 92%;
+    max-width: var(--fas-popup-width);
+    border-radius: var(--fas-radius);
+    box-shadow: 0 30px 70px -10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+    transform: translateY(-25px) scale(0.97);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid var(--fas-border);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+}
+
+.fas-search-overlay.is-open .fas-search-container {
+    transform: translateY(0) scale(1);
+}
+
+/* Dark Theme Overlay adjustments */
+.fas-search-overlay.fas-theme-dark {
+    --fas-dark-bg: rgba(15, 23, 42, 0.55);
+    --fas-surface: rgba(15, 23, 42, 0.65);
+    --fas-text-main: #f8fafc;
+    --fas-text-muted: #94a3b8;
+    --fas-border: rgba(255, 255, 255, 0.08);
+}
+
+.fas-search-overlay.fas-theme-dark .fas-result-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Light overlay design modifier class */
+.fas-search-overlay.fas-theme-light {
+    --fas-dark-bg: rgba(255, 255, 255, 0.45);
+    --fas-surface: rgba(255, 255, 255, 0.75);
+    --fas-text-main: #0f172a;
+    --fas-text-muted: #64748b;
+    --fas-border: rgba(0, 0, 0, 0.06);
+}
+
+.fas-search-overlay.fas-theme-light .fas-result-item:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+/* Explicit high-priority styles for the search icon to prevent theme resets or loading failures */
+.fas-search-icon, .fas-search-trigger svg {
+    display: inline-block !important;
+    width: 20px !important;
+    height: 20px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: currentColor !important;
+    flex-shrink: 0 !important;
+}
+
+/* Search Input Form styling */
+.fas-search-input-wrapper {
+    position: relative;
+    border-bottom: 1px solid var(--fas-border);
+    display: flex;
+    align-items: center;
+    padding: 20px 24px;
+}
+
+.fas-search-input-wrapper svg {
+    color: var(--fas-text-muted);
+    margin-right: 14px;
+}
+
+.fas-search-input {
+    width: 100%;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    font-size: 18px;
+    color: var(--fas-text-main);
+    background: transparent !important;
+    font-weight: 500;
+}
+
+/* Hardened Close Search Button styling to prevent any theme resets */
+.fas-modal-close {
+    background-color: rgba(100, 116, 139, 0.1) !important;
+    background: rgba(100, 116, 139, 0.1) !important;
+    border: none !important;
+    outline: none !important;
+    color: var(--fas-text-muted) !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    cursor: pointer !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    border-radius: 50% !important;
+    margin: 0 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: background 0.2s, color 0.2s !important;
+    box-sizing: border-box !important;
+    box-shadow: none !important;
+    line-height: 1 !important;
+}
+
+.fas-modal-close:hover {
+    background-color: #e11d48 !important;
+    background: #e11d48 !important;
+    color: #ffffff !important;
+}
+
+.fas-modal-close svg {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 14px !important;
+    height: 14px !important;
+    color: currentColor !important;
+}
+
+/* Category Tab Header styling (Beautiful Glassmorphism pills layout) */
+.fas-search-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--fas-border);
+    background: transparent;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 10px 16px;
+    gap: 12px;
+}
+
+.fas-search-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.fas-tab-btn {
+    padding: 8px 18px;
+    border: 1px solid transparent !important;
+    background: rgba(100, 116, 139, 0.05) !important;
+    cursor: pointer;
+    color: var(--fas-text-muted) !important;
+    font-weight: 600;
+    font-size: 13px;
+    border-radius: 20px !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    box-shadow: none !important;
+}
+
+.fas-tab-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--fas-text-muted);
+    transition: color 0.3s;
+}
+
+.fas-tab-btn:hover {
+    background: rgba(100, 116, 139, 0.1) !important;
+    color: var(--fas-text-main) !important;
+}
+
+.fas-tab-btn.is-active {
+    background: var(--tab-accent, var(--fas-primary)) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
+    border-color: var(--tab-accent, var(--fas-primary)) !important;
+}
+
+.fas-tab-btn.is-active .dashicons {
+    color: #ffffff !important;
+}
+
+/* Results Section */
+.fas-results-panel {
+    max-height: calc(var(--fas-popup-max-height) - 130px);
+    overflow-y: auto;
+    padding: 20px 24px;
+}
+
+.fas-tab-content {
+    display: none;
+    animation: fasFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fas-tab-content.is-active {
+    display: block;
+}
+
+@keyframes fasFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Keyword Highlighting */
+.fas-highlight {
+    background: rgba(220, 38, 38, 0.12);
+    color: #ef4444;
+    padding: 1px 3px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+/* Single Result Item Styling */
+.fas-result-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.2s, transform 0.2s;
+    margin-bottom: 8px;
+    border: 1px solid transparent;
+}
+
+.fas-result-item:hover {
+    transform: translateX(4px);
+}
+
+.fas-result-image {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: rgba(100, 116, 139, 0.1);
+    flex-shrink: 0;
+}
+
+.fas-result-fallback-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    background: rgba(100, 116, 139, 0.1);
+    color: var(--fas-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.fas-result-info {
+    flex-grow: 1;
+}
+
+.fas-result-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--fas-text-main);
+    margin: 0 0 4px 0;
+}
+
+.fas-result-excerpt {
+    font-size: 13px;
+    color: var(--fas-text-muted);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Search Trigger Button Overrides with absolute maximum priority */
+.fas-search-trigger {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background-color: var(--fas-primary) !important;
+    background: var(--fas-primary) !important;
+    color: #ffffff !important;
+    border: none !important;
+    outline: none !important;
+    padding: 10px 18px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+    text-transform: none !important;
+    text-decoration: none !important;
+    line-height: normal !important;
+    height: auto !important;
+    min-height: 0 !important;
+    width: auto !important;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.fas-search-trigger:hover {
+    background-color: var(--fas-primary) !important;
+    background: var(--fas-primary) !important;
+    opacity: 0.95 !important;
+    color: #ffffff !important;
+}
+
+/* Floating quick search button trigger with high-priority customizable offsets */
+.fas-floating-trigger {
+    position: fixed !important;
+    z-index: 999999 !important; /* Ensure it is on top of everything! */
+    width: 56px !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+    min-width: 56px !important;
+    max-width: 56px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: var(--fas-primary) !important;
+    background: var(--fas-primary) !important;
+    color: #ffffff !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+    cursor: pointer !important;
+}
+
+.fas-floating-trigger:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
+    background-color: var(--fas-primary) !important;
+    background: var(--fas-primary) !important;
+    color: #ffffff !important;
+    opacity: 0.95 !important;
+}
+
+.fas-position-bottom-right {
+    bottom: var(--fas-offset-y, 24px) !important;
+    right: var(--fas-offset-x, 24px) !important;
+    left: auto !important;
+    top: auto !important;
+}
+
+.fas-position-bottom-left {
+    bottom: var(--fas-offset-y, 24px) !important;
+    left: var(--fas-offset-x, 24px) !important;
+    right: auto !important;
+    top: auto !important;
+}
+
+.fas-position-top-right {
+    top: var(--fas-offset-y, 24px) !important;
+    right: var(--fas-offset-x, 24px) !important;
+    left: auto !important;
+    bottom: auto !important;
+}
+
+.fas-position-top-left {
+    top: var(--fas-offset-y, 24px) !important;
+    left: var(--fas-offset-x, 24px) !important;
+    right: auto !important;
+    bottom: auto !important;
+}
+
+/* Elementor Widget specific triggers */
+.fas-elementor-icon-trigger {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    justify-content: center !important;
+}
+
+/* Status Message */
+.fas-status-message {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--fas-text-muted);
+    font-size: 15px;
+}
