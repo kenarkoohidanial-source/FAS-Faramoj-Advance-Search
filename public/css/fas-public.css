@@ -205,7 +205,7 @@
     line-height: 1.4;
 }
 
-/* Search Trigger Shortcode Button */
+/* Search Trigger Shortcode/General Button */
 .fas-search-trigger {
     display: inline-flex;
     align-items: center;
@@ -218,11 +218,58 @@
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .fas-search-trigger:hover {
-    background: #0052a3;
+    background: var(--fas-primary);
+    opacity: 0.9;
+}
+
+/* Floating quick search button trigger */
+.fas-floating-trigger {
+    position: fixed;
+    z-index: 9999;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    padding: 0;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.fas-floating-trigger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.fas-position-bottom-right {
+    bottom: 24px;
+    right: 24px;
+}
+
+.fas-position-bottom-left {
+    bottom: 24px;
+    left: 24px;
+}
+
+.fas-position-top-right {
+    top: 24px;
+    right: 24px;
+}
+
+.fas-position-top-left {
+    top: 24px;
+    left: 24px;
+}
+
+/* Elementor Widget specific triggers */
+.fas-elementor-icon-trigger {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    padding: 0;
+    justify-content: center;
 }
 
 /* Status Message */

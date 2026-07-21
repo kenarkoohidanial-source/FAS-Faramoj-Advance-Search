@@ -38,6 +38,37 @@ class FAS_Admin {
             'default'           => 'dark',
         ) );
 
+        // Floating button configuration options
+        register_setting( 'fas_settings_group', 'fas_enable_floating', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'yes',
+        ) );
+
+        register_setting( 'fas_settings_group', 'fas_floating_position', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'bottom-right',
+        ) );
+
+        register_setting( 'fas_settings_group', 'fas_display_pages_type', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'all', // 'all', 'specific', 'none'
+        ) );
+
+        register_setting( 'fas_settings_group', 'fas_display_specific_pages', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '',
+        ) );
+
+        register_setting( 'fas_settings_group', 'fas_floating_bg', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '#0066cc',
+        ) );
+
         // Correct enqueue hook registration
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
     }

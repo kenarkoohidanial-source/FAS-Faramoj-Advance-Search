@@ -36,6 +36,9 @@ class FAS_Core {
 
         // Inject the search modal markup into the footer
         add_action( 'wp_footer', array( $this, 'inject_search_modal' ) );
+
+        // Auto-inject Floating Trigger button into footer if enabled
+        add_action( 'wp_footer', array( $this, 'maybe_inject_floating_trigger' ), 9 );
     }
 
     /**
@@ -78,6 +81,11 @@ class FAS_Core {
                 'searching'   => __( 'Searching...', 'faramoj-search' ),
             )
         ) );
+
+        // Inject custom floating brand color CSS variable dynamically
+        $floating_bg = get_option( 'fas_floating_bg', '#0066cc' );
+        $custom_inline_css = ":root { --fas-primary: " . esc_attr( $floating_bg ) . "; }";
+        wp_add_inline_style( 'fas-public-css', $custom_inline_css );
     }
 
     /**
@@ -112,5 +120,60 @@ class FAS_Core {
         } else {
             include plugin_dir_path( dirname( __FILE__ ) ) . 'templates/search-modal.php';
         }
+    }
+
+    /**
+     * Conditionally inject the floating search button into wp_footer.
+     */
+    public function maybe_inject_floating_trigger() {
+        $enable_floating = get_option( 'fas_enable_floating', 'yes' );
+        if ( 'yes' !== $enable_floating ) {
+            return;
+        }
+
+        $display_type = get_option( 'fas_display_pages_type', 'all' );
+        if ( 'none' === $display_type ) {
+            return;
+        }
+
+        // Handle Page Visibility conditions
+        if ( 'specific' === $display_type ) {
+            $specific_input = get_option( 'fas_display_specific_pages', '' );
+            if ( empty( $specific_input ) ) {
+                return;
+            }
+
+            // Split items by comma
+            $pages_arr = array_map( 'trim', explode( ',', $specific_input ) );
+            $should_show = false;
+
+            foreach ( $pages_arr as $val ) {
+                if ( empty( $val ) ) {
+                    continue;
+                }
+                // Check if numeric page ID or matching slug/title
+                if ( is_numeric( $val ) && is_page( intval( $val ) ) ) {
+                    $should_show = true;
+                    break;
+                } elseif ( is_page( $val ) || is_single( $val ) ) {
+                    $should_show = true;
+                    break;
+                }
+            }
+
+            if ( ! $should_show ) {
+                return;
+            }
+        }
+
+        $position = get_option( 'fas_floating_position', 'bottom-right' );
+        ?>
+        <button class="fas-search-trigger fas-floating-trigger fas-position-<?php echo esc_attr( $position ); ?>" aria-label="<?php esc_attr_e( 'Search', 'faramoj-search' ); ?>">
+            <svg class="fas-search-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </button>
+        <?php
     }
 }
