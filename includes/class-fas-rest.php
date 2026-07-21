@@ -25,6 +25,9 @@ class FAS_Rest {
             return new WP_REST_Response( array( 'error' => 'Empty search term' ), 400 );
         }
 
+        // Log search query metrics dynamically for our Statistics submenu
+        $this->log_search_stats( $term );
+
         // Switch language context if WPML is active
         if ( function_exists( 'wpml_object_id_filter' ) && ! empty( $lang ) ) {
             do_action( 'wpml_switch_language', $lang );
@@ -36,7 +39,9 @@ class FAS_Rest {
         }
 
         // Custom Transient Cache Duration from Settings (default 1 hour)
-        $cache_duration = get_option( 'fas_cache_duration', HOUR_IN_SECONDS );
+        // Detect suffix
+        $suffix = '_' . $lang;
+        $cache_duration = get_option( 'fas_cache_duration' . $suffix, HOUR_IN_SECONDS );
         if ( empty( $cache_duration ) && $cache_duration !== '0' ) {
             $cache_duration = HOUR_IN_SECONDS;
         }
@@ -50,13 +55,48 @@ class FAS_Rest {
         }
 
         if ( false === $results ) {
-            $results = $this->execute_db_query( $term );
+            $results = $this->execute_db_query( $term, $lang );
             if ( $cache_duration > 0 ) {
                 set_transient( $cache_key, $results, intval( $cache_duration ) );
             }
         }
 
         return new WP_REST_Response( $results, 200 );
+    }
+
+    /**
+     * Log search queries statistics (total count & popular terms tracking)
+     */
+    private function log_search_stats( $term ) {
+        if ( empty( $term ) || strlen( $term ) < 3 ) {
+            return;
+        }
+
+        // Standardize lowercase matching
+        $term_clean = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $term ) ) : strtolower( trim( $term ) );
+        $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [] ) );
+
+        if ( ! isset( $stats['total_count'] ) ) {
+            $stats['total_count'] = 0;
+        }
+        $stats['total_count']++;
+
+        if ( ! isset( $stats['terms'] ) ) {
+            $stats['terms'] = array();
+        }
+
+        if ( ! isset( $stats['terms'][ $term_clean ] ) ) {
+            $stats['terms'][ $term_clean ] = 0;
+        }
+        $stats['terms'][ $term_clean ]++;
+
+        // Keep top 100 popular terms to protect option storage
+        arsort( $stats['terms'] );
+        if ( count( $stats['terms'] ) > 100 ) {
+            $stats['terms'] = array_slice( $stats['terms'], 0, 100, true );
+        }
+
+        update_option( 'fas_search_stats', $stats );
     }
 
     /**
@@ -157,7 +197,7 @@ class FAS_Rest {
         return array_unique( $all_ids );
     }
 
-    private function execute_db_query( $term ) {
+    private function execute_db_query( $term, $lang ) {
         $normalized_terms = array_unique( array_filter( array(
             $term,
             $this->convert_persian_to_english_digits( $term ),

@@ -8,33 +8,35 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-$theme_mode     = get_option( 'fas_theme_mode', 'dark' );
+$suffix = FAS_Core::get_lang_suffix();
+
+$theme_mode    = get_option( 'fas_theme_mode' . $suffix, 'dark' );
 $overlay_class = ( 'light' === $theme_mode ) ? 'fas-theme-light' : 'fas-theme-dark';
 
-$tabs_order     = get_option( 'fas_tabs_order', 'all,products,posts,docs' );
+$tabs_order     = get_option( 'fas_tabs_order' . $suffix, 'all,products,posts,docs' );
 $tabs_order_arr = array_map( 'trim', explode( ',', $tabs_order ) );
 
 // Fetch individual tab titles, colors, and icons
 $tab_details = array(
     'all' => array(
-        'title' => get_option( 'fas_tab_all_title', 'All Results' ),
-        'color' => get_option( 'fas_tab_all_color', '#0066cc' ),
-        'icon'  => get_option( 'fas_tab_all_icon', 'dashicons-grid-view' ),
+        'title' => get_option( 'fas_tab_all_title' . $suffix, 'All Results' ),
+        'color' => get_option( 'fas_tab_all_color' . $suffix, '#0066cc' ),
+        'icon'  => get_option( 'fas_tab_all_icon' . $suffix, 'dashicons-grid-view' ),
     ),
     'products' => array(
-        'title' => get_option( 'fas_tab_products_title', 'Products' ),
-        'color' => get_option( 'fas_tab_products_color', '#10b981' ),
-        'icon'  => get_option( 'fas_tab_products_icon', 'dashicons-cart' ),
+        'title' => get_option( 'fas_tab_products_title' . $suffix, 'Products' ),
+        'color' => get_option( 'fas_tab_products_color' . $suffix, '#10b981' ),
+        'icon'  => get_option( 'fas_tab_products_icon' . $suffix, 'dashicons-cart' ),
     ),
     'posts' => array(
-        'title' => get_option( 'fas_tab_posts_title', 'News & Articles' ),
-        'color' => get_option( 'fas_tab_posts_color', '#f59e0b' ),
-        'icon'  => get_option( 'fas_tab_posts_icon', 'dashicons-welcome-write-blog' ),
+        'title' => get_option( 'fas_tab_posts_title' . $suffix, 'News & Articles' ),
+        'color' => get_option( 'fas_tab_posts_color' . $suffix, '#f59e0b' ),
+        'icon'  => get_option( 'fas_tab_posts_icon' . $suffix, 'dashicons-welcome-write-blog' ),
     ),
     'docs' => array(
-        'title' => get_option( 'fas_tab_docs_title', 'Documentation' ),
-        'color' => get_option( 'fas_tab_docs_color', '#6366f1' ),
-        'icon'  => get_option( 'fas_tab_docs_icon', 'dashicons-book-alt' ),
+        'title' => get_option( 'fas_tab_docs_title' . $suffix, 'Documentation' ),
+        'color' => get_option( 'fas_tab_docs_color' . $suffix, '#6366f1' ),
+        'icon'  => get_option( 'fas_tab_docs_icon' . $suffix, 'dashicons-book-alt' ),
     ),
 );
 ?>
@@ -47,7 +49,12 @@ $tab_details = array(
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
             <input type="text" class="fas-search-input" placeholder="<?php esc_attr_e( 'Search products, articles, docs...', 'faramoj-search' ); ?>" aria-label="<?php esc_attr_e( 'Live Search', 'faramoj-search' ); ?>">
-            <button class="fas-modal-close" aria-label="<?php esc_attr_e( 'Close Search', 'faramoj-search' ); ?>">&times;</button>
+            <button class="fas-modal-close" aria-label="<?php esc_attr_e( 'Close Search', 'faramoj-search' ); ?>">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
         </div>
 
         <!-- Category Tabs (Dynamically Ordered & Styled) -->
