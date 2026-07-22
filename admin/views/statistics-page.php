@@ -159,8 +159,8 @@ $recent_trends = array_slice( $recent_trends, 0, 5, true );
 
         <!-- Popular Queries Card with Glassmorphism class -->
         <div class="fas-card" style="padding: 24px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.4); padding-bottom: 12px; margin-bottom: 16px;">
-                <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+            <div style="display: flex; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.4); padding-bottom: 12px; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
                     <span class="dashicons dashicons-awards" style="color: #0066cc;"></span>
                     <span><?php echo esc_html( $i18n['popular_keywords'] ); ?></span>
                 </h3>
@@ -172,7 +172,7 @@ $recent_trends = array_slice( $recent_trends, 0, 5, true );
                     <p style="margin: 0; font-size: 14px; font-weight: 500;"><?php echo esc_html( $i18n['no_data'] ); ?></p>
                 </div>
             <?php else : ?>
-                <div class="fas-tab-nav">
+                <div class="fas-tab-nav" style="flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
                     <button type="button" class="active" data-target="fas-persian-terms"><?php echo $is_rtl ? 'عبارات فارسی / عربی' : 'Persian / Arabic'; ?></button>
                     <button type="button" data-target="fas-english-terms"><?php echo $is_rtl ? 'عبارات انگلیسی' : 'English'; ?></button>
                 </div>
