@@ -14,7 +14,7 @@ $dir_style = $is_rtl ? 'direction: rtl; text-align: right;' : 'direction: ltr; t
 
 $i18n = array(
     'title' => $is_rtl ? 'جستجوی زنده پیشرفته فراموج' : 'Faramoj Advanced Live Search',
-    'badge' => $is_rtl ? 'نسخه ۱.۱.۱' : 'Version 1.1.1',
+    'badge' => $is_rtl ? 'نسخه ۱.۱.۰' : 'Version 1.1.0',
     'desc' => $is_rtl ? 'پلاگین جستجوی پیشرفته فراموج (FAS) یک موتور جستجوی زنده، بسیار بهینه و مبتنی بر AJAX است که به طور تخصصی برای محصولات مخابراتی فنی، مقالات و مستندات فنی و مهندسی طراحی و بهینه‌سازی شده است.' : 'Faramoj Advanced Search (FAS) is an ultra-high performance, AJAX-driven live search engine tailored specifically for technical telecommunication products, articles, and documentation.',
     'dev_by' => $is_rtl ? 'با افتخار توسعه‌یافته و بهینه‌سازی‌شده توسط' : 'Proudly Developed & Optimized by',
     'developer' => $is_rtl ? 'دانیال کنارکوهی' : 'Danial Kenarkoohi',
@@ -30,8 +30,8 @@ $i18n = array(
 ?>
 <div class="wrap fas-admin-wrap" style="max-width: 850px; margin: 40px auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif; text-align: center; <?php echo $dir_style; ?>">
 
-    <!-- About card wrapper with top accent line -->
-    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-top: 4px solid #0066cc; border-radius: 12px; padding: 48px 32px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); text-align: center;">
+    <!-- About card wrapper with dynamic Glassmorphism class -->
+    <div class="fas-card" style="border-top: 4px solid #0066cc !important; padding: 48px 32px; text-align: center;">
 
         <!-- Logo Emblem -->
         <div style="width: 80px; height: 80px; border-radius: 20px; background: #0066cc; color: #ffffff; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px auto; box-shadow: 0 10px 20px rgba(0,102,204,0.25);">
@@ -39,7 +39,7 @@ $i18n = array(
         </div>
 
         <h2 style="margin: 0; font-size: 26px; font-weight: 800; color: #0f172a;"><?php echo esc_html( $i18n['title'] ); ?></h2>
-        <span style="display: inline-block; background: #e2e8f0; color: #475569; font-weight: 700; font-size: 11px; padding: 3px 12px; border-radius: 12px; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px;"><?php echo esc_html( $i18n['badge'] ); ?></span>
+        <span style="display: inline-block; background: rgba(0,0,0,0.05); color: #475569; font-weight: 700; font-size: 11px; padding: 3px 12px; border-radius: 12px; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px;"><?php echo esc_html( $i18n['badge'] ); ?></span>
 
         <p style="font-size: 15px; color: #475569; line-height: 1.6; max-width: 600px; margin: 24px auto 32px auto;">
             <?php echo esc_html( $i18n['desc'] ); ?>
@@ -47,7 +47,7 @@ $i18n = array(
 
         <!-- Dynamic Grid of Highlight Features -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>; margin-bottom: 40px;">
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; display: flex; align-items: flex-start; gap: 14px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+            <div style="background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.4); border-radius: 8px; padding: 18px; display: flex; align-items: flex-start; gap: 14px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
                 <span class="dashicons dashicons-rest-api" style="color: #0066cc; font-size: 24px; width: 24px; height: 24px; margin-top: 3px;"></span>
                 <div>
                     <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #1e293b;"><?php echo esc_html( $i18n['f1_title'] ); ?></h4>
@@ -55,7 +55,7 @@ $i18n = array(
                 </div>
             </div>
 
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; display: flex; align-items: flex-start; gap: 14px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+            <div style="background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.4); border-radius: 8px; padding: 18px; display: flex; align-items: flex-start; gap: 14px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
                 <span class="dashicons dashicons-translation" style="color: #0066cc; font-size: 24px; width: 24px; height: 24px; margin-top: 3px;"></span>
                 <div>
                     <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #1e293b;"><?php echo esc_html( $i18n['f2_title'] ); ?></h4>
@@ -63,7 +63,7 @@ $i18n = array(
                 </div>
             </div>
 
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; display: flex; align-items: flex-start; gap: 14px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+            <div style="background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.4); border-radius: 8px; padding: 18px; display: flex; align-items: flex-start; gap: 14px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
                 <span class="dashicons dashicons-database" style="color: #0066cc; font-size: 24px; width: 24px; height: 24px; margin-top: 3px;"></span>
                 <div>
                     <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #1e293b;"><?php echo esc_html( $i18n['f3_title'] ); ?></h4>
@@ -71,7 +71,7 @@ $i18n = array(
                 </div>
             </div>
 
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; display: flex; align-items: flex-start; gap: 14px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+            <div style="background: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.4); border-radius: 8px; padding: 18px; display: flex; align-items: flex-start; gap: 14px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
                 <span class="dashicons dashicons-universal-access" style="color: #0066cc; font-size: 24px; width: 24px; height: 24px; margin-top: 3px;"></span>
                 <div>
                     <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #1e293b;"><?php echo esc_html( $i18n['f4_title'] ); ?></h4>
@@ -80,7 +80,7 @@ $i18n = array(
             </div>
         </div>
 
-        <div style="border-top: 1px solid #cbd5e1; padding-top: 24px;">
+        <div style="border-top: 1px solid rgba(0,0,0,0.06); padding-top: 24px;">
             <p style="margin: 0; font-size: 12px; color: #94a3b8; font-weight: 600;">
                 <?php echo esc_html( $i18n['dev_by'] ); ?>
                 <span style="color: #0066cc; font-weight: 700; margin: 0 4px;"><?php echo esc_html( $i18n['developer'] ); ?></span>

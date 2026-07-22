@@ -41,8 +41,8 @@ arsort( $terms );
 ?>
 <div class="wrap fas-admin-wrap" style="max-width: 1200px; margin: 20px auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif; <?php echo $dir_style; ?>">
 
-    <!-- Header -->
-    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+    <!-- Header with Glassmorphism class -->
+    <div class="fas-top-bar" style="padding: 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
         <div style="text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
             <h2 style="margin: 0; font-size: 22px; font-weight: 800; color: #0066cc; display: flex; align-items: center; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
                 <span class="dashicons dashicons-chart-bar" style="font-size: 24px; width: 24px; height: 24px;"></span>
@@ -64,18 +64,18 @@ arsort( $terms );
     <!-- Cards Row -->
     <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; margin-bottom: 30px;">
 
-        <!-- Total Queries Card -->
-        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 250px;">
+        <!-- Total Queries Card with Glassmorphism class -->
+        <div class="fas-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 250px;">
             <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(0,102,204,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                 <span class="dashicons dashicons-search" style="font-size: 32px; width: 32px; height: 32px; color: #0066cc;"></span>
             </div>
             <span style="font-size: 14px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;"><?php echo esc_html( $i18n['total_queries'] ); ?></span>
-            <h3 style="margin: 10px 0 0 0; font-size: 48px; font-weight: 900; color: #0f172a; line-height: 1;"><?php echo esc_html( number_format_i18n( $total_count ) ); ?></h3>
+            <h3 style="margin: 10px 0 0 0; font-size: 48px; font-weight: 900; color: #0f172a; line-height: 1; border: none; padding: 0; background: transparent;"><?php echo esc_html( number_format_i18n( $total_count ) ); ?></h3>
         </div>
 
-        <!-- Popular Queries Card -->
-        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-            <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+        <!-- Popular Queries Card with Glassmorphism class -->
+        <div class="fas-card" style="padding: 24px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
+            <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid rgba(255, 255, 255, 0.4); padding-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
                 <span class="dashicons dashicons-awards" style="color: #0066cc;"></span>
                 <span><?php echo esc_html( $i18n['popular_keywords'] ); ?></span>
             </h3>
@@ -87,12 +87,12 @@ arsort( $terms );
                 </div>
             <?php else : ?>
                 <div style="max-height: 350px; overflow-y: auto; padding-right: 10px;">
-                    <table class="wp-list-table widefat fixed striped table-view-list" style="border: none; box-shadow: none;">
+                    <table class="wp-list-table widefat fixed striped table-view-list" style="border: none; box-shadow: none; background: transparent;">
                         <thead>
                             <tr style="text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                                <th style="font-weight: 700; color: #475569; border-bottom: 2px solid #e2e8f0; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;"><?php echo esc_html( $i18n['col_rank'] ); ?></th>
-                                <th style="font-weight: 700; color: #475569; border-bottom: 2px solid #e2e8f0; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;"><?php echo esc_html( $i18n['col_term'] ); ?></th>
-                                <th style="font-weight: 700; color: #475569; border-bottom: 2px solid #e2e8f0; text-align: <?php echo $is_rtl ? 'left' : 'right'; ?>;"><?php echo esc_html( $i18n['col_count'] ); ?></th>
+                                <th style="font-weight: 700; color: #475569; border-bottom: 2px solid rgba(255, 255, 255, 0.4); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>; background: transparent;"><?php echo esc_html( $i18n['col_rank'] ); ?></th>
+                                <th style="font-weight: 700; color: #475569; border-bottom: 2px solid rgba(255, 255, 255, 0.4); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>; background: transparent;"><?php echo esc_html( $i18n['col_term'] ); ?></th>
+                                <th style="font-weight: 700; color: #475569; border-bottom: 2px solid rgba(255, 255, 255, 0.4); text-align: <?php echo $is_rtl ? 'left' : 'right'; ?>; background: transparent;"><?php echo esc_html( $i18n['col_count'] ); ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -100,7 +100,7 @@ arsort( $terms );
                             $rank = 1;
                             foreach ( $terms as $term => $count ) :
                             ?>
-                                <tr>
+                                <tr style="background: transparent;">
                                     <td style="font-weight: 700; color: #0f172a; width: 80px;">
                                         <?php if ( $rank === 1 ) : ?>
                                             <span style="background: #f59e0b; color: #ffffff; padding: 2px 8px; border-radius: 12px; font-size: 11px;">1st</span>
