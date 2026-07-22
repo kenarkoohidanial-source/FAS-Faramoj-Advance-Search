@@ -25,13 +25,6 @@ function run_faramoj_advanced_search() {
     if ( did_action( 'elementor/loaded' ) ) {
         require_once plugin_dir_path( __FILE__ ) . 'includes/class-fas-elementor.php';
         new FAS_Elementor();
-    } else {
-        add_action( 'plugins_loaded', function() {
-            if ( did_action( 'elementor/loaded' ) ) {
-                require_once plugin_dir_path( __FILE__ ) . 'includes/class-fas-elementor.php';
-                new FAS_Elementor();
-            }
-        });
     }
 }
-run_faramoj_advanced_search();
+add_action( 'plugins_loaded', 'run_faramoj_advanced_search' );

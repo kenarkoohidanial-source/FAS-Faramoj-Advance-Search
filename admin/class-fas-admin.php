@@ -316,10 +316,14 @@ class FAS_Admin {
      */
     public function flush_search_cache() {
         global $wpdb;
+        // Keep garbage collection for sites using database transients to prevent wp_options bloat
         $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_fas_search_%' OR option_name LIKE '_transient_timeout_fas_search_%'" );
         if ( function_exists( 'wp_cache_flush' ) ) {
             wp_cache_flush();
         }
+
+        // Also update cache version to instantly invalidate persistent object caching without clearing entire object cache
+        update_option( 'fas_cache_version', time() );
     }
 
     /**
