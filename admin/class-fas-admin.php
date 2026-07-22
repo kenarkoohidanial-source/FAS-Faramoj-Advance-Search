@@ -196,6 +196,45 @@ class FAS_Admin {
                 'default'           => 24,
             ) );
 
+            // Button Sizes
+            register_setting( $group_name, 'fas_btn_size_desktop' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 56,
+            ) );
+            register_setting( $group_name, 'fas_btn_size_mobile' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 48,
+            ) );
+
+            // Results Settings
+            register_setting( $group_name, 'fas_results_count' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 15,
+            ) );
+            register_setting( $group_name, 'fas_title_size_desktop' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 15,
+            ) );
+            register_setting( $group_name, 'fas_title_size_mobile' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 14,
+            ) );
+            register_setting( $group_name, 'fas_excerpt_size_desktop' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 13,
+            ) );
+            register_setting( $group_name, 'fas_excerpt_size_mobile' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 12,
+            ) );
+
             register_setting( $group_name, 'fas_popup_width' . $suffix, array(
                 'type'              => 'integer',
                 'sanitize_callback' => 'intval',

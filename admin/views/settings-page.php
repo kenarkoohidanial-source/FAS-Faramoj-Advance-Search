@@ -261,6 +261,36 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                     </table>
                 </div>
 
+                <!-- Section: Results Styling & Limits -->
+                <div class="fas-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
+                    <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <span class="dashicons dashicons-editor-ul" style="color: #0066cc;"></span>
+                        <span><?php echo $is_rtl ? 'تنظیمات نتایج جستجو' : 'Search Results Settings'; ?></span>
+                    </h3>
+                    <table class="form-table fas-form-table" style="margin: 0; width: 100%;">
+                        <tr>
+                            <td style="padding: 10px 0; width: 220px; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'تعداد نتایج در هر تب' : 'Results per Tab'; ?></td>
+                            <td style="padding: 10px 0;">
+                                <input type="number" name="fas_results_count<?php echo esc_attr( $suffix ); ?>" id="fas_results_count" value="<?php echo esc_attr( get_option( 'fas_results_count' . $suffix, 15 ) ); ?>" class="regular-text" min="1" max="50" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'سایز عنوان (دسکتاپ / موبایل)' : 'Title Size (Desktop / Mobile)'; ?></td>
+                            <td style="padding: 10px 0; display: flex; gap: 8px;">
+                                <input type="number" name="fas_title_size_desktop<?php echo esc_attr( $suffix ); ?>" id="fas_title_size_desktop" value="<?php echo esc_attr( get_option( 'fas_title_size_desktop' . $suffix, 15 ) ); ?>" class="regular-text" style="width: 50%; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Desktop px">
+                                <input type="number" name="fas_title_size_mobile<?php echo esc_attr( $suffix ); ?>" id="fas_title_size_mobile" value="<?php echo esc_attr( get_option( 'fas_title_size_mobile' . $suffix, 14 ) ); ?>" class="regular-text" style="width: 50%; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Mobile px">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'سایز توضیحات (دسکتاپ / موبایل)' : 'Excerpt Size (Desktop / Mobile)'; ?></td>
+                            <td style="padding: 10px 0; display: flex; gap: 8px;">
+                                <input type="number" name="fas_excerpt_size_desktop<?php echo esc_attr( $suffix ); ?>" id="fas_excerpt_size_desktop" value="<?php echo esc_attr( get_option( 'fas_excerpt_size_desktop' . $suffix, 13 ) ); ?>" class="regular-text" style="width: 50%; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Desktop px">
+                                <input type="number" name="fas_excerpt_size_mobile<?php echo esc_attr( $suffix ); ?>" id="fas_excerpt_size_mobile" value="<?php echo esc_attr( get_option( 'fas_excerpt_size_mobile' . $suffix, 12 ) ); ?>" class="regular-text" style="width: 50%; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Mobile px">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
                 <!-- Section 3: Floating Trigger Position & Offsets -->
                 <div class="fas-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
                     <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">
@@ -275,6 +305,13 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                                     <option value="yes" <?php selected( $enable_floating, 'yes' ); ?>><?php echo esc_html( $i18n['enabled'] ); ?></option>
                                     <option value="no" <?php selected( $enable_floating, 'no' ); ?>><?php echo esc_html( $i18n['disabled'] ); ?></option>
                                 </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'سایز دکمه (دسکتاپ / موبایل)' : 'Button Size (Desktop / Mobile)'; ?></td>
+                            <td style="padding: 10px 0; display: flex; gap: 8px;">
+                                <input type="number" name="fas_btn_size_desktop<?php echo esc_attr( $suffix ); ?>" id="fas_btn_size_desktop" value="<?php echo esc_attr( get_option( 'fas_btn_size_desktop' . $suffix, 56 ) ); ?>" class="regular-text" style="width: 50%; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Desktop px">
+                                <input type="number" name="fas_btn_size_mobile<?php echo esc_attr( $suffix ); ?>" id="fas_btn_size_mobile" value="<?php echo esc_attr( get_option( 'fas_btn_size_mobile' . $suffix, 48 ) ); ?>" class="regular-text" style="width: 50%; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Mobile px">
                             </td>
                         </tr>
                         <tr>
@@ -470,10 +507,21 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                         <?php echo esc_html( $i18n['live_preview_desc'] ); ?>
                     </p>
 
+                    <!-- Device Toggle Controls -->
+                    <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 20px;">
+                        <button type="button" class="button fas-preview-toggle is-active" data-device="desktop" style="border-radius: 20px; font-weight: 600; background: #0066cc; color: white; border: none; padding: 5px 15px;">Desktop View</button>
+                        <button type="button" class="button fas-preview-toggle" data-device="mobile" style="border-radius: 20px; font-weight: 600; padding: 5px 15px;">Mobile View</button>
+                    </div>
+
                     <!-- Centered live preview container wrapper with generous workspace -->
-                    <div id="fas-mock-modal-wrapper" style="background: radial-gradient(circle, #f8fafc 0%, #f1f5f9 100%); padding: 40px 10px; border-radius: 12px; display: flex; justify-content: center; overflow: auto; min-height: 250px; border: 1px solid #cbd5e1;">
+                    <div id="fas-mock-modal-wrapper" style="position: relative; background: radial-gradient(circle, #f8fafc 0%, #f1f5f9 100%); padding: 40px 10px; border-radius: 12px; display: flex; justify-content: center; align-items: center; overflow: auto; min-height: 400px; border: 1px solid #cbd5e1;">
                         
-                        <div id="fas-preview-container" class="fas-search-container" style="width: 100%; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; <?php echo $dir_style; ?>">
+                        <!-- Mock Floating Button -->
+                        <div id="fas-mock-floating-btn" style="position: absolute; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: white; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);">
+                            <span class="dashicons dashicons-search" style="font-size: 20px;"></span>
+                        </div>
+
+                        <div id="fas-preview-container" class="fas-search-container" style="display: none; width: 100%; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; <?php echo $dir_style; ?>">
                             
                             <!-- Input wrapper -->
                             <div class="fas-search-input-wrapper" style="display: flex; align-items: center; padding: 18px 24px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
@@ -496,15 +544,7 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
 
                             <!-- Results box mock -->
                             <div id="fas-preview-results" style="padding: 20px 24px; min-height: 140px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                                <div class="fas-result-item" style="display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; margin-bottom: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
-                                    <div style="width: 48px; height: 48px; border-radius: 8px; background: rgba(100,116,139,0.1); display:flex; align-items:center; justify-content:center; color:#64748b;">
-                                        <span class="dashicons dashicons-cart" style="font-size: 22px; width:22px; height:22px;"></span>
-                                    </div>
-                                    <div style="text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                                        <h4 style="margin: 0 0 4px 0; font-size: 15px; font-weight:600;"><?php echo $is_rtl ? 'آنتن فوق پیشرفته Phase-30ISO' : 'Phase-30ISO Antenna'; ?></h4>
-                                        <p style="margin:0; font-size:13px; color:#64748b; line-height:1.4;"><?php echo $is_rtl ? 'محصول مخابراتی دو بانده فوق پیشرفته با مشخصات فنی عالی...' : 'Premium dual-band technical telecommunication product spec...'; ?></p>
-                                    </div>
-                                </div>
+                                <!-- Will be injected via JS -->
                             </div>
 
                         </div>
@@ -522,6 +562,8 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
 
 <script>
 jQuery(document).ready(function($) {
+    var activeDevice = 'desktop';
+
     // Initialize standard WP color pickers
     $('.fas-color-picker').wpColorPicker({
         change: function(event, ui) {
@@ -570,16 +612,63 @@ jQuery(document).ready(function($) {
         }
     });
 
+    // Device Toggle
+    $('.fas-preview-toggle').on('click', function() {
+        $('.fas-preview-toggle').removeClass('is-active').css({ 'background': '', 'color': '' });
+        $(this).addClass('is-active').css({ 'background': '#0066cc', 'color': 'white' });
+        activeDevice = $(this).data('device');
+        updateLivePreview();
+    });
+
+    // Mock Floating Button Click
+    $('#fas-mock-floating-btn').on('click', function() {
+        $(this).hide();
+        $('#fas-preview-container').fadeIn(200);
+    });
+
+    // Mock Close Button
+    $('.fas-modal-close').on('click', function(e) {
+        e.preventDefault();
+        $('#fas-preview-container').fadeOut(200, function() {
+            $('#fas-mock-floating-btn').show();
+        });
+    });
+
+    // Mock Input typing
+    $('#fas-mock-preview-input').prop('disabled', false).on('input', function() {
+        var val = $(this).val();
+        if (val.length > 0) {
+            renderMockResults();
+        } else {
+            $('#fas-preview-results').html('');
+        }
+    });
+
     // Re-render live preview on settings modification
     $('#fas-settings-form input, #fas-settings-form select').on('input change', updateLivePreview);
 
     function updateLivePreview() {
-        // Dimensions
+        // Dimensions & Device
         var width = $('#fas_popup_width').val() || 750;
         var maxH  = $('#fas_popup_max_height').val() || 600;
+
+        var isMobile = (activeDevice === 'mobile');
+        var containerWidth = isMobile ? '360px' : width + 'px';
+        var containerHeight = isMobile ? '640px' : maxH + 'px';
+
         $('#fas-preview-container').css({
-            'max-width': width + 'px',
-            'max-height': maxH + 'px'
+            'max-width': containerWidth,
+            'max-height': containerHeight,
+            'height': isMobile ? '640px' : 'auto'
+        });
+
+        // Floating Button
+        var btnSize = isMobile ? ($('#fas_btn_size_mobile').val() || 48) : ($('#fas_btn_size_desktop').val() || 56);
+        var btnColor = $('#fas_floating_bg').val() || '#0066cc';
+        $('#fas-mock-floating-btn').css({
+            'width': btnSize + 'px',
+            'height': btnSize + 'px',
+            'background': btnColor
         });
 
         // Theme Accent Mode
@@ -682,6 +771,36 @@ jQuery(document).ready(function($) {
             'padding': '10px 16px',
             'gap': '12px'
         });
+
+        if ($('#fas-mock-preview-input').val() !== '') {
+            renderMockResults();
+        }
+    }
+
+    function renderMockResults() {
+        var isMobile = (activeDevice === 'mobile');
+        var titleSize = isMobile ? ($('#fas_title_size_mobile').val() || 14) : ($('#fas_title_size_desktop').val() || 15);
+        var excerptSize = isMobile ? ($('#fas_excerpt_size_mobile').val() || 12) : ($('#fas_excerpt_size_desktop').val() || 13);
+
+        var mode = $('#fas_theme_mode').val();
+        var itemBg = (mode === 'dark') ? '#1e293b' : '#f8fafc';
+        var titleColor = (mode === 'dark') ? '#f8fafc' : '#0f172a';
+        var excerptColor = (mode === 'dark') ? '#94a3b8' : '#64748b';
+        var isRtl = <?php echo $is_rtl ? 'true' : 'false'; ?>;
+        var dirStr = isRtl ? 'row-reverse' : 'row';
+        var alignStr = isRtl ? 'right' : 'left';
+
+        var html = '<div class="fas-result-item" style="display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; margin-bottom: 8px; flex-direction: '+dirStr+'; background: '+itemBg+';">';
+        html += '<div style="width: 48px; height: 48px; border-radius: 8px; background: rgba(100,116,139,0.1); display:flex; align-items:center; justify-content:center; color:#64748b;">';
+        html += '<span class="dashicons dashicons-cart" style="font-size: 22px; width:22px; height:22px;"></span>';
+        html += '</div>';
+        html += '<div style="text-align: '+alignStr+';">';
+        html += '<h4 style="margin: 0 0 4px 0; font-size: '+titleSize+'px; font-weight:600; color: '+titleColor+';">' + (isRtl ? 'آنتن فوق پیشرفته Phase-30ISO' : 'Phase-30ISO Antenna') + '</h4>';
+        html += '<p style="margin:0; font-size: '+excerptSize+'px; color: '+excerptColor+'; line-height:1.4;">' + (isRtl ? 'محصول مخابراتی دو بانده فوق پیشرفته...' : 'Premium dual-band technical product spec...') + '</p>';
+        html += '</div>';
+        html += '</div>';
+
+        $('#fas-preview-results').html(html);
     }
 
     // Initial load
