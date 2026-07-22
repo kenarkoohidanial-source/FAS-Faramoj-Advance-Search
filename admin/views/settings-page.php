@@ -10,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Retrieve active languages
 $langs = $this->get_active_languages();
 
-// Detect active language suffix
-$active_lang = isset( $_GET['fas_lang'] ) ? sanitize_text_field( $_GET['fas_lang'] ) : 'en';
+// Detect active language suffix - defaults to active admin display locale instead of hardcoded 'en'
+$active_lang = isset( $_GET['fas_lang'] ) ? sanitize_text_field( $_GET['fas_lang'] ) : $this->get_admin_display_locale();
 if ( ! isset( $langs[ $active_lang ] ) ) {
     reset( $langs );
     $active_lang = key( $langs );
@@ -140,7 +140,7 @@ $i18n = array(
     'live' => $is_rtl ? 'زنده' : 'Live',
     'live_preview' => $is_rtl ? 'پیش‌نمایش زنده چیدمان پاپ‌آپ' : 'Modal Overlay Live Preview',
     'live_preview_desc' => $is_rtl ? 'پیش‌نمایش تعاملی زیر به طور زنده تغییرات چیدمان پاپ‌آپ، ابعاد پیکسل، و حالت‌های تیره/روشن تنظیم شده در بالا را نمایش می‌دهد.' : 'The live preview below renders without any layout constraints. Resize your popup width and max-height freely using the dimension controls above to see the layout changes in real-time.',
-    'type_search' => $is_rtl ? 'عبارتی را برای جستجو تایپ کنید...' : 'Type to search...',
+    'type_search' => $is_rtl ? 'جستجو در محصولات، مقالات، مستندات...' : 'Search products, articles, docs...',
 );
 
 $settings_saved = isset( $_GET['settings-updated'] ) && 'true' === $_GET['settings-updated'];
@@ -213,7 +213,7 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
 
                 <!-- Section 1: Engine & Performance -->
                 <div class="fas-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                    <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+                    <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">
                         <span class="dashicons dashicons-performance" style="color: #0066cc;"></span>
                         <span><?php echo esc_html( $i18n['engine_performance'] ); ?></span>
                     </h3>
@@ -230,7 +230,7 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
 
                 <!-- Section 2: Popup & Dimensions -->
                 <div class="fas-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                    <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+                    <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">
                         <span class="dashicons dashicons-editor-expand" style="color: #0066cc;"></span>
                         <span><?php echo esc_html( $i18n['popup_layout'] ); ?></span>
                     </h3>
@@ -263,7 +263,7 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
 
                 <!-- Section 3: Floating Trigger Position & Offsets -->
                 <div class="fas-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                    <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+                    <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">
                         <span class="dashicons dashicons-admin-appearance" style="color: #0066cc;"></span>
                         <span><?php echo esc_html( $i18n['floating_settings'] ); ?></span>
                     </h3>
@@ -334,7 +334,7 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
 
                 <!-- Category customization card -->
                 <div class="fas-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                    <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+                    <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">
                         <span class="dashicons dashicons-move" style="color: #0066cc;"></span>
                         <span><?php echo esc_html( $i18n['tabs_customization'] ); ?></span>
                     </h3>
@@ -459,9 +459,9 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
 
                 </div>
 
-                <!-- Requirement 1: Centered Interactive Live Preview placed beautifully under the Category sorting/customization cards -->
+                <!-- Interactive Live Preview placed beautifully under the Category sorting/customization cards -->
                 <div class="fas-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                    <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+                    <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">
                         <span style="background: #e11d48; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 12px; font-weight: 800; text-transform: uppercase;"><?php echo esc_html( $i18n['live'] ); ?></span>
                         <span><?php echo esc_html( $i18n['live_preview'] ); ?></span>
                     </h3>
@@ -478,7 +478,7 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             <!-- Input wrapper -->
                             <div class="fas-search-input-wrapper" style="display: flex; align-items: center; padding: 18px 24px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
                                 <span class="dashicons dashicons-search" style="color: #64748b; margin: <?php echo $is_rtl ? '0 0 0 12px' : '0 12px 0 0'; ?>; font-size: 20px; width: 20px; height: 20px;"></span>
-                                <input type="text" placeholder="<?php echo esc_attr( $i18n['type_search'] ); ?>" style="border:none; outline:none; background:transparent; width:100%; font-size:18px; color:#1e293b; font-weight:500; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;" disabled>
+                                <input id="fas-mock-preview-input" type="text" placeholder="<?php echo esc_attr( $i18n['type_search'] ); ?>" style="border:none; outline:none; background:transparent; width:100%; font-size:18px; color:#1e293b; font-weight:500; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;" disabled>
 
                                 <!-- Close button in preview -->
                                 <button class="fas-modal-close" style="background: rgba(100, 116, 139, 0.1); border: none !important; color: #64748b; width: 34px; height: 34px; border-radius: 50% !important; margin: <?php echo $is_rtl ? '0 14px 0 0' : '0 0 0 14px'; ?>; display: flex; align-items: center; justify-content: center;" disabled>
@@ -613,6 +613,10 @@ jQuery(document).ready(function($) {
             $('#fas-preview-container input').css('color', '#0f172a');
             $('#fas-preview-container .fas-search-input-wrapper').css('border-bottom-color', '#e2e8f0');
         }
+
+        // Live preview of Farsi placeholder when editing Farsi settings
+        var placeholderVal = '<?php echo esc_js( $i18n['type_search'] ); ?>';
+        $('#fas-mock-preview-input').attr('placeholder', placeholderVal);
 
         // Parse Tabs Configuration & Order
         var orderRaw = $('#fas_tabs_order').val() || 'all,products,posts,docs';

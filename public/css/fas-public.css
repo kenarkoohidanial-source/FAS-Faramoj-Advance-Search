@@ -139,6 +139,8 @@
     box-sizing: border-box !important;
     box-shadow: none !important;
     line-height: 1 !important;
+    padding: 0 !important; /* RESET THEME PADDING! */
+    flex-shrink: 0 !important; /* PREVENT FLEX SQUASHING! */
 }
 
 .fas-modal-close:hover {

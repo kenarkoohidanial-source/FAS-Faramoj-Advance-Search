@@ -117,6 +117,11 @@ class FAS_Core {
             $current_lang = pll_current_language();
         } elseif ( defined( 'ICL_LANGUAGE_CODE' ) ) {
             $current_lang = ICL_LANGUAGE_CODE;
+        } else {
+            $locale = get_locale();
+            if ( strpos( $locale, 'fa' ) === 0 ) {
+                $current_lang = 'fa';
+            }
         }
 
         $suffix = self::get_lang_suffix();
@@ -125,15 +130,21 @@ class FAS_Core {
         $tabs_order = self::get_option( 'fas_tabs_order', 'all,products,posts,docs' );
         $tabs_order_arr = array_map( 'trim', explode( ',', $tabs_order ) );
 
+        // Dynamically translate placeholder text according to loaded frontend language
+        $is_fa = ( 'fa' === $current_lang );
+        $placeholder_text = $is_fa ? 'جستجو در محصولات، مقالات، مستندات...' : 'Search products, articles, docs...';
+        $no_results_text  = $is_fa ? 'هیچ نتیجه‌ای یافت نشد' : 'No results found';
+        $searching_text   = $is_fa ? 'در حال جستجو...' : 'Searching...';
+
         wp_localize_script( 'fas-public-js', 'fas_params', array(
             'ajax_url'   => esc_url_raw( rest_url( 'fas/v1/search' ) ),
             'lang'       => sanitize_text_field( $current_lang ),
             'nonce'      => wp_create_nonce( 'wp_rest' ),
             'tabs_order' => $tabs_order_arr,
             'i18n'       => array(
-                'placeholder' => __( 'Search products, articles, docs...', 'faramoj-search' ),
-                'no_results'  => __( 'No results found', 'faramoj-search' ),
-                'searching'   => __( 'Searching...', 'faramoj-search' ),
+                'placeholder' => $placeholder_text,
+                'no_results'  => $no_results_text,
+                'searching'   => $searching_text,
             )
         ) );
 

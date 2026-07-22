@@ -16,7 +16,7 @@ $overlay_class = ( 'light' === $theme_mode ) ? 'fas-theme-light' : 'fas-theme-da
 $tabs_order     = FAS_Core::get_option( 'fas_tabs_order', 'all,products,posts,docs' );
 $tabs_order_arr = array_map( 'trim', explode( ',', $tabs_order ) );
 
-// Fetch individual tab titles, colors, icons, and custom uploaded SVG/PNG icons
+// Fetch individual tab titles, colors, icons, and custom uploaded SVG/PNG icons via unified FAS_Core::get_option
 $tab_details = array(
     'all' => array(
         'title'       => FAS_Core::get_option( 'fas_tab_all_title', 'All Results' ),
@@ -43,6 +43,10 @@ $tab_details = array(
         'custom_icon' => FAS_Core::get_option( 'fas_tab_docs_custom_icon', '' ),
     ),
 );
+
+// Determine dynamic placeholder based on current suffix
+$is_fa = ( '_fa' === $suffix );
+$placeholder_text = $is_fa ? 'جستجو در محصولات، مقالات، مستندات...' : 'Search products, articles, docs...';
 ?>
 <div class="fas-search-overlay <?php echo esc_attr( $overlay_class ); ?>">
     <div class="fas-search-container">
@@ -52,7 +56,7 @@ $tab_details = array(
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input type="text" class="fas-search-input" placeholder="<?php esc_attr_e( 'Search products, articles, docs...', 'faramoj-search' ); ?>" aria-label="<?php esc_attr_e( 'Live Search', 'faramoj-search' ); ?>">
+            <input type="text" class="fas-search-input" placeholder="<?php echo esc_attr( $placeholder_text ); ?>" aria-label="<?php esc_attr_e( 'Live Search', 'faramoj-search' ); ?>">
             <button class="fas-modal-close" aria-label="<?php esc_attr_e( 'Close Search', 'faramoj-search' ); ?>">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
