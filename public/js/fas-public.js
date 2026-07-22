@@ -21,6 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.fas-tab-btn');
     const tabContents = document.querySelectorAll('.fas-tab-content');
 
+    // Force placeholder translation dynamically via JavaScript
+    if (searchInput && i18n.placeholder) {
+        searchInput.setAttribute('placeholder', i18n.placeholder);
+    }
+
     const openModal = () => {
         if (searchOverlay) {
             searchOverlay.classList.add('is-open');
