@@ -148,10 +148,28 @@ $btn_text = $settings_saved ? $i18n['save_success'] : $i18n['save_changes'];
 $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
 ?>
 <div class="wrap fas-admin-wrap" style="max-width: 1200px; margin: 20px auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif; <?php echo $dir_style; ?>">
+    <?php if ( $settings_saved ) : ?>
+        <script>
+            // Revert save button text and color after 3 seconds
+            setTimeout(function() {
+                var btn = document.getElementById('fas-main-save-btn');
+                if (btn) {
+                    btn.innerText = '<?php echo esc_js( $i18n['save_changes'] ); ?>';
+                    btn.style.background = '#0066cc';
+                    btn.style.boxShadow = '0 4px 12px rgba(0,102,204,0.3)';
+                }
+            }, 3000);
+        </script>
+    <?php endif; ?>
     
     <style>
         .fas-admin-wrap .wp-picker-container {
             direction: ltr !important;
+        }
+        .fas-admin-wrap input[type="number"] {
+            padding: 6px 12px !important;
+            height: 35px !important;
+            box-sizing: border-box;
         }
         .fas-card {
             transition: box-shadow 0.3s ease, transform 0.3s ease;
@@ -171,23 +189,16 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
     </style>
 
     <!-- Redesigned Top-bar Header Box -->
-    <div class="fas-top-bar" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); gap: 20px;">
+    <div class="fas-top-bar" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); gap: 20px;">
         
-        <!-- Center aligned Title -->
-        <div style="text-align: center; width: 100%;">
-            <h2 style="margin: 0; font-size: 26px; font-weight: 850; color: #0066cc;"><?php echo esc_html( $i18n['title'] ); ?> <span style="font-size: 14px; color: #64748b; font-weight: 500;">(<?php echo esc_html( $langs[ $active_lang ] ); ?>)</span></h2>
+        <!-- Right/Left aligned Title based on RTL via flex container -->
+        <div style="display: flex; align-items: center;">
+            <h2 style="margin: 0; font-size: 22px; font-weight: 850; color: #0066cc;"><?php echo esc_html( $i18n['title'] ); ?> <span style="font-size: 14px; color: #64748b; font-weight: 500;">(<?php echo esc_html( $langs[ $active_lang ] ); ?>)</span></h2>
         </div>
         
-        <!-- Lower row: Save Changes Button on the left, Active Language Selector on the right -->
-        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; flex-direction: row; gap: 16px; box-sizing: border-box;">
-            <!-- Save changes button on the left (with conditional green color on success) -->
-            <div>
-                <button type="submit" form="fas-settings-form" class="button button-primary button-large" style="background: <?php echo esc_attr( $btn_bg ); ?>; border: none; font-weight: 700; padding: 12px 28px; height: auto; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,102,204,0.3); cursor: pointer; transition: background 0.3s ease, transform 0.2s;">
-                    <?php echo esc_html( $btn_text ); ?>
-                </button>
-            </div>
-            
-            <!-- Active language selection dropdown on the right -->
+        <!-- Actions -->
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <!-- Active language selection dropdown -->
             <div style="display: flex; align-items: center; gap: 8px;">
                 <label for="fas_lang_switcher" style="font-weight: 700; color: #475569; font-size: 14px;"><?php echo esc_html( $i18n['configure_lang'] ); ?></label>
                 <select id="fas_lang_switcher" onchange="location = this.value;" style="border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px; font-weight: 600; color: #0f172a; outline: none; background: #f8fafc; cursor: pointer;">
@@ -195,6 +206,13 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                         <option value="<?php echo esc_url( add_query_arg( 'fas_lang', $code ) ); ?>" <?php selected( $active_lang, $code ); ?>><?php echo esc_html( $name ); ?></option>
                     <?php endforeach; ?>
                 </select>
+            </div>
+
+            <!-- Save changes button -->
+            <div>
+                <button type="submit" id="fas-main-save-btn" form="fas-settings-form" class="button button-primary button-large" style="background: <?php echo esc_attr( $btn_bg ); ?>; border: none; font-weight: 700; padding: 12px 28px; height: auto; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,102,204,0.3); cursor: pointer; transition: background 0.3s ease, transform 0.2s, color 0.3s ease;">
+                    <?php echo esc_html( $btn_text ); ?>
+                </button>
             </div>
         </div>
     </div>
@@ -526,10 +544,10 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             <!-- Input wrapper -->
                             <div class="fas-search-input-wrapper" style="display: flex; align-items: center; padding: 18px 24px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
                                 <span class="dashicons dashicons-search" style="color: #64748b; margin: <?php echo $is_rtl ? '0 0 0 12px' : '0 12px 0 0'; ?>; font-size: 20px; width: 20px; height: 20px;"></span>
-                                <input id="fas-mock-preview-input" type="text" placeholder="<?php echo esc_attr( $i18n['type_search'] ); ?>" style="border:none; outline:none; background:transparent; width:100%; font-size:18px; color:#1e293b; font-weight:500; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;" disabled>
+                                <input id="fas-mock-preview-input" type="text" placeholder="<?php echo esc_attr( $i18n['type_search'] ); ?>" style="border:none; outline:none; background:transparent; width:100%; font-size:18px; color:#1e293b; font-weight:500; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
                                 
                                 <!-- Close button in preview -->
-                                <button class="fas-modal-close" style="background: rgba(100, 116, 139, 0.1); border: none !important; color: #64748b; width: 34px; height: 34px; border-radius: 50% !important; margin: <?php echo $is_rtl ? '0 14px 0 0' : '0 0 0 14px'; ?>; display: flex; align-items: center; justify-content: center;" disabled>
+                                <button class="fas-modal-close" style="background: rgba(100, 116, 139, 0.1); border: none !important; color: #64748b; width: 34px; height: 34px; border-radius: 50% !important; margin: <?php echo $is_rtl ? '0 14px 0 0' : '0 0 0 14px'; ?>; display: flex; align-items: center; justify-content: center; cursor: pointer;">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                         <line x1="18" y1="6" x2="6" y2="18"></line>
                                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -665,11 +683,35 @@ jQuery(document).ready(function($) {
         // Floating Button
         var btnSize = isMobile ? ($('#fas_btn_size_mobile').val() || 48) : ($('#fas_btn_size_desktop').val() || 56);
         var btnColor = $('#fas_floating_bg').val() || '#0066cc';
-        $('#fas-mock-floating-btn').css({
+        var btnPos = $('#fas_floating_position').val() || 'bottom-right';
+        var offsetX = $('#fas_floating_offset_x').val() || 24;
+        var offsetY = $('#fas_floating_offset_y').val() || 24;
+
+        var posCss = {
             'width': btnSize + 'px',
             'height': btnSize + 'px',
-            'background': btnColor
-        });
+            'background': btnColor,
+            'top': 'auto',
+            'bottom': 'auto',
+            'left': 'auto',
+            'right': 'auto'
+        };
+
+        if (btnPos === 'bottom-right') {
+            posCss['bottom'] = offsetY + 'px';
+            posCss['right'] = offsetX + 'px';
+        } else if (btnPos === 'bottom-left') {
+            posCss['bottom'] = offsetY + 'px';
+            posCss['left'] = offsetX + 'px';
+        } else if (btnPos === 'top-right') {
+            posCss['top'] = offsetY + 'px';
+            posCss['right'] = offsetX + 'px';
+        } else if (btnPos === 'top-left') {
+            posCss['top'] = offsetY + 'px';
+            posCss['left'] = offsetX + 'px';
+        }
+
+        $('#fas-mock-floating-btn').css(posCss);
 
         // Theme Accent Mode
         var mode = $('#fas_theme_mode').val();
