@@ -57,12 +57,8 @@ $placeholder_text = $is_fa ? 'جستجو در محصولات، مقالات، م
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
             <input type="text" class="fas-search-input" placeholder="<?php echo esc_attr( $placeholder_text ); ?>" aria-label="<?php esc_attr_e( 'Live Search', 'faramoj-search' ); ?>">
-            <button class="fas-modal-close" aria-label="<?php esc_attr_e( 'Close Search', 'faramoj-search' ); ?>">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
+            <!-- Standardized Close Span Element to totally bypass theme-level button overrides -->
+            <span class="fas-modal-close" role="button" aria-label="<?php esc_attr_e( 'Close Search', 'faramoj-search' ); ?>">&times;</span>
         </div>
 
         <!-- Category Tabs (Dynamically Ordered & Styled) -->
