@@ -28,8 +28,12 @@ $i18n = array(
 
 // Handle statistics clear request
 if ( isset( $_POST['fas_clear_stats'] ) && check_admin_referer( 'fas_clear_stats_nonce', 'fas_stats_nonce' ) ) {
-    update_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [] ) );
-    echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( $i18n['notice_cleared'] ) . '</p></div>';
+    if ( current_user_can( 'manage_options' ) ) {
+        update_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [] ) );
+        echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( $i18n['notice_cleared'] ) . '</p></div>';
+    } else {
+        echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'You do not have permission to perform this action.', 'faramoj-search' ) . '</p></div>';
+    }
 }
 
 $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [] ) );

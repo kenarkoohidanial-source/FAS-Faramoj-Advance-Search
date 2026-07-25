@@ -9,6 +9,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class FAS_Rest {
 
+    /**
+     * Register REST API routes.
+     *
+     * @return void
+     */
     public function register_routes() {
         register_rest_route( 'fas/v1', '/search', array(
             'methods'             => 'GET',
@@ -17,12 +22,18 @@ class FAS_Rest {
         ) );
     }
 
+    /**
+     * Handle search requests and return results.
+     *
+     * @param WP_REST_Request $request The REST request object.
+     * @return WP_REST_Response|WP_Error Response object containing search results or an error.
+     */
     public function get_search_results( WP_REST_Request $request ) {
         $term = sanitize_text_field( $request->get_param( 's' ) );
         $lang = sanitize_text_field( $request->get_param( 'lang' ) );
 
         if ( empty( $term ) ) {
-            return new WP_REST_Response( array( 'error' => 'Empty search term' ), 400 );
+            return new WP_Error( 'empty_term', 'Empty search term', array( 'status' => 400 ) );
         }
 
         // Log search query metrics dynamically for our Statistics submenu
@@ -65,6 +76,9 @@ class FAS_Rest {
 
     /**
      * Log search queries statistics (total count & popular terms tracking)
+     *
+     * @param string $term The search term to log.
+     * @return void
      */
     private function log_search_stats( $term ) {
         if ( empty( $term ) || strlen( $term ) < 3 ) {
@@ -139,6 +153,9 @@ class FAS_Rest {
 
     /**
      * Convert Persian and Arabic numbers to English digits.
+     *
+     * @param string $string The string containing Persian/Arabic digits.
+     * @return string The converted string with English digits.
      */
     private function convert_persian_to_english_digits( $string ) {
         $persian = array( '۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹' );
@@ -151,6 +168,9 @@ class FAS_Rest {
 
     /**
      * Convert English numbers to Persian digits.
+     *
+     * @param string $string The string containing English digits.
+     * @return string The converted string with Persian digits.
      */
     private function convert_english_to_persian_digits( $string ) {
         $persian = array( '۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹' );
@@ -161,6 +181,10 @@ class FAS_Rest {
 
     /**
      * Helper to highlight the query in a text safely.
+     *
+     * @param string $text The text to highlight.
+     * @param string $term The search term.
+     * @return string The highlighted text.
      */
     private function highlight_text( $text, $term ) {
         $escaped = esc_html( $text );
@@ -188,81 +212,83 @@ class FAS_Rest {
     }
 
     /**
-     * Fetch all unique post IDs matching search terms in content or metadata.
+     * Fetch all unique post IDs matching search terms in content or metadata via raw SQL for maximum performance.
+     *
+     * @param string $post_type The post type to search in.
+     * @param array $search_terms Array of search terms.
+     * @param array $meta_keys Array of meta keys to search in.
+     * @return array Array of matched post IDs.
      */
     private function get_matched_post_ids( $post_type, $search_terms, $meta_keys = [] ) {
-        $all_ids = array();
+        global $wpdb;
 
-        // Build combined arguments for keyword search
-        $keyword_args = array(
-            'post_type'      => $post_type,
-            'posts_per_page' => 50,
-            'post_status'    => 'publish',
-            'fields'         => 'ids',
-        );
-        
-        // Add a single custom filter to modify the SQL for the 's' parameter
-        // to use OR logic on the different normalized terms.
-        $search_filter = function( $search, $wp_query ) use ( $search_terms ) {
-            global $wpdb;
-            if ( empty( $search ) ) {
-                return $search;
-            }
-            $search = '';
+        if ( empty( $search_terms ) ) {
+            return array();
+        }
+
+        $query_parts = array();
+        $query_args  = array( $post_type ); // First parameter for post_type
+
+        // 1. Build Title and Content Search Block
+        $search_blocks = array();
+        foreach ( $search_terms as $term ) {
+            $like = '%' . $wpdb->esc_like( $term ) . '%';
+            $search_blocks[] = "({$wpdb->posts}.post_title LIKE %s OR {$wpdb->posts}.post_content LIKE %s)";
+            $query_args[] = $like;
+            $query_args[] = $like;
+        }
+        $query_parts[] = "(" . implode( " OR ", $search_blocks ) . ")";
+
+        // 2. Build Meta Search Block (ACF) if applicable
+        if ( ! empty( $meta_keys ) ) {
+            $meta_blocks = array();
             foreach ( $search_terms as $term ) {
                 $like = '%' . $wpdb->esc_like( $term ) . '%';
-                $search .= $wpdb->prepare( " OR ({$wpdb->posts}.post_title LIKE %s) OR ({$wpdb->posts}.post_content LIKE %s)", $like, $like );
-            }
-            if ( ! empty( $search ) ) {
-                $search = ' AND (' . ltrim( $search, ' OR' ) . ') ';
-            }
-            return $search;
-        };
-        add_filter( 'posts_search', $search_filter, 10, 2 );
-
-        // This single WP_Query replaces the keyword N+1 queries.
-        // We set 's' to an arbitrary string to trigger the posts_search filter
-        $keyword_args['s'] = 'FAS_MAGIC_SEARCH_STRING';
-        $query1 = new WP_Query( $keyword_args );
-        if ( ! empty( $query1->posts ) ) {
-            $all_ids = array_merge( $all_ids, $query1->posts );
-        }
-
-        // Clean up our filter
-        remove_filter( 'posts_search', $search_filter, 10 );
-
-
-        // Build combined arguments for ACF / metadata search
-        if ( ! empty( $meta_keys ) ) {
-            $meta_query = array( 'relation' => 'OR' );
-            
-            foreach ( $search_terms as $t ) {
                 foreach ( $meta_keys as $key ) {
-                    $meta_query[] = array(
-                        'key'     => $key,
-                        'value'   => $t,
-                        'compare' => 'LIKE',
-                    );
+                    $meta_blocks[] = "({$wpdb->postmeta}.meta_key = %s AND {$wpdb->postmeta}.meta_value LIKE %s)";
+                    $query_args[] = $key;
+                    $query_args[] = $like;
                 }
             }
-
-            $meta_args = array(
-                'post_type'      => $post_type,
-                'posts_per_page' => 50,
-                'post_status'    => 'publish',
-                'fields'         => 'ids',
-                'meta_query'     => $meta_query,
-            );
-            
-            $query2 = new WP_Query( $meta_args );
-            if ( ! empty( $query2->posts ) ) {
-                $all_ids = array_merge( $all_ids, $query2->posts );
+            if ( ! empty( $meta_blocks ) ) {
+                $query_parts[] = "(" . implode( " OR ", $meta_blocks ) . ")";
             }
         }
 
-        return array_unique( $all_ids );
+        // 3. Assemble Final Unified Query
+        $where_clause = implode( " OR ", $query_parts );
+
+        $sql = "
+            SELECT DISTINCT {$wpdb->posts}.ID
+            FROM {$wpdb->posts}
+        ";
+
+        if ( ! empty( $meta_keys ) ) {
+            $sql .= " LEFT JOIN {$wpdb->postmeta} ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id ";
+        }
+
+        $sql .= "
+            WHERE {$wpdb->posts}.post_type = %s
+            AND {$wpdb->posts}.post_status = 'publish'
+            AND ( {$where_clause} )
+            LIMIT 50
+        ";
+
+        $prepared_sql = $wpdb->prepare( $sql, $query_args );
+
+        // Execute direct query
+        $results = $wpdb->get_col( $prepared_sql );
+
+        return ! empty( $results ) ? array_map( 'intval', $results ) : array();
     }
 
+    /**
+     * Execute database query to fetch search results.
+     *
+     * @param string $term The search term.
+     * @param string $lang The current language code.
+     * @return array Formatted search results.
+     */
     private function execute_db_query( $term, $lang ) {
         $normalized_terms = array_unique( array_filter( array(
             $term,
@@ -293,68 +319,9 @@ class FAS_Rest {
         $final_page_ids    = array_slice( $page_ids, 0, $limit );
 
         // Render function helper
-        $render_items = function( $ids, $default_category ) use ( $term ) {
-            $items = array();
-            if ( empty( $ids ) ) {
-                return $items;
-            }
-
-            $query = new WP_Query( array(
-                'post_type' => array( 'product', 'post', 'page' ),
-                'post__in'  => $ids,
-                'orderby'   => 'post__in',
-            ) );
-
-            if ( $query->have_posts() ) {
-                $template_path = locate_template( 'faramoj-advanced-search/search-result-item.php' );
-                if ( ! $template_path ) {
-                    $template_path = plugin_dir_path( dirname( __FILE__ ) ) . 'templates/search-result-item.php';
-                }
-
-                while ( $query->have_posts() ) {
-                    $query->the_post();
-                    $id = get_the_ID();
-                    $type = get_post_type();
-                    
-                    $title   = get_the_title();
-                    $excerpt = wp_trim_words( get_the_excerpt(), 15, '...' );
-
-                    $item = array(
-                        'title'        => $title,
-                        'permalink'    => get_permalink(),
-                        'image'        => get_the_post_thumbnail_url( $id, 'thumbnail' ) ?: '',
-                        'excerpt'      => $excerpt,
-                        'title_html'   => $this->highlight_text( $title, $term ),
-                        'excerpt_html' => $this->highlight_text( $excerpt, $term ),
-                    );
-
-                    $category = $default_category;
-                    if ( 'all' === $default_category ) {
-                        if ( $type === 'product' ) {
-                            $category = 'products';
-                        } elseif ( $type === 'post' ) {
-                            $category = 'posts';
-                        } else {
-                            $category = 'docs';
-                        }
-                    }
-
-                    ob_start();
-                    $args = array( 'item' => $item, 'category' => $category );
-                    include $template_path;
-                    $rendered_html = ob_get_clean();
-
-                    $items[] = array( 'html' => $rendered_html );
-                }
-                wp_reset_postdata();
-            }
-
-            return $items;
-        };
-
-        $formatted_results['products'] = $render_items( $final_product_ids, 'products' );
-        $formatted_results['posts']    = $render_items( $final_post_ids, 'posts' );
-        $formatted_results['docs']     = $render_items( $final_page_ids, 'docs' );
+        $formatted_results['products'] = $this->render_search_items( $final_product_ids, 'products', $term );
+        $formatted_results['posts']    = $this->render_search_items( $final_post_ids, 'posts', $term );
+        $formatted_results['docs']     = $this->render_search_items( $final_page_ids, 'docs', $term );
 
         // Merge pre-rendered results directly in PHP for the combined 'all' tab.
         // This is 100% reliable, uses zero extra SQL queries, and avoids WPML/Polylang multi-CPT filter conflicts.
@@ -366,5 +333,72 @@ class FAS_Rest {
         $formatted_results['all'] = array_slice( $all_items, 0, 20 );
 
         return $formatted_results;
+    }
+
+    /**
+     * Helper to render search result items into HTML cards.
+     *
+     * @param array  $ids Array of post IDs.
+     * @param string $default_category The category identifier for these items.
+     * @param string $term The search term used for highlighting.
+     * @return array Array of rendered HTML items.
+     */
+    private function render_search_items( $ids, $default_category, $term ) {
+        $items = array();
+        if ( empty( $ids ) ) {
+            return $items;
+        }
+
+        $query = new WP_Query( array(
+            'post_type' => array( 'product', 'post', 'page' ),
+            'post__in'  => $ids,
+            'orderby'   => 'post__in',
+        ) );
+
+        if ( $query->have_posts() ) {
+            $template_path = locate_template( 'faramoj-advanced-search/search-result-item.php' );
+            if ( ! $template_path ) {
+                $template_path = plugin_dir_path( dirname( __FILE__ ) ) . 'templates/search-result-item.php';
+            }
+
+            while ( $query->have_posts() ) {
+                $query->the_post();
+                $id = get_the_ID();
+                $type = get_post_type();
+
+                $title   = get_the_title();
+                $excerpt = wp_trim_words( get_the_excerpt(), 15, '...' );
+
+                $item = array(
+                    'title'        => $title,
+                    'permalink'    => get_permalink(),
+                    'image'        => get_the_post_thumbnail_url( $id, 'thumbnail' ) ?: '',
+                    'excerpt'      => $excerpt,
+                    'title_html'   => $this->highlight_text( $title, $term ),
+                    'excerpt_html' => $this->highlight_text( $excerpt, $term ),
+                );
+
+                $category = $default_category;
+                if ( 'all' === $default_category ) {
+                    if ( $type === 'product' ) {
+                        $category = 'products';
+                    } elseif ( $type === 'post' ) {
+                        $category = 'posts';
+                    } else {
+                        $category = 'docs';
+                    }
+                }
+
+                ob_start();
+                $args = array( 'item' => $item, 'category' => $category );
+                include $template_path;
+                $rendered_html = ob_get_clean();
+
+                $items[] = array( 'html' => $rendered_html );
+            }
+            wp_reset_postdata();
+        }
+
+        return $items;
     }
 }

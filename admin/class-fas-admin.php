@@ -346,6 +346,9 @@ class FAS_Admin {
         add_action( 'update_option_fas_cache_duration', array( $this, 'flush_search_cache' ) );
         add_action( 'updated_option', array( $this, 'maybe_flush_search_cache' ), 10, 3 );
 
+        // Plugin Settings Update invalidation (also covered by updated_option hook but good to be explicit for options pages if needed)
+        // Note: maybe_flush_search_cache already checks for 'fas_' options.
+
         // Correct enqueue hook registration during settings initialization
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
     }
