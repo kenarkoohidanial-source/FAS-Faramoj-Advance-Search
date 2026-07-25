@@ -1,13 +1,7 @@
 <?php
-/**
- * Internationalization & Language handler
- */
+namespace Faramoj\AdvancedSearch\Core;
 
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
-}
-
-class FAS_I18n {
+class I18n {
 
     /**
      * Load the plugin text domain for translation.
@@ -16,14 +10,14 @@ class FAS_I18n {
         load_plugin_textdomain(
             'faramoj-search',
             false,
-            dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
+            dirname( dirname( dirname( plugin_basename( __FILE__ ) ) ) ) . '/languages/'
         );
     }
 
     /**
      * Get the active language code dynamically.
      */
-    public static function get_current_language() {
+    public function get_current_language() {
         $lang = 'en';
 
         if ( function_exists( 'pll_current_language' ) ) {

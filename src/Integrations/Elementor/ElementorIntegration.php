@@ -1,13 +1,7 @@
 <?php
-/**
- * Elementor integration handler for Faramoj Advanced Search
- */
+namespace Faramoj\AdvancedSearch\Integrations\Elementor;
 
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
-}
-
-class FAS_Elementor {
+class ElementorIntegration {
 
     public function __construct() {
         // Register custom Elementor widget
@@ -18,7 +12,6 @@ class FAS_Elementor {
      * Register Search trigger widget in Elementor
      */
     public function register_widgets( $widgets_manager ) {
-        require_once plugin_dir_path( __FILE__ ) . 'class-fas-elementor-widget.php';
-        $widgets_manager->register( new FAS_Elementor_Widget() );
+        $widgets_manager->register( new ElementorWidget() );
     }
 }
