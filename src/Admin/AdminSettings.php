@@ -1,13 +1,7 @@
 <?php
-/**
- * Admin settings page logic
- */
+namespace Faramoj\AdvancedSearch\Admin;
 
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
-}
-
-class FAS_Admin {
+class AdminSettings {
 
     /**
      * Helper to get active site languages (WPML, Polylang, or Fallbacks)
@@ -378,7 +372,8 @@ class FAS_Admin {
      * Render the settings page HTML layout.
      */
     public function render_settings_page() {
-        $view_path = plugin_dir_path( __FILE__ ) . 'views/settings-page.php';
+        // Adjust path since AdminSettings is now in src/Admin and views are in admin/views
+        $view_path = plugin_dir_path( dirname( dirname( __FILE__ ) ) ) . 'admin/views/settings-page.php';
         if ( file_exists( $view_path ) ) {
             include $view_path;
         } else {
@@ -390,7 +385,8 @@ class FAS_Admin {
      * Render the search query statistics metrics.
      */
     public function render_statistics_page() {
-        $view_path = plugin_dir_path( __FILE__ ) . 'views/statistics-page.php';
+        // Adjust path since AdminSettings is now in src/Admin and views are in admin/views
+        $view_path = plugin_dir_path( dirname( dirname( __FILE__ ) ) ) . 'admin/views/statistics-page.php';
         if ( file_exists( $view_path ) ) {
             include $view_path;
         } else {
@@ -402,7 +398,8 @@ class FAS_Admin {
      * Render the About Us information.
      */
     public function render_about_us_page() {
-        $view_path = plugin_dir_path( __FILE__ ) . 'views/about-us-page.php';
+        // Adjust path since AdminSettings is now in src/Admin and views are in admin/views
+        $view_path = plugin_dir_path( dirname( dirname( __FILE__ ) ) ) . 'admin/views/about-us-page.php';
         if ( file_exists( $view_path ) ) {
             include $view_path;
         } else {
@@ -439,7 +436,8 @@ class FAS_Admin {
 
         // Read CSS from local PHP-constructed view or string directly to avoid hardened server blockages
         ob_start();
-        include plugin_dir_path( __FILE__ ) . 'css/fas-admin.php';
+        // Adjust path to point to admin/css/fas-admin.php
+        include plugin_dir_path( dirname( dirname( __FILE__ ) ) ) . 'admin/css/fas-admin.php';
         $custom_css = ob_get_clean();
 
         // Strip PHP tags if any (our css file has <?php header... but contains css below)

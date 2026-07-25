@@ -1,0 +1,19 @@
+{
+    "name": "faramoj/advanced-search",
+    "description": "A highly optimized, modern multilingual search engine with ACF support.",
+    "type": "wordpress-plugin",
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Faramoj\\AdvancedSearch\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Danial Kenarkoohi",
+            "email": "info@faramoj.com"
+        }
+    ]
+}

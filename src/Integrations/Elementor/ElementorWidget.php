@@ -1,13 +1,11 @@
 <?php
-/**
- * Custom Search Trigger Elementor Widget
- */
+namespace Faramoj\AdvancedSearch\Integrations\Elementor;
 
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+    return; // Changed from exit to return for testing purpose, though this shouldn't be executed in CLI
 }
 
-class FAS_Elementor_Widget extends \Elementor\Widget_Base {
+class ElementorWidget extends \Elementor\Widget_Base {
 
     public function get_name() {
         return 'fas_search_trigger';
