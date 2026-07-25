@@ -167,8 +167,8 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
             direction: ltr !important;
         }
         .fas-admin-wrap input[type="number"] {
-            padding: 6px 12px !important;
-            height: 35px !important;
+            padding: 8px 16px !important;
+            height: 40px !important;
             box-sizing: border-box;
         }
         .fas-card {
@@ -295,15 +295,15 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                         <tr>
                             <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'سایز عنوان (دسکتاپ / موبایل)' : 'Title Size (Desktop / Mobile)'; ?></td>
                             <td style="padding: 10px 0; display: flex; justify-content: space-between; gap: 4px;">
-                                <input type="number" name="fas_title_size_desktop<?php echo esc_attr( $suffix ); ?>" id="fas_title_size_desktop" value="<?php echo esc_attr( get_option( 'fas_title_size_desktop' . $suffix, 15 ) ); ?>" class="regular-text" style="width: 48%; min-width: 0; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Desktop px">
-                                <input type="number" name="fas_title_size_mobile<?php echo esc_attr( $suffix ); ?>" id="fas_title_size_mobile" value="<?php echo esc_attr( get_option( 'fas_title_size_mobile' . $suffix, 14 ) ); ?>" class="regular-text" style="width: 48%; min-width: 0; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Mobile px">
+                                <input type="number" name="fas_title_size_desktop<?php echo esc_attr( $suffix ); ?>" id="fas_title_size_desktop" value="<?php echo esc_attr( get_option( 'fas_title_size_desktop' . $suffix, 15 ) ); ?>" class="regular-text" style="width: 48%; min-width: 80px; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Desktop px">
+                                <input type="number" name="fas_title_size_mobile<?php echo esc_attr( $suffix ); ?>" id="fas_title_size_mobile" value="<?php echo esc_attr( get_option( 'fas_title_size_mobile' . $suffix, 14 ) ); ?>" class="regular-text" style="width: 48%; min-width: 80px; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Mobile px">
                             </td>
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'سایز توضیحات (دسکتاپ / موبایل)' : 'Excerpt Size (Desktop / Mobile)'; ?></td>
                             <td style="padding: 10px 0; display: flex; justify-content: space-between; gap: 4px;">
-                                <input type="number" name="fas_excerpt_size_desktop<?php echo esc_attr( $suffix ); ?>" id="fas_excerpt_size_desktop" value="<?php echo esc_attr( get_option( 'fas_excerpt_size_desktop' . $suffix, 13 ) ); ?>" class="regular-text" style="width: 48%; min-width: 0; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Desktop px">
-                                <input type="number" name="fas_excerpt_size_mobile<?php echo esc_attr( $suffix ); ?>" id="fas_excerpt_size_mobile" value="<?php echo esc_attr( get_option( 'fas_excerpt_size_mobile' . $suffix, 12 ) ); ?>" class="regular-text" style="width: 48%; min-width: 0; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Mobile px">
+                                <input type="number" name="fas_excerpt_size_desktop<?php echo esc_attr( $suffix ); ?>" id="fas_excerpt_size_desktop" value="<?php echo esc_attr( get_option( 'fas_excerpt_size_desktop' . $suffix, 13 ) ); ?>" class="regular-text" style="width: 48%; min-width: 80px; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Desktop px">
+                                <input type="number" name="fas_excerpt_size_mobile<?php echo esc_attr( $suffix ); ?>" id="fas_excerpt_size_mobile" value="<?php echo esc_attr( get_option( 'fas_excerpt_size_mobile' . $suffix, 12 ) ); ?>" class="regular-text" style="width: 48%; min-width: 80px; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Mobile px">
                             </td>
                         </tr>
                     </table>
@@ -328,8 +328,8 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                         <tr>
                             <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'سایز دکمه (دسکتاپ / موبایل)' : 'Button Size (Desktop / Mobile)'; ?></td>
                             <td style="padding: 10px 0; display: flex; justify-content: space-between; gap: 4px;">
-                                <input type="number" name="fas_btn_size_desktop<?php echo esc_attr( $suffix ); ?>" id="fas_btn_size_desktop" value="<?php echo esc_attr( get_option( 'fas_btn_size_desktop' . $suffix, 56 ) ); ?>" class="regular-text" style="width: 48%; min-width: 0; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Desktop px">
-                                <input type="number" name="fas_btn_size_mobile<?php echo esc_attr( $suffix ); ?>" id="fas_btn_size_mobile" value="<?php echo esc_attr( get_option( 'fas_btn_size_mobile' . $suffix, 48 ) ); ?>" class="regular-text" style="width: 48%; min-width: 0; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Mobile px">
+                                <input type="number" name="fas_btn_size_desktop<?php echo esc_attr( $suffix ); ?>" id="fas_btn_size_desktop" value="<?php echo esc_attr( get_option( 'fas_btn_size_desktop' . $suffix, 56 ) ); ?>" class="regular-text" style="width: 48%; min-width: 80px; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Desktop px">
+                                <input type="number" name="fas_btn_size_mobile<?php echo esc_attr( $suffix ); ?>" id="fas_btn_size_mobile" value="<?php echo esc_attr( get_option( 'fas_btn_size_mobile' . $suffix, 48 ) ); ?>" class="regular-text" style="width: 48%; min-width: 80px; box-sizing: border-box; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="Mobile px">
                             </td>
                         </tr>
                         <tr>
