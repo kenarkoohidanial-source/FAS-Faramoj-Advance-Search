@@ -100,14 +100,14 @@ class FAS_Core {
             'fas-public-css',
             plugins_url( 'public/css/fas-public.css', dirname( __FILE__ ) ),
             array(),
-            '1.1.0'
+            '1.1.5'
         );
 
         wp_enqueue_script(
             'fas-public-js',
             plugins_url( 'public/js/fas-public.js', dirname( __FILE__ ) ),
             array(),
-            '1.1.0',
+            '1.1.5',
             true
         );
 
@@ -155,6 +155,13 @@ class FAS_Core {
         $floating_offset_x = self::get_option( 'fas_floating_offset_x', 24 );
         $floating_offset_y = self::get_option( 'fas_floating_offset_y', 24 );
 
+        $btn_size_desktop = self::get_option( 'fas_btn_size_desktop', 56 );
+        $btn_size_mobile  = self::get_option( 'fas_btn_size_mobile', 48 );
+        $title_size_desktop = self::get_option( 'fas_title_size_desktop', 15 );
+        $title_size_mobile  = self::get_option( 'fas_title_size_mobile', 14 );
+        $excerpt_size_desktop = self::get_option( 'fas_excerpt_size_desktop', 13 );
+        $excerpt_size_mobile  = self::get_option( 'fas_excerpt_size_mobile', 12 );
+
         $custom_inline_css = "
             :root { 
                 --fas-primary: " . esc_attr( $floating_bg ) . "; 
@@ -162,6 +169,12 @@ class FAS_Core {
                 --fas-popup-max-height: " . esc_attr( $popup_max_height ) . "px;
                 --fas-offset-x: " . esc_attr( $floating_offset_x ) . "px;
                 --fas-offset-y: " . esc_attr( $floating_offset_y ) . "px;
+                --fas-btn-size-desktop: " . esc_attr( $btn_size_desktop ) . "px;
+                --fas-btn-size-mobile: " . esc_attr( $btn_size_mobile ) . "px;
+                --fas-title-size-desktop: " . esc_attr( $title_size_desktop ) . "px;
+                --fas-title-size-mobile: " . esc_attr( $title_size_mobile ) . "px;
+                --fas-excerpt-size-desktop: " . esc_attr( $excerpt_size_desktop ) . "px;
+                --fas-excerpt-size-mobile: " . esc_attr( $excerpt_size_mobile ) . "px;
             }
         ";
         wp_add_inline_style( 'fas-public-css', $custom_inline_css );

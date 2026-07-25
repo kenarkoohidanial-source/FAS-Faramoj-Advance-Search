@@ -196,6 +196,45 @@ class FAS_Admin {
                 'default'           => 24,
             ) );
 
+            // Button Sizes
+            register_setting( $group_name, 'fas_btn_size_desktop' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 56,
+            ) );
+            register_setting( $group_name, 'fas_btn_size_mobile' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 48,
+            ) );
+
+            // Results Settings
+            register_setting( $group_name, 'fas_results_count' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 15,
+            ) );
+            register_setting( $group_name, 'fas_title_size_desktop' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 15,
+            ) );
+            register_setting( $group_name, 'fas_title_size_mobile' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 14,
+            ) );
+            register_setting( $group_name, 'fas_excerpt_size_desktop' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 13,
+            ) );
+            register_setting( $group_name, 'fas_excerpt_size_mobile' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 12,
+            ) );
+
             register_setting( $group_name, 'fas_popup_width' . $suffix, array(
                 'type'              => 'integer',
                 'sanitize_callback' => 'intval',
@@ -316,10 +355,14 @@ class FAS_Admin {
      */
     public function flush_search_cache() {
         global $wpdb;
+        // Keep garbage collection for sites using database transients to prevent wp_options bloat
         $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_fas_search_%' OR option_name LIKE '_transient_timeout_fas_search_%'" );
         if ( function_exists( 'wp_cache_flush' ) ) {
             wp_cache_flush();
         }
+
+        // Also update cache version to instantly invalidate persistent object caching without clearing entire object cache
+        update_option( 'fas_cache_version', time() );
     }
 
     /**

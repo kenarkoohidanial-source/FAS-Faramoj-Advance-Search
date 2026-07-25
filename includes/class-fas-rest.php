@@ -44,8 +44,9 @@ class FAS_Rest {
             $cache_duration = HOUR_IN_SECONDS;
         }
 
-        // Optimized Cache Key based on term and language
-        $cache_key = 'fas_search_' . md5( $term . '_' . $lang );
+        // Optimized Cache Key based on term and language, using cache versioning
+        $cache_version = get_option( 'fas_cache_version', 1 );
+        $cache_key = 'fas_search_' . md5( $term . '_' . $lang . '_' . $cache_version );
         
         $results = false;
         if ( $cache_duration > 0 ) {
@@ -70,31 +71,70 @@ class FAS_Rest {
             return;
         }
 
+        // Get IP
+        $ip = '';
+        if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
+            $ip = sanitize_text_field( wp_unslash( $_SERVER['HTTP_CLIENT_IP'] ) );
+        } elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+            $ip = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
+        } elseif ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
+            $ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+        }
+
+        $timestamp = current_time( 'mysql' );
+
         // Standardize lowercase matching
         $term_clean = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $term ) ) : strtolower( trim( $term ) );
-        $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [] ) );
 
-        if ( ! isset( $stats['total_count'] ) ) {
-            $stats['total_count'] = 0;
-        }
-        $stats['total_count']++;
+        // Defer database writing to the shutdown hook so it does not block the REST API response
+        add_action( 'shutdown', function() use ( $term_clean, $ip, $timestamp ) {
+            $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [] ) );
 
-        if ( ! isset( $stats['terms'] ) ) {
-            $stats['terms'] = array();
-        }
+            if ( ! isset( $stats['total_count'] ) ) {
+                $stats['total_count'] = 0;
+            }
+            $stats['total_count']++;
 
-        if ( ! isset( $stats['terms'][ $term_clean ] ) ) {
-            $stats['terms'][ $term_clean ] = 0;
-        }
-        $stats['terms'][ $term_clean ]++;
+            if ( ! isset( $stats['terms'] ) ) {
+                $stats['terms'] = array();
+            }
 
-        // Keep top 100 popular terms to protect option storage
-        arsort( $stats['terms'] );
-        if ( count( $stats['terms'] ) > 100 ) {
-            $stats['terms'] = array_slice( $stats['terms'], 0, 100, true );
-        }
+            if ( ! isset( $stats['terms'][ $term_clean ] ) ) {
+                $stats['terms'][ $term_clean ] = array(
+                    'count' => 0,
+                    'logs'  => array()
+                );
+            } else if ( ! is_array( $stats['terms'][ $term_clean ] ) ) {
+                // Migrate old format
+                $old_count = $stats['terms'][ $term_clean ];
+                $stats['terms'][ $term_clean ] = array(
+                    'count' => $old_count,
+                    'logs'  => array()
+                );
+            }
 
-        update_option( 'fas_search_stats', $stats );
+            $stats['terms'][ $term_clean ]['count']++;
+
+            // Add IP log, keep max 10 recent logs per term to prevent bloat
+            array_unshift( $stats['terms'][ $term_clean ]['logs'], array( 'ip' => $ip, 'time' => $timestamp ) );
+            if ( count( $stats['terms'][ $term_clean ]['logs'] ) > 10 ) {
+                $stats['terms'][ $term_clean ]['logs'] = array_slice( $stats['terms'][ $term_clean ]['logs'], 0, 10 );
+            }
+
+            // Custom sort function to sort by count
+            uasort( $stats['terms'], function( $a, $b ) {
+                $count_a = is_array($a) ? $a['count'] : $a;
+                $count_b = is_array($b) ? $b['count'] : $b;
+                return $count_b <=> $count_a;
+            } );
+
+            // Keep top 100 popular terms to protect option storage
+            if ( count( $stats['terms'] ) > 100 ) {
+                $stats['terms'] = array_slice( $stats['terms'], 0, 100, true );
+            }
+
+            update_option( 'fas_search_stats', $stats );
+        } );
     }
 
     /**
@@ -153,23 +193,50 @@ class FAS_Rest {
     private function get_matched_post_ids( $post_type, $search_terms, $meta_keys = [] ) {
         $all_ids = array();
 
-        foreach ( $search_terms as $t ) {
-            // 1. Keyword search
-            $args1 = array(
-                'post_type'      => $post_type,
-                'posts_per_page' => 50,
-                's'              => $t,
-                'post_status'    => 'publish',
-                'fields'         => 'ids',
-            );
-            $query1 = new WP_Query( $args1 );
-            if ( ! empty( $query1->posts ) ) {
-                $all_ids = array_merge( $all_ids, $query1->posts );
-            }
+        // Build combined arguments for keyword search
+        $keyword_args = array(
+            'post_type'      => $post_type,
+            'posts_per_page' => 50,
+            'post_status'    => 'publish',
+            'fields'         => 'ids',
+        );
 
-            // 2. Custom metadata fields search (ACF)
-            if ( ! empty( $meta_keys ) ) {
-                $meta_query = array( 'relation' => 'OR' );
+        // Add a single custom filter to modify the SQL for the 's' parameter
+        // to use OR logic on the different normalized terms.
+        $search_filter = function( $search, $wp_query ) use ( $search_terms ) {
+            global $wpdb;
+            if ( empty( $search ) ) {
+                return $search;
+            }
+            $search = '';
+            foreach ( $search_terms as $term ) {
+                $like = '%' . $wpdb->esc_like( $term ) . '%';
+                $search .= $wpdb->prepare( " OR ({$wpdb->posts}.post_title LIKE %s) OR ({$wpdb->posts}.post_content LIKE %s)", $like, $like );
+            }
+            if ( ! empty( $search ) ) {
+                $search = ' AND (' . ltrim( $search, ' OR' ) . ') ';
+            }
+            return $search;
+        };
+        add_filter( 'posts_search', $search_filter, 10, 2 );
+
+        // This single WP_Query replaces the keyword N+1 queries.
+        // We set 's' to an arbitrary string to trigger the posts_search filter
+        $keyword_args['s'] = 'FAS_MAGIC_SEARCH_STRING';
+        $query1 = new WP_Query( $keyword_args );
+        if ( ! empty( $query1->posts ) ) {
+            $all_ids = array_merge( $all_ids, $query1->posts );
+        }
+
+        // Clean up our filter
+        remove_filter( 'posts_search', $search_filter, 10 );
+
+
+        // Build combined arguments for ACF / metadata search
+        if ( ! empty( $meta_keys ) ) {
+            $meta_query = array( 'relation' => 'OR' );
+
+            foreach ( $search_terms as $t ) {
                 foreach ( $meta_keys as $key ) {
                     $meta_query[] = array(
                         'key'     => $key,
@@ -177,18 +244,19 @@ class FAS_Rest {
                         'compare' => 'LIKE',
                     );
                 }
+            }
 
-                $args2 = array(
-                    'post_type'      => $post_type,
-                    'posts_per_page' => 50,
-                    'post_status'    => 'publish',
-                    'fields'         => 'ids',
-                    'meta_query'     => $meta_query,
-                );
-                $query2 = new WP_Query( $args2 );
-                if ( ! empty( $query2->posts ) ) {
-                    $all_ids = array_merge( $all_ids, $query2->posts );
-                }
+            $meta_args = array(
+                'post_type'      => $post_type,
+                'posts_per_page' => 50,
+                'post_status'    => 'publish',
+                'fields'         => 'ids',
+                'meta_query'     => $meta_query,
+            );
+
+            $query2 = new WP_Query( $meta_args );
+            if ( ! empty( $query2->posts ) ) {
+                $all_ids = array_merge( $all_ids, $query2->posts );
             }
         }
 
@@ -214,10 +282,15 @@ class FAS_Rest {
             'docs'     => []
         );
 
-        // Limit each specific tab results to top 15 items
-        $final_product_ids = array_slice( $product_ids, 0, 15 );
-        $final_post_ids    = array_slice( $post_ids, 0, 15 );
-        $final_page_ids    = array_slice( $page_ids, 0, 15 );
+        $limit = FAS_Core::get_option( 'fas_results_count', 15 );
+        if ( empty( $limit ) || $limit < 1 ) {
+            $limit = 15;
+        }
+
+        // Limit each specific tab results
+        $final_product_ids = array_slice( $product_ids, 0, $limit );
+        $final_post_ids    = array_slice( $post_ids, 0, $limit );
+        $final_page_ids    = array_slice( $page_ids, 0, $limit );
 
         // Render function helper
         $render_items = function( $ids, $default_category ) use ( $term ) {
