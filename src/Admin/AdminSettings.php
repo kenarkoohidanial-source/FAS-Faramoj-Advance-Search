@@ -373,7 +373,7 @@ class AdminSettings {
      */
     public function render_settings_page() {
         // Adjust path since AdminSettings is now in src/Admin and views are in admin/views
-        $view_path = plugin_dir_path( dirname( dirname( __FILE__ ) ) ) . 'admin/views/settings-page.php';
+        $view_path = FAS_PLUGIN_DIR . 'admin/views/settings-page.php';
         if ( file_exists( $view_path ) ) {
             include $view_path;
         } else {
@@ -386,7 +386,7 @@ class AdminSettings {
      */
     public function render_statistics_page() {
         // Adjust path since AdminSettings is now in src/Admin and views are in admin/views
-        $view_path = plugin_dir_path( dirname( dirname( __FILE__ ) ) ) . 'admin/views/statistics-page.php';
+        $view_path = FAS_PLUGIN_DIR . 'admin/views/statistics-page.php';
         if ( file_exists( $view_path ) ) {
             include $view_path;
         } else {
@@ -399,7 +399,7 @@ class AdminSettings {
      */
     public function render_about_us_page() {
         // Adjust path since AdminSettings is now in src/Admin and views are in admin/views
-        $view_path = plugin_dir_path( dirname( dirname( __FILE__ ) ) ) . 'admin/views/about-us-page.php';
+        $view_path = FAS_PLUGIN_DIR . 'admin/views/about-us-page.php';
         if ( file_exists( $view_path ) ) {
             include $view_path;
         } else {
@@ -437,7 +437,7 @@ class AdminSettings {
         // Read CSS from local PHP-constructed view or string directly to avoid hardened server blockages
         ob_start();
         // Adjust path to point to admin/css/fas-admin.php
-        include plugin_dir_path( dirname( dirname( __FILE__ ) ) ) . 'admin/css/fas-admin.php';
+        include FAS_PLUGIN_DIR . 'admin/css/fas-admin.php';
         $custom_css = ob_get_clean();
 
         // Strip PHP tags if any (our css file has <?php header... but contains css below)

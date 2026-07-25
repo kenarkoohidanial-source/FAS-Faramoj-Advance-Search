@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
     return; // Exit if accessed directly.
 }
 
+define( 'FAS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+
 // Load Composer Autoloader
 if ( file_exists( plugin_dir_path( __FILE__ ) . 'vendor/autoload.php' ) ) {
     require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
