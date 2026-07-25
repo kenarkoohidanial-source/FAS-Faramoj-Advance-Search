@@ -14,7 +14,7 @@ $dir_style = $is_rtl ? 'direction: rtl; text-align: right;' : 'direction: ltr; t
 
 $i18n = array(
     'title' => $is_rtl ? 'جستجوی زنده پیشرفته فراموج' : 'Faramoj Advanced Live Search',
-    'badge' => $is_rtl ? 'نسخه ۱.۱.۰' : 'Version 1.1.0',
+    'badge' => $is_rtl ? 'نسخه ۱.۱.۵' : 'Version 1.1.5',
     'desc' => $is_rtl ? 'پلاگین جستجوی پیشرفته فراموج (FAS) یک موتور جستجوی زنده، بسیار بهینه و مبتنی بر AJAX است که به طور تخصصی برای محصولات مخابراتی فنی، مقالات و مستندات فنی و مهندسی طراحی و بهینه‌سازی شده است.' : 'Faramoj Advanced Search (FAS) is an ultra-high performance, AJAX-driven live search engine tailored specifically for technical telecommunication products, articles, and documentation.',
     'dev_by' => $is_rtl ? 'با افتخار توسعه‌یافته و بهینه‌سازی‌شده توسط' : 'Proudly Developed & Optimized by',
     'developer' => $is_rtl ? 'دانیال کنارکوهی' : 'Danial Kenarkoohi',

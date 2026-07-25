@@ -276,13 +276,13 @@
 
 .fas-result-title {
     font-weight: 600;
-    font-size: 15px;
+    font-size: var(--fas-title-size-desktop, 15px);
     color: var(--fas-text-main);
     margin: 0 0 4px 0;
 }
 
 .fas-result-excerpt {
-    font-size: 13px;
+    font-size: var(--fas-excerpt-size-desktop, 13px);
     color: var(--fas-text-muted);
     margin: 0;
     line-height: 1.4;
@@ -324,12 +324,12 @@
 .fas-floating-trigger {
     position: fixed !important;
     z-index: 999999 !important; /* Ensure it is on top of everything! */
-    width: 56px !important;
-    height: 56px !important;
-    min-height: 56px !important;
-    max-height: 56px !important;
-    min-width: 56px !important;
-    max-width: 56px !important;
+    width: var(--fas-btn-size-desktop, 56px) !important;
+    height: var(--fas-btn-size-desktop, 56px) !important;
+    min-height: var(--fas-btn-size-desktop, 56px) !important;
+    max-height: var(--fas-btn-size-desktop, 56px) !important;
+    min-width: var(--fas-btn-size-desktop, 56px) !important;
+    max-width: var(--fas-btn-size-desktop, 56px) !important;
     border-radius: 50% !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -343,6 +343,12 @@
     outline: none !important;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
     cursor: pointer !important;
+}
+
+/* Ensure SVG icon scales slightly if button is small */
+.fas-floating-trigger svg {
+    width: calc(var(--fas-btn-size-desktop, 56px) * 0.4) !important;
+    height: calc(var(--fas-btn-size-desktop, 56px) * 0.4) !important;
 }
 
 .fas-floating-trigger:hover {
@@ -397,4 +403,45 @@
     padding: 40px 0;
     color: var(--fas-text-muted);
     font-size: 15px;
+}
+
+/* Full Mobile Responsiveness */
+@media (max-width: 768px) {
+    .fas-floating-trigger {
+        width: var(--fas-btn-size-mobile, 48px) !important;
+        height: var(--fas-btn-size-mobile, 48px) !important;
+        min-height: var(--fas-btn-size-mobile, 48px) !important;
+        max-height: var(--fas-btn-size-mobile, 48px) !important;
+        min-width: var(--fas-btn-size-mobile, 48px) !important;
+        max-width: var(--fas-btn-size-mobile, 48px) !important;
+    }
+    
+    .fas-floating-trigger svg {
+        width: calc(var(--fas-btn-size-mobile, 48px) * 0.4) !important;
+        height: calc(var(--fas-btn-size-mobile, 48px) * 0.4) !important;
+    }
+
+    .fas-result-title {
+        font-size: var(--fas-title-size-mobile, 14px);
+    }
+
+    .fas-result-excerpt {
+        font-size: var(--fas-excerpt-size-mobile, 12px);
+    }
+
+    .fas-search-container {
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+        transform: translateY(0) scale(1);
+    }
+
+    .fas-search-overlay {
+        padding-top: 0;
+    }
+    
+    .fas-results-panel {
+        max-height: calc(100vh - 130px);
+    }
 }
