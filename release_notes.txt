@@ -1,0 +1,21 @@
+# Release Notes V.1.1.5
+
+## 🚀 Features & Enhancements (English)
+* **Responsive UI Sizes:** You can now set distinct sizes for the Floating Button, Title Font, and Excerpt Font for both Desktop and Mobile devices independently.
+* **Results Limiter:** Added a new setting to cap the number of results retrieved per search category.
+* **Interactive Live Preview Overhaul:** The backend live preview has been entirely rebuilt! It now features a toggle between Mobile and Desktop canvas sizes, and includes a mock floating button that opens a fully interactive search modal simulation.
+* **Analytics & Keyword Suggestions:** The Statistics page now tracks unique IP searches over a 24-hour window to suggest trending keywords.
+* **IP Logging & Language Segmentation:** Persian/Arabic terms are now separated from English terms in the stats table. Search query rows are expandable, showing the last 10 unique IP addresses and timestamps.
+* **Google Trends Integration:** One-click links to Google Trends added directly to keyword statistics.
+* **Performance Boost:** Severe N+1 Database queries resolved using a single, optimized SQL lookup filter. Stats tracking logic deferred to the `shutdown` hook to eliminate REST API blockages.
+
+---
+
+## 🚀 ویژگی‌های جدید و بهبودها (فارسی)
+* **تنظیمات سایز واکنش‌گرا:** اکنون می‌توانید سایز دکمه شناور، اندازه فونت عنوان و متن توضیحات را برای صفحات دسکتاپ و موبایل به صورت کاملاً مجزا تنظیم کنید.
+* **محدودکننده نتایج:** اضافه شدن قابلیت تعیین حداکثر تعداد نتایج نمایشی در هر تب.
+* **بازطراحی پیش‌نمایش زنده:** پیش‌نمایش زنده در پنل مدیریت کاملاً از نو طراحی شد! حالا دارای دکمه تغییر سایز بوم (موبایل و دسکتاپ) است و با کلیک روی دکمه شناور مجازی، رفتار پاپ‌آپ فرانت‌رند را شبیه‌سازی می‌کند.
+* **تحلیل کلمات کلیدی و پیشنهادات:** بخش آمار و ارقام اکنون آی‌پی‌های یکتا را در بازه ۲۴ ساعته رصد کرده و برای نگارش مقالات جدید، کلمات کلیدی داغ را پیشنهاد می‌دهد.
+* **تفکیک زبان‌ها و ثبت IP:** عبارات جستجو شده فارسی/عربی و انگلیسی در دو تب مجزا در بخش آمار نمایش داده می‌شوند. همچنین با کلیک روی هر کلمه کلیدی، ۱۰ آدرس IP آخر به همراه زمان جستجو قابل مشاهده است.
+* **اتصال به گوگل ترندز:** اضافه شدن لینک‌های تک‌کلیک به گوگل ترندز برای بررسی روند محبوبیت کلمات کلیدی.
+* **بهینه‌سازی خیره‌کننده عملکرد:** مشکل خطرناک N+1 در پردازش کوئری‌ها برطرف شد و با یک فیلتر یکپارچه جایگزین گردید. همچنین بارگذاری آمار در پایگاه‌داده به هوک `shutdown` منتقل شد تا هیچ تاخیری در نمایش زنده نتایج به کاربر ایجاد نشود.

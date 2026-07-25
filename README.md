@@ -1,4 +1,4 @@
-# Faramoj Advanced Search (FAS) - v1.1.0
+# Faramoj Advanced Search (FAS) - v1.1.5
 
 > An ultra-high-performance, modern, and highly-optimized live search engine for WordPress, specifically crafted for technical telecommunication products, articles, documentation, and metadata. Developed by **Danial Kenarkoohi**.
 
