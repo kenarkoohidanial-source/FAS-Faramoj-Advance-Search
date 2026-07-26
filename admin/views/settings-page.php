@@ -674,56 +674,48 @@ jQuery(document).ready(function($) {
         }
     });
 
+    var previewDebounceTimer = null;
+
     // Re-render live preview on settings modification
-    $('#fas-settings-form input, #fas-settings-form select').on('input change', updateLivePreview);
+    $('#fas-settings-form input, #fas-settings-form select').on('input change', function() {
+        clearTimeout(previewDebounceTimer);
+        previewDebounceTimer = setTimeout(updateLivePreview, 300);
+    });
 
     function updateLivePreview() {
-        // Dimensions & Device
-        var width = $('#fas_popup_width').val() || 750;
-        var maxH  = $('#fas_popup_max_height').val() || 600;
-        
-        var isMobile = (activeDevice === 'mobile');
-        var containerWidth = isMobile ? '360px' : width + 'px';
-        var containerHeight = isMobile ? '640px' : maxH + 'px';
-        
-        $('#fas-preview-container').css({
-            'max-width': containerWidth,
-            'max-height': containerHeight,
-            'height': isMobile ? '640px' : 'auto'
+        $('#fas-preview-loader').fadeIn(150);
+        var formData = $('#fas-settings-form').serialize();
+        formData += '&active_lang=<?php echo esc_js( $active_lang ); ?>';
+
+        $.ajax({
+            url: '<?php echo esc_url( rest_url( 'fas/v1/preview' ) ); ?>',
+            method: 'POST',
+            data: formData,
+            success: function(response) {
+                if (response.success && response.html) {
+                    var iframe = document.getElementById('fas-preview-iframe');
+                    iframe.srcdoc = response.html;
+
+                    // Adjust iframe container sizes based on device toggle and inputs
+                    var width = $('#fas_popup_width').val() || 750;
+                    var maxH  = $('#fas_popup_max_height').val() || 600;
+                    var isMobile = (activeDevice === 'mobile');
+                    var containerWidth = isMobile ? '360px' : width + 'px';
+                    var containerHeight = isMobile ? '640px' : maxH + 'px';
+
+                    $(iframe).css({
+                        'max-width': containerWidth,
+                        'height': containerHeight
+                    });
+
+                    setTimeout(function() { $('#fas-preview-loader').fadeOut(150); }, 200);
+                }
+            },
+            error: function() {
+                $('#fas-preview-loader').fadeOut(150);
+                console.error("FAS Live Preview failed to load.");
+            }
         });
-
-        // Floating Button
-        var btnSize = isMobile ? ($('#fas_btn_size_mobile').val() || 48) : ($('#fas_btn_size_desktop').val() || 56);
-        var btnColor = $('#fas_floating_bg').val() || '#0066cc';
-        var btnPos = $('#fas_floating_position').val() || 'bottom-right';
-        var offsetX = $('#fas_floating_offset_x').val() || 24;
-        var offsetY = $('#fas_floating_offset_y').val() || 24;
-        
-        var posCss = {
-            'width': btnSize + 'px',
-            'height': btnSize + 'px',
-            'background': btnColor,
-            'top': 'auto',
-            'bottom': 'auto',
-            'left': 'auto',
-            'right': 'auto'
-        };
-
-        if (btnPos === 'bottom-right') {
-            posCss['bottom'] = offsetY + 'px';
-            posCss['right'] = offsetX + 'px';
-        } else if (btnPos === 'bottom-left') {
-            posCss['bottom'] = offsetY + 'px';
-            posCss['left'] = offsetX + 'px';
-        } else if (btnPos === 'top-right') {
-            posCss['top'] = offsetY + 'px';
-            posCss['right'] = offsetX + 'px';
-        } else if (btnPos === 'top-left') {
-            posCss['top'] = offsetY + 'px';
-            posCss['left'] = offsetX + 'px';
-        }
-
-        var isRtl = <?php echo $is_rtl ? 'true' : 'false'; ?>;
     }
 
     // Initial load

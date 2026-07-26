@@ -100,14 +100,14 @@ class FAS_Core {
             'fas-public-css',
             plugins_url( 'public/css/fas-public.css', dirname( __FILE__ ) ),
             array(),
-            '1.1.5'
+            '1.2.0'
         );
 
         wp_enqueue_script(
             'fas-public-js',
             plugins_url( 'public/js/fas-public.js', dirname( __FILE__ ) ),
             array(),
-            '1.1.5',
+            '1.2.0',
             true
         );
 
