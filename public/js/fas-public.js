@@ -337,9 +337,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const term = searchInput ? searchInput.value.trim() : '';
 
                 if (postId && postId !== '0') {
-                    // Fire and forget fetch request
+                    // Fire and forget fetch request with keepalive so it's not cancelled by navigation
                     fetch(trackClickUrl, {
                         method: 'POST',
+                        keepalive: true,
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
                         },

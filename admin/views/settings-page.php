@@ -334,15 +334,15 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'رنگ پس زمینه آیتم (RGBA/HEX)' : 'Item Background (RGBA/HEX)'; ?></td>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'رنگ پس زمینه آیتم' : 'Item Background'; ?></td>
                             <td style="padding: 10px 0;">
-                                <input type="text" name="fas_history_bg<?php echo esc_attr( $suffix ); ?>" id="fas_history_bg" value="<?php echo esc_attr( $history_bg ); ?>" class="regular-text" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
+                                <input type="text" name="fas_history_bg<?php echo esc_attr( $suffix ); ?>" id="fas_history_bg" value="<?php echo esc_attr( $history_bg ); ?>" class="fas-color-picker" data-alpha-enabled="true">
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'رنگ هاور آیتم (RGBA/HEX)' : 'Item Hover Background'; ?></td>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'رنگ هاور آیتم' : 'Item Hover Background'; ?></td>
                             <td style="padding: 10px 0;">
-                                <input type="text" name="fas_history_hover_bg<?php echo esc_attr( $suffix ); ?>" id="fas_history_hover_bg" value="<?php echo esc_attr( $history_hover_bg ); ?>" class="regular-text" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
+                                <input type="text" name="fas_history_hover_bg<?php echo esc_attr( $suffix ); ?>" id="fas_history_hover_bg" value="<?php echo esc_attr( $history_hover_bg ); ?>" class="fas-color-picker" data-alpha-enabled="true">
                             </td>
                         </tr>
                     </table>
@@ -766,6 +766,15 @@ jQuery(document).ready(function($) {
         // History Mock styling
         var histTextSize = $('#fas_history_text_size').val() || 13;
         var histBg = $('#fas_history_bg').val() || 'rgba(255, 255, 255, 0.1)';
+
+        // Handle hex to rgba fallback if user selects solid color from picker
+        if (histBg.indexOf('#') === 0 && histBg.length === 7) {
+            var r = parseInt(histBg.slice(1, 3), 16),
+                g = parseInt(histBg.slice(3, 5), 16),
+                b = parseInt(histBg.slice(5, 7), 16);
+            histBg = 'rgba(' + r + ', ' + g + ', ' + b + ', 0.1)';
+        }
+
         var isRtl = <?php echo $is_rtl ? 'true' : 'false'; ?>;
         var histHtml = '';
         var mockTerms = ['phase-30', 'antenna', 'radio'];
