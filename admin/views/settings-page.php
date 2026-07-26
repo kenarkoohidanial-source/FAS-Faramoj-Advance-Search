@@ -571,53 +571,15 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                     </div>
 
                     <!-- Centered live preview container wrapper with generous workspace -->
-                    <div id="fas-mock-modal-wrapper" style="position: relative; background: radial-gradient(circle, #f8fafc 0%, #f1f5f9 100%); padding: 40px 10px; border-radius: 12px; display: flex; justify-content: center; align-items: center; overflow: auto; min-height: 400px; border: 1px solid #cbd5e1;">
-                        
-                        <!-- Mock Floating Button -->
-                        <div id="fas-mock-floating-btn" style="position: absolute; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: white; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);">
-                            <span class="dashicons dashicons-search" style="font-size: 20px;"></span>
+                    <div id="fas-mock-modal-wrapper" style="position: relative; background: radial-gradient(circle, #f8fafc 0%, #f1f5f9 100%); padding: 40px 10px; border-radius: 12px; display: flex; justify-content: center; align-items: center; overflow: hidden; min-height: 400px; border: 1px solid #cbd5e1; transition: all 0.3s ease;">
+                        <iframe id="fas-preview-iframe" src="about:blank" style="width: 100%; height: 100%; min-height: 400px; border: none; border-radius: 8px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);"></iframe>
+                        <div id="fas-preview-loader" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center; z-index: 10;">
+                            <span class="dashicons dashicons-update" style="animation: fas-spin 1s linear infinite; font-size: 32px; width: 32px; height: 32px; color: #0066cc;"></span>
                         </div>
-
-                        <div id="fas-preview-container" class="fas-search-container" style="display: none; width: 100%; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; <?php echo $dir_style; ?>">
-                            
-                            <!-- Search History mock -->
-                            <div id="fas-preview-history" class="fas-search-history" style="padding: 10px 24px; border-bottom: 1px solid #e2e8f0; display: block; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
-                                    <span style="font-size: 13px; font-weight: 600; color: #64748b;"><?php echo $is_rtl ? 'تاریخچه جستجو' : 'Search History'; ?></span>
-                                    <span style="font-size: 12px; color: #e11d48; cursor: pointer;"><?php echo $is_rtl ? 'پاک کردن' : 'Clear'; ?></span>
-                                </div>
-                                <div id="fas-preview-history-items" style="display: flex; flex-wrap: wrap; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
-                                    <!-- Items injected via JS -->
-                                </div>
-                            </div>
-
-                            <!-- Input wrapper -->
-                            <div class="fas-search-input-wrapper" style="display: flex; align-items: center; padding: 18px 24px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
-                                <span class="dashicons dashicons-search" style="color: #64748b; margin: <?php echo $is_rtl ? '0 0 0 12px' : '0 12px 0 0'; ?>; font-size: 20px; width: 20px; height: 20px;"></span>
-                                <input id="fas-mock-preview-input" type="text" placeholder="<?php echo esc_attr( $i18n['type_search'] ); ?>" style="border:none; outline:none; background:transparent; width:100%; font-size:18px; color:#1e293b; font-weight:500; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                                
-                                <!-- Close button in preview -->
-                                <button class="fas-modal-close" style="background: rgba(100, 116, 139, 0.1); border: none !important; color: #64748b; width: 34px; height: 34px; border-radius: 50% !important; margin: <?php echo $is_rtl ? '0 14px 0 0' : '0 0 0 14px'; ?>; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <!-- Tabs (Dynamic pills layout) -->
-                            <div id="fas-preview-tabs" class="fas-search-tabs" style="flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
-                                <!-- Loaded dynamically via javascript -->
-                            </div>
-
-                            <!-- Results box mock -->
-                            <div id="fas-preview-results" style="padding: 20px 24px; min-height: 140px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                                <!-- Will be injected via JS -->
-                            </div>
-
-                        </div>
-
                     </div>
+                    <style>
+                        @keyframes fas-spin { 100% { transform: rotate(360deg); } }
+                    </style>
                 </div>
 
             </div>
@@ -776,152 +738,7 @@ jQuery(document).ready(function($) {
         }
 
         var isRtl = <?php echo $is_rtl ? 'true' : 'false'; ?>;
-        var histHtml = '';
-        var mockTerms = ['phase-30', 'antenna', 'radio'];
-        for(var i=0; i<Math.min(mockTerms.length, ($('#fas_history_count').val() || 5)); i++) {
-            histHtml += '<button style="background: '+histBg+'; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); color: #0f172a; padding: 6px 12px; border-radius: 16px; font-size: '+histTextSize+'px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); flex-direction: '+(isRtl ? 'row-reverse' : 'row')+';">';
-            histHtml += '<span>'+mockTerms[i]+'</span>';
-            histHtml += '<span style="color: #64748b; font-size: 14px;">&times;</span>';
-            histHtml += '</button>';
-        }
-        $('#fas-preview-history-items').html(histHtml);
-
-        // Theme Accent Mode
-        var mode = $('#fas_theme_mode').val();
-        if (mode === 'dark') {
-            $('#fas-preview-container').css({
-                'background-color': '#0f172a',
-                'border-color': '#1e293b'
-            });
-            $('#fas-preview-results').css('background-color', '#0f172a');
-            $('#fas-preview-results .fas-result-item').css({
-                'background-color': '#1e293b',
-                'border-color': 'transparent'
-            });
-            $('#fas-preview-results h4').css('color', '#f8fafc');
-            $('#fas-preview-results p').css('color', '#94a3b8');
-            $('#fas-preview-container input').css('color', '#f8fafc');
-            $('#fas-preview-container .fas-search-input-wrapper').css('border-bottom-color', '#1e293b');
-            $('#fas-preview-history').css('border-bottom-color', '#1e293b');
-            $('#fas-preview-history-items button').css('color', '#f8fafc').css('border-color', 'rgba(255,255,255,0.08)');
-        } else {
-            $('#fas-preview-container').css({
-                'background-color': '#ffffff',
-                'border-color': '#e2e8f0'
-            });
-            $('#fas-preview-results').css('background-color', '#ffffff');
-            $('#fas-preview-results .fas-result-item').css({
-                'background-color': '#f8fafc',
-                'border-color': 'transparent'
-            });
-            $('#fas-preview-results h4').css('color', '#0f172a');
-            $('#fas-preview-results p').css('color', '#64748b');
-            $('#fas-preview-container input').css('color', '#0f172a');
-            $('#fas-preview-container .fas-search-input-wrapper').css('border-bottom-color', '#e2e8f0');
-            $('#fas-preview-history').css('border-bottom-color', '#e2e8f0');
-            $('#fas-preview-history-items button').css('color', '#0f172a').css('border-color', 'rgba(0,0,0,0.06)');
-        }
-
-        // Live preview of Farsi placeholder when editing Farsi settings
-        var placeholderVal = '<?php echo esc_js( $i18n['type_search'] ); ?>';
-        $('#fas-mock-preview-input').attr('placeholder', placeholderVal);
-
-        // Parse Tabs Configuration & Order
-        var orderRaw = $('#fas_tabs_order').val() || 'all,products,posts,docs';
-        var orderArr = orderRaw.split(',').map(function(item) { return item.trim(); });
-
-        var tabsHtml = '';
-        var activeClassAdded = false;
-
-        orderArr.forEach(function(key) {
-            var title = '';
-            var color = '';
-            var icon  = '';
-            var customIcon = '';
-
-            if (key === 'all') {
-                title = $('#fas_tab_all_title').val() || 'All Results';
-                color = $('#fas_tab_all_color').val() || '#0066cc';
-                icon  = $('#fas_tab_all_icon').val() || 'dashicons-grid-view';
-                customIcon = $('#fas_tab_all_custom_icon').val() || '';
-            } else if (key === 'products') {
-                title = $('#fas_tab_products_title').val() || 'Products';
-                color = $('#fas_tab_products_color').val() || '#10b981';
-                icon  = $('#fas_tab_products_icon').val() || 'dashicons-cart';
-                customIcon = $('#fas_tab_products_custom_icon').val() || '';
-            } else if (key === 'posts') {
-                title = $('#fas_tab_posts_title').val() || 'News & Articles';
-                color = $('#fas_tab_posts_color').val() || '#f59e0b';
-                icon  = $('#fas_tab_posts_icon').val() || 'dashicons-welcome-write-blog';
-                customIcon = $('#fas_tab_posts_custom_icon').val() || '';
-            } else if (key === 'docs') {
-                title = $('#fas_tab_docs_title').val() || 'Documentation';
-                color = $('#fas_tab_docs_color').val() || '#6366f1';
-                icon  = $('#fas_tab_docs_icon').val() || 'dashicons-book-alt';
-                customIcon = $('#fas_tab_docs_custom_icon').val() || '';
-            } else {
-                return; // skip unknown keys
-            }
-
-            var isActive = !activeClassAdded;
-            activeClassAdded = true;
-
-            var tabStyle = 'display: flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1px solid '+(isActive ? color : 'transparent')+'; background: '+(isActive ? color : 'rgba(100, 116, 139, 0.05)')+'; font-weight: 600; font-size:13px; cursor: pointer; color: ' + (isActive ? '#ffffff' : '#64748b') + '; border-radius: 20px; transition: all 0.3s ease; white-space: nowrap;';
-            
-            var iconHtml = '';
-            if (customIcon) {
-                iconHtml = '<img src="' + customIcon + '" style="width:16px; height:16px; object-fit:contain; flex-shrink:0;">';
-            } else {
-                iconHtml = '<span class="dashicons ' + icon + '" style="font-size:18px; width:18px; height:18px; color:' + (isActive ? '#ffffff' : '#64748b') + ';"></span>';
-            }
-
-            tabsHtml += '<button type="button" style="' + tabStyle + '">' +
-                        iconHtml +
-                        '<span>' + title + '</span>' +
-                        '</button>';
-        });
-
-        $('#fas-preview-tabs').html(tabsHtml).css({
-            'display': 'flex',
-            'background-color': 'transparent',
-            'border-bottom-width': '1px',
-            'border-bottom-style': 'solid',
-            'border-bottom-color': (mode === 'dark' ? '#1e293b' : '#e2e8f0'),
-            'padding': '10px 16px',
-            'gap': '12px'
-        });
-
-        if ($('#fas-mock-preview-input').val() !== '') {
-            renderMockResults();
-        }
-    }
-
-    function renderMockResults() {
-        $('#fas-preview-history').hide();
-        var isMobile = (activeDevice === 'mobile');
-        var titleSize = isMobile ? ($('#fas_title_size_mobile').val() || 14) : ($('#fas_title_size_desktop').val() || 15);
-        var excerptSize = isMobile ? ($('#fas_excerpt_size_mobile').val() || 12) : ($('#fas_excerpt_size_desktop').val() || 13);
-        
-        var mode = $('#fas_theme_mode').val();
-        var itemBg = (mode === 'dark') ? '#1e293b' : '#f8fafc';
-        var titleColor = (mode === 'dark') ? '#f8fafc' : '#0f172a';
-        var excerptColor = (mode === 'dark') ? '#94a3b8' : '#64748b';
         var isRtl = <?php echo $is_rtl ? 'true' : 'false'; ?>;
-        var dirStr = isRtl ? 'row-reverse' : 'row';
-        var alignStr = isRtl ? 'right' : 'left';
-        
-        var html = '<div class="fas-result-item" style="display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; margin-bottom: 8px; flex-direction: '+dirStr+'; background: '+itemBg+';">';
-        html += '<div style="width: 48px; height: 48px; border-radius: 8px; background: rgba(100,116,139,0.1); display:flex; align-items:center; justify-content:center; color:#64748b;">';
-        html += '<span class="dashicons dashicons-cart" style="font-size: 22px; width:22px; height:22px;"></span>';
-        html += '</div>';
-        html += '<div style="text-align: '+alignStr+';">';
-        html += '<h4 style="margin: 0 0 4px 0; font-size: '+titleSize+'px; font-weight:600; color: '+titleColor+';">' + (isRtl ? 'آنتن فوق پیشرفته Phase-30ISO' : 'Phase-30ISO Antenna') + '</h4>';
-        html += '<p style="margin:0; font-size: '+excerptSize+'px; color: '+excerptColor+'; line-height:1.4;">' + (isRtl ? 'محصول مخابراتی دو بانده فوق پیشرفته...' : 'Premium dual-band technical product spec...') + '</p>';
-        html += '</div>';
-        html += '</div>';
-
-        $('#fas-preview-results').html(html);
-    }
 
     // Initial load
     updateLivePreview();
