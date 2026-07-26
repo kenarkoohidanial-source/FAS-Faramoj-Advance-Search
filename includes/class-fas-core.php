@@ -162,6 +162,12 @@ class FAS_Core {
         $excerpt_size_desktop = self::get_option( 'fas_excerpt_size_desktop', 13 );
         $excerpt_size_mobile  = self::get_option( 'fas_excerpt_size_mobile', 12 );
 
+        // History UI Options
+        $history_count     = self::get_option( 'fas_history_count', 5 );
+        $history_bg        = self::get_option( 'fas_history_bg', 'rgba(255, 255, 255, 0.1)' );
+        $history_hover_bg  = self::get_option( 'fas_history_hover_bg', 'rgba(255, 255, 255, 0.2)' );
+        $history_text_size = self::get_option( 'fas_history_text_size', 13 );
+
         $custom_inline_css = "
             :root { 
                 --fas-primary: " . esc_attr( $floating_bg ) . "; 
@@ -175,6 +181,9 @@ class FAS_Core {
                 --fas-title-size-mobile: " . esc_attr( $title_size_mobile ) . "px;
                 --fas-excerpt-size-desktop: " . esc_attr( $excerpt_size_desktop ) . "px;
                 --fas-excerpt-size-mobile: " . esc_attr( $excerpt_size_mobile ) . "px;
+                --fas-history-bg: " . esc_attr( $history_bg ) . ";
+                --fas-history-hover-bg: " . esc_attr( $history_hover_bg ) . ";
+                --fas-history-text-size: " . esc_attr( $history_text_size ) . "px;
             }
         ";
         wp_add_inline_style( 'fas-public-css', $custom_inline_css );

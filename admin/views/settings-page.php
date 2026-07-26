@@ -35,6 +35,11 @@ $floating_offset_y      = get_option( 'fas_floating_offset_y' . $suffix, 24 );
 $popup_width            = get_option( 'fas_popup_width' . $suffix, 750 );
 $popup_max_height       = get_option( 'fas_popup_max_height' . $suffix, 600 );
 
+$history_count          = get_option( 'fas_history_count' . $suffix, 5 );
+$history_bg             = get_option( 'fas_history_bg' . $suffix, 'rgba(255, 255, 255, 0.1)' );
+$history_hover_bg       = get_option( 'fas_history_hover_bg' . $suffix, 'rgba(255, 255, 255, 0.2)' );
+$history_text_size      = get_option( 'fas_history_text_size' . $suffix, 13 );
+
 // Fixed Sortable Loading Bug: Check if empty or corrupted, fall back to core tabs
 $tabs_order             = get_option( 'fas_tabs_order' . $suffix );
 if ( empty( $tabs_order ) || strpos( $tabs_order, 'all' ) === false ) {
@@ -309,6 +314,40 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                     </table>
                 </div>
 
+                <!-- Section: History Settings -->
+                <div class="fas-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
+                    <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <span class="dashicons dashicons-backup" style="color: #0066cc;"></span>
+                        <span><?php echo $is_rtl ? 'تنظیمات تاریخچه جستجو' : 'Search History Settings'; ?></span>
+                    </h3>
+                    <table class="form-table fas-form-table" style="margin: 0; width: 100%;">
+                        <tr>
+                            <td style="padding: 10px 0; width: 220px; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'تعداد نمایش' : 'Display Count'; ?></td>
+                            <td style="padding: 10px 0;">
+                                <input type="number" name="fas_history_count<?php echo esc_attr( $suffix ); ?>" id="fas_history_count" value="<?php echo esc_attr( $history_count ); ?>" class="regular-text" min="0" max="20" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'سایز متن' : 'Text Size'; ?></td>
+                            <td style="padding: 10px 0;">
+                                <input type="number" name="fas_history_text_size<?php echo esc_attr( $suffix ); ?>" id="fas_history_text_size" value="<?php echo esc_attr( $history_text_size ); ?>" class="regular-text" min="10" max="24" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'رنگ پس زمینه آیتم (RGBA/HEX)' : 'Item Background (RGBA/HEX)'; ?></td>
+                            <td style="padding: 10px 0;">
+                                <input type="text" name="fas_history_bg<?php echo esc_attr( $suffix ); ?>" id="fas_history_bg" value="<?php echo esc_attr( $history_bg ); ?>" class="regular-text" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'رنگ هاور آیتم (RGBA/HEX)' : 'Item Hover Background'; ?></td>
+                            <td style="padding: 10px 0;">
+                                <input type="text" name="fas_history_hover_bg<?php echo esc_attr( $suffix ); ?>" id="fas_history_hover_bg" value="<?php echo esc_attr( $history_hover_bg ); ?>" class="regular-text" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
                 <!-- Section 3: Floating Trigger Position & Offsets -->
                 <div class="fas-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
                     <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">
@@ -541,6 +580,17 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
 
                         <div id="fas-preview-container" class="fas-search-container" style="display: none; width: 100%; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; <?php echo $dir_style; ?>">
                             
+                            <!-- Search History mock -->
+                            <div id="fas-preview-history" class="fas-search-history" style="padding: 10px 24px; border-bottom: 1px solid #e2e8f0; display: block; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+                                    <span style="font-size: 13px; font-weight: 600; color: #64748b;"><?php echo $is_rtl ? 'تاریخچه جستجو' : 'Search History'; ?></span>
+                                    <span style="font-size: 12px; color: #e11d48; cursor: pointer;"><?php echo $is_rtl ? 'پاک کردن' : 'Clear'; ?></span>
+                                </div>
+                                <div id="fas-preview-history-items" style="display: flex; flex-wrap: wrap; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+                                    <!-- Items injected via JS -->
+                                </div>
+                            </div>
+
                             <!-- Input wrapper -->
                             <div class="fas-search-input-wrapper" style="display: flex; align-items: center; padding: 18px 24px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
                                 <span class="dashicons dashicons-search" style="color: #64748b; margin: <?php echo $is_rtl ? '0 0 0 12px' : '0 12px 0 0'; ?>; font-size: 20px; width: 20px; height: 20px;"></span>
@@ -713,6 +763,20 @@ jQuery(document).ready(function($) {
 
         $('#fas-mock-floating-btn').css(posCss);
 
+        // History Mock styling
+        var histTextSize = $('#fas_history_text_size').val() || 13;
+        var histBg = $('#fas_history_bg').val() || 'rgba(255, 255, 255, 0.1)';
+        var isRtl = <?php echo $is_rtl ? 'true' : 'false'; ?>;
+        var histHtml = '';
+        var mockTerms = ['phase-30', 'antenna', 'radio'];
+        for(var i=0; i<Math.min(mockTerms.length, ($('#fas_history_count').val() || 5)); i++) {
+            histHtml += '<button style="background: '+histBg+'; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); color: #0f172a; padding: 6px 12px; border-radius: 16px; font-size: '+histTextSize+'px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); flex-direction: '+(isRtl ? 'row-reverse' : 'row')+';">';
+            histHtml += '<span>'+mockTerms[i]+'</span>';
+            histHtml += '<span style="color: #64748b; font-size: 14px;">&times;</span>';
+            histHtml += '</button>';
+        }
+        $('#fas-preview-history-items').html(histHtml);
+
         // Theme Accent Mode
         var mode = $('#fas_theme_mode').val();
         if (mode === 'dark') {
@@ -729,6 +793,8 @@ jQuery(document).ready(function($) {
             $('#fas-preview-results p').css('color', '#94a3b8');
             $('#fas-preview-container input').css('color', '#f8fafc');
             $('#fas-preview-container .fas-search-input-wrapper').css('border-bottom-color', '#1e293b');
+            $('#fas-preview-history').css('border-bottom-color', '#1e293b');
+            $('#fas-preview-history-items button').css('color', '#f8fafc').css('border-color', 'rgba(255,255,255,0.08)');
         } else {
             $('#fas-preview-container').css({
                 'background-color': '#ffffff',
@@ -743,6 +809,8 @@ jQuery(document).ready(function($) {
             $('#fas-preview-results p').css('color', '#64748b');
             $('#fas-preview-container input').css('color', '#0f172a');
             $('#fas-preview-container .fas-search-input-wrapper').css('border-bottom-color', '#e2e8f0');
+            $('#fas-preview-history').css('border-bottom-color', '#e2e8f0');
+            $('#fas-preview-history-items button').css('color', '#0f172a').css('border-color', 'rgba(0,0,0,0.06)');
         }
 
         // Live preview of Farsi placeholder when editing Farsi settings
@@ -820,6 +888,7 @@ jQuery(document).ready(function($) {
     }
 
     function renderMockResults() {
+        $('#fas-preview-history').hide();
         var isMobile = (activeDevice === 'mobile');
         var titleSize = isMobile ? ($('#fas_title_size_mobile').val() || 14) : ($('#fas_title_size_desktop').val() || 15);
         var excerptSize = isMobile ? ($('#fas_excerpt_size_mobile').val() || 12) : ($('#fas_excerpt_size_desktop').val() || 13);

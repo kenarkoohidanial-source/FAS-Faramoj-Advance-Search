@@ -179,18 +179,49 @@
 }
 
 .fas-search-history-item {
-    background: rgba(100, 116, 139, 0.1);
+    background: var(--fas-history-bg, rgba(255, 255, 255, 0.1));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--fas-border);
     color: var(--fas-text-main);
     padding: 6px 12px;
     border-radius: 16px;
-    font-size: 13px;
+    font-size: var(--fas-history-text-size, 13px);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     cursor: pointer;
-    border: none;
-    transition: background 0.2s;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .fas-search-history-item:hover {
-    background: rgba(100, 116, 139, 0.2);
+    background: var(--fas-history-hover-bg, rgba(255, 255, 255, 0.2));
+    transform: translateY(-1px);
+    box-shadow: 0 6px 8px -2px rgba(0, 0, 0, 0.08);
+}
+
+.fas-search-history-item-text {
+    pointer-events: none;
+}
+
+.fas-search-history-item-remove {
+    background: transparent;
+    border: none;
+    color: var(--fas-text-muted);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.fas-search-history-item-remove:hover {
+    color: #e11d48;
 }
 
 /* Category Tab Header styling (Beautiful Glassmorphism pills layout) */ 

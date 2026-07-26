@@ -26,12 +26,14 @@ class FAS_Rest {
     public function track_search_click( WP_REST_Request $request ) {
         $post_id = intval( $request->get_param( 'post_id' ) );
         $title   = sanitize_text_field( $request->get_param( 'title' ) );
+        $term    = sanitize_text_field( $request->get_param( 'term' ) );
+        $month   = current_time( 'Y-m' );
 
         if ( empty( $post_id ) ) {
             return new WP_REST_Response( array( 'error' => 'Empty post ID' ), 400 );
         }
 
-        $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [], 'clicks' => [] ) );
+        $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [], 'clicks' => [], 'monthly' => [] ) );
 
         if ( ! isset( $stats['clicks'] ) ) {
             $stats['clicks'] = array();
@@ -54,6 +56,32 @@ class FAS_Rest {
 
         if ( count( $stats['clicks'] ) > 100 ) {
             $stats['clicks'] = array_slice( $stats['clicks'], 0, 100, true );
+        }
+
+        // Track clicks per term
+        if ( ! empty( $term ) ) {
+            $term_clean = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $term ) ) : strtolower( trim( $term ) );
+            if ( isset( $stats['terms'][ $term_clean ] ) && is_array( $stats['terms'][ $term_clean ] ) ) {
+                if ( ! isset( $stats['terms'][ $term_clean ]['click_count'] ) ) {
+                    $stats['terms'][ $term_clean ]['click_count'] = 0;
+                }
+                $stats['terms'][ $term_clean ]['click_count']++;
+            }
+
+            // Monthly stats tracking
+            if ( ! isset( $stats['monthly'] ) ) {
+                $stats['monthly'] = array();
+            }
+            if ( ! isset( $stats['monthly'][ $month ] ) ) {
+                $stats['monthly'][ $month ] = array( 'terms' => array() );
+            }
+            if ( ! isset( $stats['monthly'][ $month ]['terms'][ $term_clean ] ) ) {
+                $stats['monthly'][ $month ]['terms'][ $term_clean ] = array( 'count' => 0, 'click_count' => 0 );
+            }
+            if ( ! isset( $stats['monthly'][ $month ]['terms'][ $term_clean ]['click_count'] ) ) {
+                $stats['monthly'][ $month ]['terms'][ $term_clean ]['click_count'] = 0;
+            }
+            $stats['monthly'][ $month ]['terms'][ $term_clean ]['click_count']++;
         }
 
         update_option( 'fas_search_stats', $stats );
@@ -129,10 +157,11 @@ class FAS_Rest {
 
         // Standardize lowercase matching
         $term_clean = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $term ) ) : strtolower( trim( $term ) );
+        $month = current_time( 'Y-m' );
         
         // Defer database writing to the shutdown hook so it does not block the REST API response
-        add_action( 'shutdown', function() use ( $term_clean, $ip, $timestamp ) {
-            $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [] ) );
+        add_action( 'shutdown', function() use ( $term_clean, $ip, $timestamp, $month ) {
+            $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [], 'clicks' => [], 'monthly' => [] ) );
 
             if ( ! isset( $stats['total_count'] ) ) {
                 $stats['total_count'] = 0;
@@ -159,6 +188,22 @@ class FAS_Rest {
 
             $stats['terms'][ $term_clean ]['count']++;
             
+            if ( ! isset( $stats['terms'][ $term_clean ]['click_count'] ) ) {
+                $stats['terms'][ $term_clean ]['click_count'] = 0;
+            }
+
+            // Monthly Tracking
+            if ( ! isset( $stats['monthly'] ) ) {
+                $stats['monthly'] = array();
+            }
+            if ( ! isset( $stats['monthly'][ $month ] ) ) {
+                $stats['monthly'][ $month ] = array( 'terms' => array() );
+            }
+            if ( ! isset( $stats['monthly'][ $month ]['terms'][ $term_clean ] ) ) {
+                $stats['monthly'][ $month ]['terms'][ $term_clean ] = array( 'count' => 0, 'click_count' => 0 );
+            }
+            $stats['monthly'][ $month ]['terms'][ $term_clean ]['count']++;
+
             // Add IP log, keep max 10 recent logs per term to prevent bloat
             array_unshift( $stats['terms'][ $term_clean ]['logs'], array( 'ip' => $ip, 'time' => $timestamp ) );
             if ( count( $stats['terms'][ $term_clean ]['logs'] ) > 10 ) {

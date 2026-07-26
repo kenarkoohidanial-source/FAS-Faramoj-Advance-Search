@@ -190,6 +190,28 @@ class FAS_Admin {
                 'default'           => 24,
             ) );
 
+            // History Settings
+            register_setting( $group_name, 'fas_history_count' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 5,
+            ) );
+            register_setting( $group_name, 'fas_history_bg' . $suffix, array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default'           => 'rgba(255, 255, 255, 0.1)',
+            ) );
+            register_setting( $group_name, 'fas_history_hover_bg' . $suffix, array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default'           => 'rgba(255, 255, 255, 0.2)',
+            ) );
+            register_setting( $group_name, 'fas_history_text_size' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 13,
+            ) );
+
             register_setting( $group_name, 'fas_floating_offset_y' . $suffix, array(
                 'type'              => 'integer',
                 'sanitize_callback' => 'intval',

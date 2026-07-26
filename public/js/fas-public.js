@@ -39,7 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let history = getHistory();
         history = history.filter(t => t.toLowerCase() !== term.toLowerCase());
         history.unshift(term);
-        if (history.length > 5) history.pop(); // keep last 5
+        const maxHistory = (typeof fas_params !== 'undefined' && fas_params.history_count) ? parseInt(fas_params.history_count, 10) : 5;
+        if (history.length > maxHistory) history.pop(); // keep dynamic limit
         try {
             localStorage.setItem('fas_search_history', JSON.stringify(history));
         } catch (e) {}
@@ -48,6 +49,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearHistory = () => {
         try {
             localStorage.removeItem('fas_search_history');
+            renderHistory();
+        } catch (e) {}
+    };
+
+    const removeHistoryItem = (term) => {
+        let history = getHistory();
+        history = history.filter(t => t !== term);
+        try {
+            localStorage.setItem('fas_search_history', JSON.stringify(history));
             renderHistory();
         } catch (e) {}
     };
@@ -82,7 +92,33 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'fas-search-history-item';
-            btn.textContent = term;
+
+            const textSpan = document.createElement('span');
+            textSpan.className = 'fas-search-history-item-text';
+            textSpan.textContent = term;
+
+            const removeBtn = document.createElement('span');
+            removeBtn.className = 'fas-search-history-item-remove';
+            removeBtn.innerHTML = '&times;';
+            removeBtn.title = currentLang === 'fa' ? 'حذف' : 'Remove';
+
+            // Handle individual remove click
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // prevent clicking the parent button
+                removeHistoryItem(term);
+            });
+
+            btn.appendChild(textSpan);
+            btn.appendChild(removeBtn);
+
+            // Handle clicking the item to search
+            btn.addEventListener('click', (e) => {
+                if (searchInput) {
+                    searchInput.value = term;
+                    searchInput.dispatchEvent(new Event('input'));
+                }
+            });
+
             itemsContainer.appendChild(btn);
         });
 
@@ -90,16 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Bind clear button
         historyContainer.querySelector('.fas-search-history-clear').addEventListener('click', clearHistory);
-
-        // Bind history items
-        historyContainer.querySelectorAll('.fas-search-history-item').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                if (searchInput) {
-                    searchInput.value = e.target.innerText;
-                    searchInput.dispatchEvent(new Event('input'));
-                }
-            });
-        });
     };
 
     // Force placeholder translation dynamically via JavaScript
@@ -308,6 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
             item.addEventListener('click', (e) => {
                 const postId = item.getAttribute('data-post-id');
                 const postTitle = item.getAttribute('data-post-title');
+                const term = searchInput ? searchInput.value.trim() : '';
 
                 if (postId && postId !== '0') {
                     // Fire and forget fetch request
@@ -316,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
                         },
-                        body: `post_id=${encodeURIComponent(postId)}&title=${encodeURIComponent(postTitle)}`
+                        body: `post_id=${encodeURIComponent(postId)}&title=${encodeURIComponent(postTitle)}&term=${encodeURIComponent(term)}`
                     }).catch(() => {});
                 }
             });
