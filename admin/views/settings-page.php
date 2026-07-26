@@ -723,22 +723,8 @@ jQuery(document).ready(function($) {
             posCss['left'] = offsetX + 'px';
         }
 
-        $('#fas-mock-floating-btn').css(posCss);
-
-        // History Mock styling
-        var histTextSize = $('#fas_history_text_size').val() || 13;
-        var histBg = $('#fas_history_bg').val() || 'rgba(255, 255, 255, 0.1)';
-
-        // Handle hex to rgba fallback if user selects solid color from picker
-        if (histBg.indexOf('#') === 0 && histBg.length === 7) {
-            var r = parseInt(histBg.slice(1, 3), 16),
-                g = parseInt(histBg.slice(3, 5), 16),
-                b = parseInt(histBg.slice(5, 7), 16);
-            histBg = 'rgba(' + r + ', ' + g + ', ' + b + ', 0.1)';
-        }
-
         var isRtl = <?php echo $is_rtl ? 'true' : 'false'; ?>;
-        var isRtl = <?php echo $is_rtl ? 'true' : 'false'; ?>;
+    }
 
     // Initial load
     updateLivePreview();

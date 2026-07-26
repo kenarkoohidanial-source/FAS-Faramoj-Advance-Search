@@ -124,12 +124,33 @@ class FAS_Admin {
 
         add_submenu_page(
             'faramoj-search',
+            __( 'Settings & Tools', 'faramoj-search' ),
+            __( 'Settings & Tools', 'faramoj-search' ),
+            'manage_options',
+            'fas-tools',
+            array( $this, 'render_tools_page' )
+        );
+
+        add_submenu_page(
+            'faramoj-search',
             __( 'About Us', 'faramoj-search' ),
             __( 'About Us', 'faramoj-search' ),
             'manage_options',
             'fas-about-us',
             array( $this, 'render_about_us_page' )
         );
+    }
+
+    /**
+     * Render the Tools & Import/Export page.
+     */
+    public function render_tools_page() {
+        $view_path = plugin_dir_path( __FILE__ ) . 'views/tools-page.php';
+        if ( file_exists( $view_path ) ) {
+            include $view_path;
+        } else {
+            echo '<div class="wrap"><h2>' . esc_html__( 'Settings & Tools', 'faramoj-search' ) . '</h2><p>' . esc_html__( 'Error: Tools view file not found.', 'faramoj-search' ) . '</p></div>';
+        }
     }
 
     /**
@@ -440,6 +461,7 @@ class FAS_Admin {
         $pages = array(
             'toplevel_page_faramoj-search',
             'faramoj-search_page_fas-statistics',
+            'faramoj-search_page_fas-tools',
             'faramoj-search_page_fas-about-us'
         );
 
