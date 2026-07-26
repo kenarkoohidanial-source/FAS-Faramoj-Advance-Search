@@ -15,11 +15,92 @@ document.addEventListener('DOMContentLoaded', () => {
         searching: 'Searching...'
     };
 
+    const trackClickUrl = ajaxUrl.replace('/search', '/track-click');
+
     // Modal Interaction
     const triggerButtons = document.querySelectorAll('.fas-search-trigger');
     const closeButton = document.querySelector('.fas-modal-close');
     const tabButtons = document.querySelectorAll('.fas-tab-btn');
     const tabContents = document.querySelectorAll('.fas-tab-content');
+    const historyContainer = document.querySelector('.fas-search-history');
+
+    // History Logic
+    const getHistory = () => {
+        try {
+            const history = localStorage.getItem('fas_search_history');
+            return history ? JSON.parse(history) : [];
+        } catch (e) {
+            return [];
+        }
+    };
+
+    const saveHistory = (term) => {
+        if (!term || term.length < 3) return;
+        let history = getHistory();
+        history = history.filter(t => t.toLowerCase() !== term.toLowerCase());
+        history.unshift(term);
+        if (history.length > 5) history.pop(); // keep last 5
+        try {
+            localStorage.setItem('fas_search_history', JSON.stringify(history));
+        } catch (e) {}
+    };
+
+    const clearHistory = () => {
+        try {
+            localStorage.removeItem('fas_search_history');
+            renderHistory();
+        } catch (e) {}
+    };
+
+    const renderHistory = () => {
+        if (!historyContainer) return;
+        const history = getHistory();
+        if (history.length === 0) {
+            historyContainer.style.display = 'none';
+            return;
+        }
+
+        let titleText = currentLang === 'fa' ? 'تاریخچه جستجو' : 'Search History';
+        let clearText = currentLang === 'fa' ? 'پاک کردن' : 'Clear';
+
+        let html = `
+            <div class="fas-search-history-header">
+                <span class="fas-search-history-title">${titleText}</span>
+                <button type="button" class="fas-search-history-clear">${clearText}</button>
+            </div>
+            <div class="fas-search-history-items">
+        `;
+
+        html += `</div>`;
+        historyContainer.innerHTML = html;
+
+        // Use textContent to prevent self-XSS when inserting history terms
+        const itemsContainer = historyContainer.querySelector('.fas-search-history-items');
+        itemsContainer.innerHTML = ''; // clear initial safe string
+
+        history.forEach(term => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'fas-search-history-item';
+            btn.textContent = term;
+            itemsContainer.appendChild(btn);
+        });
+
+        historyContainer.style.display = 'block';
+
+        // Bind clear button
+        historyContainer.querySelector('.fas-search-history-clear').addEventListener('click', clearHistory);
+
+        // Bind history items
+        historyContainer.querySelectorAll('.fas-search-history-item').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (searchInput) {
+                    searchInput.value = e.target.innerText;
+                    searchInput.dispatchEvent(new Event('input'));
+                }
+            });
+        });
+    };
 
     // Force placeholder translation dynamically via JavaScript
     if (searchInput && i18n.placeholder) {
@@ -30,6 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (searchOverlay) {
             searchOverlay.classList.add('is-open');
             document.body.style.overflow = 'hidden'; // Prevent background scroll
+            if (searchInput && searchInput.value.trim().length === 0) {
+                renderHistory();
+            }
             setTimeout(() => {
                 if (searchInput) searchInput.focus();
             }, 100);
@@ -109,9 +193,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 abortController.abort();
                 abortController = null;
             }
+            if (query.length === 0) {
+                renderHistory();
+            }
             return; 
         } 
  
+        if (historyContainer) {
+            historyContainer.style.display = 'none';
+        }
+
         // Show searching message in current active tab content
         showFasSearching();
 
@@ -134,7 +225,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     return res.json();
                 }) 
                 .then(data => { 
-                    renderFasResults(data); 
+                    renderFasResults(data);
+
+                    // Save to history if any results were found
+                    if (data.all && data.all.length > 0) {
+                        saveHistory(query);
+                    }
                 }) 
                 .catch(err => {
                     if (err.name === 'AbortError') {
@@ -172,7 +268,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const items = data[cat] || [];
             if (items.length === 0) {
-                container.innerHTML = `<div class="fas-status-message">${i18n.no_results}</div>`;
+                let noResHtml = `<div class="fas-status-message">${i18n.no_results}</div>`;
+                if (data.did_you_mean && cat === 'all') {
+                    let dymText = currentLang === 'fa' ? 'آیا منظور شما این است:' : 'Did you mean:';
+                    noResHtml += `<div class="fas-did-you-mean" style="text-align: center; margin-top: -20px; font-size: 14px; color: var(--fas-text-muted);">
+                        ${dymText} <a href="#" class="fas-dym-link" style="color: var(--fas-primary); font-weight: 600; text-decoration: none;">${data.did_you_mean}</a>
+                    </div>`;
+                }
+                container.innerHTML = noResHtml;
                 return;
             }
 
@@ -185,6 +288,38 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             container.innerHTML = html;
+        });
+
+        // Attach Did You Mean click handler
+        const dymLinks = document.querySelectorAll('.fas-dym-link');
+        dymLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (searchInput) {
+                    searchInput.value = e.target.innerText;
+                    searchInput.dispatchEvent(new Event('input'));
+                }
+            });
+        });
+
+        // Attach click tracking to newly rendered result items
+        const resultItems = document.querySelectorAll('.fas-result-item');
+        resultItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                const postId = item.getAttribute('data-post-id');
+                const postTitle = item.getAttribute('data-post-title');
+
+                if (postId && postId !== '0') {
+                    // Fire and forget fetch request
+                    fetch(trackClickUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `post_id=${encodeURIComponent(postId)}&title=${encodeURIComponent(postTitle)}`
+                    }).catch(() => {});
+                }
+            });
         });
     }
 });

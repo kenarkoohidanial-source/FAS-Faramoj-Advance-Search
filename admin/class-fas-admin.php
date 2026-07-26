@@ -433,6 +433,11 @@ class FAS_Admin {
         // Enqueue WP Media Library so we can upload custom SVG/PNG icons natively!
         wp_enqueue_media();
 
+        // Enqueue Chart.js for Statistics page
+        if ( $hook === 'faramoj-search_page_fas-statistics' ) {
+            wp_enqueue_script( 'chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', array(), '4.4.1', true );
+        }
+
         // Enqueue an empty stylesheet handle so we can safely add inline styles to it
         wp_register_style( 'fas-admin-css', false );
         wp_enqueue_style( 'fas-admin-css' );

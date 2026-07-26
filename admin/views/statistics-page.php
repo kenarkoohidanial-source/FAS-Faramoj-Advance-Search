@@ -19,7 +19,7 @@ $i18n = array(
     'clear_btn' => $is_rtl ? 'پاکسازی کامل تمامی آمارها' : 'Clear All Statistics',
     'confirm_clear' => $is_rtl ? 'آیا مطمئن هستید که می‌خواهید تمامی آمارهای جستجو را پاک کرده و شمارنده‌ها را صفر کنید؟' : 'Are you sure you want to delete all search logs and reset counters?',
     'total_queries' => $is_rtl ? 'مجموع عبارات ردیابی شده' : 'Total Queries Tracked',
-    'popular_keywords' => $is_rtl ? 'محبوب‌ترین و بیشترین کلمات کلیدی جستجو شده' : 'Most Popular Search Keywords',
+    'popular_keywords' => $is_rtl ? '📊 محبوب‌ترین و بیشترین کلمات کلیدی جستجو شده' : 'Most Popular Search Keywords 📊',
     'no_data' => $is_rtl ? 'هنوز هیچ آمار جستجویی در سیستم ثبت نشده است.' : 'No search query data logged yet.',
     'col_rank' => $is_rtl ? 'رتبه' : 'Rank',
     'col_term' => $is_rtl ? 'کلمه کلیدی جستجو' : 'Search Keyword',
@@ -28,13 +28,14 @@ $i18n = array(
 
 // Handle statistics clear request
 if ( isset( $_POST['fas_clear_stats'] ) && check_admin_referer( 'fas_clear_stats_nonce', 'fas_stats_nonce' ) ) {
-    update_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [] ) );
+    update_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [], 'clicks' => [] ) );
     echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( $i18n['notice_cleared'] ) . '</p></div>';
 }
 
-$stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [] ) );
+$stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [], 'clicks' => [] ) );
 $total_count = isset( $stats['total_count'] ) ? intval( $stats['total_count'] ) : 0;
 $terms = isset( $stats['terms'] ) && is_array( $stats['terms'] ) ? $stats['terms'] : array();
+$clicks = isset( $stats['clicks'] ) && is_array( $stats['clicks'] ) ? $stats['clicks'] : array();
 
 // Separate terms by language (Simple check for Persian/Arabic characters)
 $persian_terms = array();
@@ -159,11 +160,22 @@ $recent_trends = array_slice( $recent_trends, 0, 5, true );
 
         <!-- Popular Queries Card with Glassmorphism class -->
         <div class="fas-card" style="padding: 24px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-            <div style="display: flex; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.4); padding-bottom: 12px; margin-bottom: 16px;">
-                <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
-                    <span class="dashicons dashicons-awards" style="color: #0066cc;"></span>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.4); padding-bottom: 12px; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
                     <span><?php echo esc_html( $i18n['popular_keywords'] ); ?></span>
                 </h3>
+            </div>
+
+            <!-- Charts Container -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                <div style="background: rgba(255,255,255,0.5); padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <h4 style="margin-top:0; color: #475569; text-align: center;"><?php echo $is_rtl ? 'بیشترین عبارات جستجو شده' : 'Most Searched Terms'; ?></h4>
+                    <canvas id="searchTermsChart" style="max-height: 250px;"></canvas>
+                </div>
+                <div style="background: rgba(255,255,255,0.5); padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <h4 style="margin-top:0; color: #475569; text-align: center;"><?php echo $is_rtl ? 'بیشترین نتایج کلیک شده' : 'Most Clicked Results'; ?></h4>
+                    <canvas id="clickedResultsChart" style="max-height: 250px;"></canvas>
+                </div>
             </div>
 
             <?php if ( empty( $terms ) ) : ?>
@@ -206,6 +218,91 @@ jQuery(document).ready(function($) {
     $('.fas-term-row').on('click', function() {
         $(this).next('.fas-logs-panel-tr').find('.fas-logs-panel').slideToggle(200);
     });
+});
+</script>
+
+<?php
+// Prepare data for Chart.js
+$chart_terms_labels = [];
+$chart_terms_data = [];
+$term_counter = 0;
+foreach ( $persian_terms + $english_terms as $term => $data ) {
+    if ( $term_counter >= 10 ) break; // Top 10 for chart
+    $chart_terms_labels[] = $term;
+    $chart_terms_data[] = is_array($data) ? $data['count'] : $data;
+    $term_counter++;
+}
+
+$chart_clicks_labels = [];
+$chart_clicks_data = [];
+$click_counter = 0;
+foreach ( $clicks as $post_id => $data ) {
+    if ( $click_counter >= 10 ) break;
+    $chart_clicks_labels[] = mb_strimwidth( $data['title'], 0, 30, '...' );
+    $chart_clicks_data[] = $data['count'];
+    $click_counter++;
+}
+?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Chart !== 'undefined') {
+        // Search Terms Chart
+        const termsCtx = document.getElementById('searchTermsChart');
+        if (termsCtx) {
+            new Chart(termsCtx, {
+                type: 'bar',
+                data: {
+                    labels: <?php echo json_encode($chart_terms_labels); ?>,
+                    datasets: [{
+                        label: '<?php echo $is_rtl ? 'تعداد جستجو' : 'Search Count'; ?>',
+                        data: <?php echo json_encode($chart_terms_data); ?>,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Clicked Results Chart
+        const clicksCtx = document.getElementById('clickedResultsChart');
+        if (clicksCtx) {
+            new Chart(clicksCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: <?php echo json_encode($chart_clicks_labels); ?>,
+                    datasets: [{
+                        data: <?php echo json_encode($chart_clicks_data); ?>,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)',
+                            'rgba(255, 159, 64, 0.6)',
+                            'rgba(199, 199, 199, 0.6)',
+                            'rgba(83, 102, 255, 0.6)',
+                            'rgba(255, 99, 255, 0.6)',
+                            'rgba(99, 255, 132, 0.6)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    }
 });
 </script>
 

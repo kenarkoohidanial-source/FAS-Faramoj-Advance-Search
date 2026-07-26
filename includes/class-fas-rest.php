@@ -15,6 +15,50 @@ class FAS_Rest {
             'callback'            => array( $this, 'get_search_results' ),
             'permission_callback' => '__return_true',
         ) );
+
+        register_rest_route( 'fas/v1', '/track-click', array(
+            'methods'             => 'POST',
+            'callback'            => array( $this, 'track_search_click' ),
+            'permission_callback' => '__return_true',
+        ) );
+    }
+
+    public function track_search_click( WP_REST_Request $request ) {
+        $post_id = intval( $request->get_param( 'post_id' ) );
+        $title   = sanitize_text_field( $request->get_param( 'title' ) );
+
+        if ( empty( $post_id ) ) {
+            return new WP_REST_Response( array( 'error' => 'Empty post ID' ), 400 );
+        }
+
+        $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [], 'clicks' => [] ) );
+
+        if ( ! isset( $stats['clicks'] ) ) {
+            $stats['clicks'] = array();
+        }
+
+        // Use post_id as key, but store title for display purposes
+        if ( ! isset( $stats['clicks'][ $post_id ] ) ) {
+            $stats['clicks'][ $post_id ] = array(
+                'count' => 0,
+                'title' => $title
+            );
+        }
+
+        $stats['clicks'][ $post_id ]['count']++;
+
+        // Keep top 100 clicked items to protect option storage
+        uasort( $stats['clicks'], function( $a, $b ) {
+            return $b['count'] <=> $a['count'];
+        } );
+
+        if ( count( $stats['clicks'] ) > 100 ) {
+            $stats['clicks'] = array_slice( $stats['clicks'], 0, 100, true );
+        }
+
+        update_option( 'fas_search_stats', $stats );
+
+        return new WP_REST_Response( array( 'success' => true ), 200 );
     }
 
     public function get_search_results( WP_REST_Request $request ) {
@@ -320,6 +364,7 @@ class FAS_Rest {
                     $excerpt = wp_trim_words( get_the_excerpt(), 15, '...' );
 
                     $item = array(
+                        'id'           => $id,
                         'title'        => $title,
                         'permalink'    => get_permalink(),
                         'image'        => get_the_post_thumbnail_url( $id, 'thumbnail' ) ?: '',
@@ -365,6 +410,51 @@ class FAS_Rest {
         );
         $formatted_results['all'] = array_slice( $all_items, 0, 20 );
 
+        // "Did you mean" logic if no results
+        if ( empty( $formatted_results['all'] ) ) {
+            $formatted_results['did_you_mean'] = $this->get_did_you_mean_suggestion( $term );
+        }
+
         return $formatted_results;
+    }
+
+    /**
+     * Find the closest matching successfully searched term from stats.
+     */
+    private function get_did_you_mean_suggestion( $query ) {
+        $stats = get_option( 'fas_search_stats', array() );
+        if ( empty( $stats['terms'] ) ) {
+            return '';
+        }
+
+        $query_clean = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $query ) ) : strtolower( trim( $query ) );
+        $best_match = '';
+        $shortest_dist = -1;
+
+        foreach ( $stats['terms'] as $term => $data ) {
+            // Levenshtein function limits string length to 255
+            if ( strlen( $query_clean ) > 255 || strlen( $term ) > 255 ) {
+                continue;
+            }
+
+            // Calculate similarity (Levenshtein distance)
+            $dist = levenshtein( $query_clean, $term );
+
+            // Allow for typos (distance up to 3 for longer words, 1 for short words)
+            $max_dist = strlen($query_clean) <= 4 ? 1 : 3;
+
+            // Ensure distance is valid (not -1) and within threshold
+            if ( $dist >= 0 && $dist <= $max_dist ) {
+                if ( $shortest_dist === -1 || $dist < $shortest_dist ) {
+                    // Make sure it's not the exact same query
+                    if ( $query_clean !== $term ) {
+                        $best_match = $term;
+                        $shortest_dist = $dist;
+                    }
+                }
+            }
+        }
+
+        return $best_match;
     }
 }

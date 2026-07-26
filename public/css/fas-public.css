@@ -145,6 +145,54 @@
     color: #e11d48 !important;
 }
 
+/* Search History Styling */
+.fas-search-history {
+    padding: 10px 24px;
+    border-bottom: 1px solid var(--fas-border);
+}
+
+.fas-search-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.fas-search-history-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fas-text-muted);
+}
+
+.fas-search-history-clear {
+    background: transparent;
+    border: none;
+    color: #e11d48;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.fas-search-history-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.fas-search-history-item {
+    background: rgba(100, 116, 139, 0.1);
+    color: var(--fas-text-main);
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s;
+}
+
+.fas-search-history-item:hover {
+    background: rgba(100, 116, 139, 0.2);
+}
+
 /* Category Tab Header styling (Beautiful Glassmorphism pills layout) */ 
 .fas-search-tabs { 
     display: flex; 
