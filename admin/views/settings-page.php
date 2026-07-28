@@ -111,9 +111,9 @@ $i18n = array(
     'theme_accent' => $is_rtl ? 'حالت رنگی و تم پاپ‌آپ' : 'Theme Accent Mode',
     'dark_mode' => $is_rtl ? 'تم زغالی تیره پاپ‌آپ (Deep Slate)' : 'Deep Slate Dark Mode Overlay',
     'light_mode' => $is_rtl ? 'تم روشن شرکتی پاپ‌آپ (Clean Corporate)' : 'Clean Corporate Light Mode Overlay',
-    'popup_width' => $is_rtl ? 'عرض پاپ‌آپ (پیکسل)' : 'Popup Width (px)',
+    'popup_width' => $is_rtl ? 'عرض پاپ‌آپ<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(پیکسل)</span>' : 'Popup Width<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(px)</span>',
     'popup_width_desc' => $is_rtl ? 'عرض کادر پاپ‌آپ پدیدار شده (محدوده مجاز: ۳۰۰ تا ۲۰۰۰ پیکسل)' : 'Width constraint (range: 300px - 2000px).',
-    'popup_height' => $is_rtl ? 'حداکثر ارتفاع پاپ‌آپ (پیکسل)' : 'Popup Max Height (px)',
+    'popup_height' => $is_rtl ? 'حداکثر ارتفاع پاپ‌آپ<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(پیکسل)</span>' : 'Popup Max Height<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(px)</span>',
     'popup_height_desc' => $is_rtl ? 'حداکثر ارتفاع کادر نتایج جستجو (محدوده مجاز: ۳۰۰ تا ۱۵۰۰ پیکسل)' : 'Max result pane height (range: 300px - 1500px).',
     'floating_settings' => $is_rtl ? 'تنظیمات دکمه شناور جستجو' : 'Floating Search Trigger Settings',
     'enable_floating' => $is_rtl ? 'فعال‌سازی دکمه شناور' : 'Enable Floating Button',
@@ -124,9 +124,9 @@ $i18n = array(
     'bottom_left' => $is_rtl ? 'پایین چپ' : 'Bottom Left',
     'top_right' => $is_rtl ? 'بالا راست' : 'Top Right',
     'top_left' => $is_rtl ? 'بالا چپ' : 'Top Left',
-    'offset_x' => $is_rtl ? 'فاصله افقی دکمه (X پیکسل)' : 'Horizontal Offset (X px)',
+    'offset_x' => $is_rtl ? 'فاصله افقی دکمه<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(X پیکسل)</span>' : 'Horizontal Offset<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(X px)</span>',
     'offset_x_desc' => $is_rtl ? 'فاصله از لبه کناری صفحه وب.' : 'Distance from side edge of the screen.',
-    'offset_y' => $is_rtl ? 'فاصله عمودی دکمه (Y پیکسل)' : 'Vertical Offset (Y px)',
+    'offset_y' => $is_rtl ? 'فاصله عمودی دکمه<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(Y پیکسل)</span>' : 'Vertical Offset<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(Y px)</span>',
     'offset_y_desc' => $is_rtl ? 'فاصله از لبه بالا یا پایین صفحه وب.' : 'Distance from top or bottom edge of the screen.',
     'display_pages' => $is_rtl ? 'صفحات وب قابل نمایش' : 'Display Pages',
     'show_all' => $is_rtl ? 'نمایش در تمام صفحات وب' : 'Show on All Pages',
@@ -244,8 +244,13 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                         <tr>
                             <td style="padding: 10px 0; width: 220px; font-weight: 600; color: #475569;"><?php echo esc_html( $i18n['cache_duration'] ); ?></td>
                             <td style="padding: 10px 0;">
-                                <input type="number" name="fas_cache_duration<?php echo esc_attr( $suffix ); ?>" id="fas_cache_duration" value="<?php echo esc_attr( $cache_duration ); ?>" class="regular-text" min="0" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                <span class="fas-description" style="margin-top: 6px; font-size: 11px; color: #64748b; display: block;"><?php echo esc_html( $i18n['cache_duration_desc'] ); ?></span>
+                                <div class="fas-input-row">
+                                    <input type="number" name="fas_cache_duration<?php echo esc_attr( $suffix ); ?>" id="fas_cache_duration" value="<?php echo esc_attr( $cache_duration ); ?>" class="regular-text" min="0" style="border-radius: 6px; border: 1px solid #cbd5e1;">
+                                    <div class="fas-tooltip-wrapper">
+                                        <span class="fas-info-icon">!</span>
+                                        <div class="fas-tooltip-content"><?php echo esc_html( $i18n['cache_duration_desc'] ); ?> (مجاز: 0 به بالا)</div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     </table>
@@ -268,17 +273,27 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo esc_html( $i18n['popup_width'] ); ?></td>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $i18n['popup_width']; ?></td>
                             <td style="padding: 10px 0;">
-                                <input type="number" name="fas_popup_width<?php echo esc_attr( $suffix ); ?>" id="fas_popup_width" value="<?php echo esc_attr( $popup_width ); ?>" class="regular-text" min="300" max="2000" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                <span class="fas-description" style="margin-top: 4px; font-size: 11px; color: #64748b; display: block;"><?php echo esc_html( $i18n['popup_width_desc'] ); ?></span>
+                                <div class="fas-input-row">
+                                    <input type="number" name="fas_popup_width<?php echo esc_attr( $suffix ); ?>" id="fas_popup_width" value="<?php echo esc_attr( $popup_width ); ?>" class="regular-text" min="400" max="1200" style="border-radius: 6px; border: 1px solid #cbd5e1;">
+                                    <div class="fas-tooltip-wrapper">
+                                        <span class="fas-info-icon">!</span>
+                                        <div class="fas-tooltip-content"><?php echo esc_html( $i18n['popup_width_desc'] ); ?> (مجاز: 400 تا 1200)</div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo esc_html( $i18n['popup_height'] ); ?></td>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $i18n['popup_height']; ?></td>
                             <td style="padding: 10px 0;">
-                                <input type="number" name="fas_popup_max_height<?php echo esc_attr( $suffix ); ?>" id="fas_popup_max_height" value="<?php echo esc_attr( $popup_max_height ); ?>" class="regular-text" min="300" max="1500" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                <span class="fas-description" style="margin-top: 4px; font-size: 11px; color: #64748b; display: block;"><?php echo esc_html( $i18n['popup_height_desc'] ); ?></span>
+                                <div class="fas-input-row">
+                                    <input type="number" name="fas_popup_max_height<?php echo esc_attr( $suffix ); ?>" id="fas_popup_max_height" value="<?php echo esc_attr( $popup_max_height ); ?>" class="regular-text" min="300" max="900" style="border-radius: 6px; border: 1px solid #cbd5e1;">
+                                    <div class="fas-tooltip-wrapper">
+                                        <span class="fas-info-icon">!</span>
+                                        <div class="fas-tooltip-content"><?php echo esc_html( $i18n['popup_height_desc'] ); ?> (مجاز: 300 تا 900)</div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     </table>
@@ -383,17 +398,27 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo esc_html( $i18n['offset_x'] ); ?></td>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $i18n['offset_x']; ?></td>
                             <td style="padding: 10px 0;">
-                                <input type="number" name="fas_floating_offset_x<?php echo esc_attr( $suffix ); ?>" id="fas_floating_offset_x" value="<?php echo esc_attr( $floating_offset_x ); ?>" class="regular-text" min="0" max="300" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                <span class="fas-description" style="margin-top: 4px; font-size: 11px; color: #64748b; display: block;"><?php echo esc_html( $i18n['offset_x_desc'] ); ?></span>
+                                <div class="fas-input-row">
+                                    <input type="number" name="fas_floating_offset_x<?php echo esc_attr( $suffix ); ?>" id="fas_floating_offset_x" value="<?php echo esc_attr( $floating_offset_x ); ?>" class="regular-text" min="0" max="100" style="border-radius: 6px; border: 1px solid #cbd5e1;">
+                                    <div class="fas-tooltip-wrapper">
+                                        <span class="fas-info-icon">!</span>
+                                        <div class="fas-tooltip-content"><?php echo esc_html( $i18n['offset_x_desc'] ); ?> (مجاز: 0 تا 100)</div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo esc_html( $i18n['offset_y'] ); ?></td>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $i18n['offset_y']; ?></td>
                             <td style="padding: 10px 0;">
-                                <input type="number" name="fas_floating_offset_y<?php echo esc_attr( $suffix ); ?>" id="fas_floating_offset_y" value="<?php echo esc_attr( $floating_offset_y ); ?>" class="regular-text" min="0" max="300" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                <span class="fas-description" style="margin-top: 4px; font-size: 11px; color: #64748b; display: block;"><?php echo esc_html( $i18n['offset_y_desc'] ); ?></span>
+                                <div class="fas-input-row">
+                                    <input type="number" name="fas_floating_offset_y<?php echo esc_attr( $suffix ); ?>" id="fas_floating_offset_y" value="<?php echo esc_attr( $floating_offset_y ); ?>" class="regular-text" min="0" max="100" style="border-radius: 6px; border: 1px solid #cbd5e1;">
+                                    <div class="fas-tooltip-wrapper">
+                                        <span class="fas-info-icon">!</span>
+                                        <div class="fas-tooltip-content"><?php echo esc_html( $i18n['offset_y_desc'] ); ?> (مجاز: 0 تا 100)</div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         <tr>
@@ -438,7 +463,7 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                     </p>
 
                     <!-- Drag and Drop Sortable Container -->
-                    <div id="fas-sortable-tabs" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+                    <div id="fas-sortable-tabs" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; flex-direction: row;">
                         <?php
                         foreach ( $tabs_order_arr as $tab_key ) {
                             if ( ! isset( $tab_details[ $tab_key ] ) ) {
@@ -467,7 +492,10 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             <span style="font-weight: 700; color: #1e293b; font-size: 13px;"><?php echo esc_html( $i18n['tab_all_cust'] ); ?></span>
                             <div style="display: flex; gap: 10px; margin-top: 10px;">
                                 <input type="text" name="fas_tab_all_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_all_title" value="<?php echo esc_attr( $tab_all_title ); ?>" class="regular-text" placeholder="All Results" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
-                                <input type="text" name="fas_tab_all_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_all_icon" value="<?php echo esc_attr( $tab_all_icon ); ?>" class="regular-text" placeholder="dashicons-grid-view" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
+                                <div style="flex:1; display: flex; align-items: center; gap: 8px;">
+                                    <span class="dashicons <?php echo esc_attr( $tab_all_icon ); ?>" id="fas_tab_all_icon_preview"></span>
+                                    <input type="text" name="fas_tab_all_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_all_icon" value="<?php echo esc_attr( $tab_all_icon ); ?>" class="regular-text" placeholder="dashicons-grid-view" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;" oninput="document.getElementById('fas_tab_all_icon_preview').className = 'dashicons ' + this.value;">
+                                </div>
                             </div>
                             
                             <!-- Custom SVG/PNG Icon Row -->
@@ -489,7 +517,10 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             <span style="font-weight: 700; color: #1e293b; font-size: 13px;"><?php echo esc_html( $i18n['tab_prod_cust'] ); ?></span>
                             <div style="display: flex; gap: 10px; margin-top: 10px;">
                                 <input type="text" name="fas_tab_products_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_products_title" value="<?php echo esc_attr( $tab_products_title ); ?>" class="regular-text" placeholder="Products" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
-                                <input type="text" name="fas_tab_products_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_products_icon" value="<?php echo esc_attr( $tab_products_icon ); ?>" class="regular-text" placeholder="dashicons-cart" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
+                                <div style="flex:1; display: flex; align-items: center; gap: 8px;">
+                                    <span class="dashicons <?php echo esc_attr( $tab_products_icon ); ?>" id="fas_tab_products_icon_preview"></span>
+                                    <input type="text" name="fas_tab_products_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_products_icon" value="<?php echo esc_attr( $tab_products_icon ); ?>" class="regular-text" placeholder="dashicons-cart" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;" oninput="document.getElementById('fas_tab_products_icon_preview').className = 'dashicons ' + this.value;">
+                                </div>
                             </div>
                             
                             <!-- Custom SVG/PNG Icon Row -->
@@ -511,7 +542,10 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             <span style="font-weight: 700; color: #1e293b; font-size: 13px;"><?php echo esc_html( $i18n['tab_post_cust'] ); ?></span>
                             <div style="display: flex; gap: 10px; margin-top: 10px;">
                                 <input type="text" name="fas_tab_posts_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_posts_title" value="<?php echo esc_attr( $tab_posts_title ); ?>" class="regular-text" placeholder="News & Articles" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
-                                <input type="text" name="fas_tab_posts_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_posts_icon" value="<?php echo esc_attr( $tab_posts_icon ); ?>" class="regular-text" placeholder="dashicons-welcome-write-blog" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
+                                <div style="flex:1; display: flex; align-items: center; gap: 8px;">
+                                    <span class="dashicons <?php echo esc_attr( $tab_posts_icon ); ?>" id="fas_tab_posts_icon_preview"></span>
+                                    <input type="text" name="fas_tab_posts_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_posts_icon" value="<?php echo esc_attr( $tab_posts_icon ); ?>" class="regular-text" placeholder="dashicons-welcome-write-blog" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;" oninput="document.getElementById('fas_tab_posts_icon_preview').className = 'dashicons ' + this.value;">
+                                </div>
                             </div>
                             
                             <!-- Custom SVG/PNG Icon Row -->
@@ -533,7 +567,10 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             <span style="font-weight: 700; color: #1e293b; font-size: 13px;"><?php echo esc_html( $i18n['tab_doc_cust'] ); ?></span>
                             <div style="display: flex; gap: 10px; margin-top: 10px;">
                                 <input type="text" name="fas_tab_docs_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_docs_title" value="<?php echo esc_attr( $tab_docs_title ); ?>" class="regular-text" placeholder="Documentation" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
-                                <input type="text" name="fas_tab_docs_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_docs_icon" value="<?php echo esc_attr( $tab_docs_icon ); ?>" class="regular-text" placeholder="dashicons-book-alt" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
+                                <div style="flex:1; display: flex; align-items: center; gap: 8px;">
+                                    <span class="dashicons <?php echo esc_attr( $tab_docs_icon ); ?>" id="fas_tab_docs_icon_preview"></span>
+                                    <input type="text" name="fas_tab_docs_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_docs_icon" value="<?php echo esc_attr( $tab_docs_icon ); ?>" class="regular-text" placeholder="dashicons-book-alt" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;" oninput="document.getElementById('fas_tab_docs_icon_preview').className = 'dashicons ' + this.value;">
+                                </div>
                             </div>
                             
                             <!-- Custom SVG/PNG Icon Row -->
