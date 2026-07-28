@@ -79,6 +79,7 @@ class FAS_Core {
             $admin = new FAS_Admin();
             add_action( 'admin_menu', array( $admin, 'add_admin_menu' ) );
             add_action( 'admin_init', array( $admin, 'register_settings' ) );
+            add_action( 'admin_init', array( $admin, 'handle_csv_export' ) );
         }
 
         // Frontend Styles & Scripts
