@@ -643,31 +643,121 @@ class FAS_Rest {
     }
 
     /**
-     * Find the closest matching successfully searched term from stats.
+     * Calculate Levenshtein distance for multi-byte strings (e.g. Persian)
      */
-    private function get_did_you_mean_suggestion( $query ) {
-        $stats = get_option( 'fas_search_stats', array() );
-        if ( empty( $stats['terms'] ) ) {
-            return '';
+    private function mb_levenshtein( $str1, $str2 ) {
+        if ( ! function_exists( 'mb_strlen' ) || ! function_exists( 'mb_substr' ) ) {
+            return levenshtein( $str1, $str2 );
         }
 
-        $query_clean = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $query ) ) : strtolower( trim( $query ) );
+        $len1 = mb_strlen( $str1, 'UTF-8' );
+        $len2 = mb_strlen( $str2, 'UTF-8' );
+
+        if ( $len1 == 0 ) return $len2;
+        if ( $len2 == 0 ) return $len1;
+
+        $v0 = range( 0, $len2 );
+        $v1 = array();
+
+        for ( $i = 0; $i < $len1; $i++ ) {
+            $v1[0] = $i + 1;
+            $c1 = mb_substr( $str1, $i, 1, 'UTF-8' );
+
+            for ( $j = 0; $j < $len2; $j++ ) {
+                $c2 = mb_substr( $str2, $j, 1, 'UTF-8' );
+                $cost = ( $c1 == $c2 ) ? 0 : 1;
+                $v1[$j + 1] = min( $v1[$j] + 1, $v0[$j + 1] + 1, $v0[$j] + $cost );
+            }
+
+            for ( $j = 0; $j <= $len2; $j++ ) {
+                $v0[$j] = $v1[$j];
+            }
+        }
+
+        return $v1[$len2];
+    }
+
+    /**
+     * Find the closest matching successfully searched term from stats and database.
+     */
+    private function get_did_you_mean_suggestion( $query ) {
+        global $wpdb;
+
+        $query_clean = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $query ), 'UTF-8' ) : strtolower( trim( $query ) );
         $best_match = '';
         $shortest_dist = -1;
 
-        foreach ( $stats['terms'] as $term => $data ) {
-            // Levenshtein function limits string length to 255
-            if ( strlen( $query_clean ) > 255 || strlen( $term ) > 255 ) {
+        // 1. Gather dictionary terms
+        $dictionary = array();
+
+        // Add history terms
+        $stats = get_option( 'fas_search_stats', array() );
+        if ( ! empty( $stats['terms'] ) && is_array( $stats['terms'] ) ) {
+            foreach ( $stats['terms'] as $term => $data ) {
+                $dictionary[$term] = true;
+            }
+        }
+
+        // Add DB terms (posts, products, terms) - cache this to avoid heavy queries on every missed search
+        $db_terms = get_transient( 'fas_did_you_mean_dict' );
+        if ( false === $db_terms ) {
+            $db_terms = array();
+            
+            // Get recent published posts/products titles
+            $titles = $wpdb->get_col( "SELECT post_title FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ('post', 'page', 'product') ORDER BY post_date DESC LIMIT 500" );
+            if ( $titles ) {
+                foreach ( $titles as $title ) {
+                    // Split title into words to build a richer dictionary
+                    $words = explode( ' ', $title );
+                    foreach ( $words as $word ) {
+                        $word = trim( $word );
+                        if ( function_exists('mb_strlen') ? mb_strlen($word, 'UTF-8') > 2 : strlen($word) > 2 ) {
+                             $db_terms[] = function_exists( 'mb_strtolower' ) ? mb_strtolower( $word, 'UTF-8' ) : strtolower( $word );
+                        }
+                    }
+                    $db_terms[] = function_exists( 'mb_strtolower' ) ? mb_strtolower( $title, 'UTF-8' ) : strtolower( $title );
+                }
+            }
+
+            // Get popular terms (categories, tags)
+            $tax_terms = $wpdb->get_col( "SELECT t.name FROM {$wpdb->terms} t INNER JOIN {$wpdb->term_taxonomy} tt ON t.term_id = tt.term_id WHERE tt.count > 0 LIMIT 100" );
+            if ( $tax_terms ) {
+                foreach ( $tax_terms as $term ) {
+                    $db_terms[] = function_exists( 'mb_strtolower' ) ? mb_strtolower( $term, 'UTF-8' ) : strtolower( $term );
+                }
+            }
+            
+            $db_terms = array_unique( $db_terms );
+            set_transient( 'fas_did_you_mean_dict', $db_terms, 12 * HOUR_IN_SECONDS );
+        }
+
+        if ( is_array( $db_terms ) ) {
+            foreach ( $db_terms as $term ) {
+                $dictionary[$term] = true;
+            }
+        }
+
+        if ( empty( $dictionary ) ) {
+            return '';
+        }
+
+        // 2. Find closest match
+        foreach ( $dictionary as $term => $dummy ) {
+            // mb_levenshtein can be slow on very long strings, restrict length
+            $q_len = function_exists('mb_strlen') ? mb_strlen($query_clean, 'UTF-8') : strlen($query_clean);
+            $t_len = function_exists('mb_strlen') ? mb_strlen($term, 'UTF-8') : strlen($term);
+            
+            if ( $q_len > 100 || $t_len > 100 ) {
                 continue;
             }
 
             // Calculate similarity (Levenshtein distance)
-            $dist = levenshtein( $query_clean, $term );
+            $dist = $this->mb_levenshtein( $query_clean, $term );
             
             // Allow for typos (distance up to 3 for longer words, 1 for short words)
-            $max_dist = strlen($query_clean) <= 4 ? 1 : 3;
+            $max_dist = $q_len <= 4 ? 1 : 3;
             
-            // Ensure distance is valid (not -1) and within threshold
+            // Ensure distance is valid and within threshold
             if ( $dist >= 0 && $dist <= $max_dist ) {
                 if ( $shortest_dist === -1 || $dist < $shortest_dist ) {
                     // Make sure it's not the exact same query
