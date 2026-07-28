@@ -438,7 +438,7 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                     </p>
 
                     <!-- Drag and Drop Sortable Container -->
-                    <div id="fas-sortable-tabs" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+                    <div id="fas-sortable-tabs" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; flex-direction: row;">
                         <?php
                         foreach ( $tabs_order_arr as $tab_key ) {
                             if ( ! isset( $tab_details[ $tab_key ] ) ) {
@@ -467,7 +467,10 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             <span style="font-weight: 700; color: #1e293b; font-size: 13px;"><?php echo esc_html( $i18n['tab_all_cust'] ); ?></span>
                             <div style="display: flex; gap: 10px; margin-top: 10px;">
                                 <input type="text" name="fas_tab_all_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_all_title" value="<?php echo esc_attr( $tab_all_title ); ?>" class="regular-text" placeholder="All Results" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
-                                <input type="text" name="fas_tab_all_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_all_icon" value="<?php echo esc_attr( $tab_all_icon ); ?>" class="regular-text" placeholder="dashicons-grid-view" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
+                                <div style="flex:1; display: flex; align-items: center; gap: 8px;">
+                                    <span class="dashicons <?php echo esc_attr( $tab_all_icon ); ?>" id="fas_tab_all_icon_preview"></span>
+                                    <input type="text" name="fas_tab_all_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_all_icon" value="<?php echo esc_attr( $tab_all_icon ); ?>" class="regular-text" placeholder="dashicons-grid-view" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;" oninput="document.getElementById('fas_tab_all_icon_preview').className = 'dashicons ' + this.value;">
+                                </div>
                             </div>
                             
                             <!-- Custom SVG/PNG Icon Row -->
@@ -489,7 +492,10 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             <span style="font-weight: 700; color: #1e293b; font-size: 13px;"><?php echo esc_html( $i18n['tab_prod_cust'] ); ?></span>
                             <div style="display: flex; gap: 10px; margin-top: 10px;">
                                 <input type="text" name="fas_tab_products_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_products_title" value="<?php echo esc_attr( $tab_products_title ); ?>" class="regular-text" placeholder="Products" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
-                                <input type="text" name="fas_tab_products_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_products_icon" value="<?php echo esc_attr( $tab_products_icon ); ?>" class="regular-text" placeholder="dashicons-cart" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
+                                <div style="flex:1; display: flex; align-items: center; gap: 8px;">
+                                    <span class="dashicons <?php echo esc_attr( $tab_products_icon ); ?>" id="fas_tab_products_icon_preview"></span>
+                                    <input type="text" name="fas_tab_products_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_products_icon" value="<?php echo esc_attr( $tab_products_icon ); ?>" class="regular-text" placeholder="dashicons-cart" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;" oninput="document.getElementById('fas_tab_products_icon_preview').className = 'dashicons ' + this.value;">
+                                </div>
                             </div>
                             
                             <!-- Custom SVG/PNG Icon Row -->
@@ -511,7 +517,10 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             <span style="font-weight: 700; color: #1e293b; font-size: 13px;"><?php echo esc_html( $i18n['tab_post_cust'] ); ?></span>
                             <div style="display: flex; gap: 10px; margin-top: 10px;">
                                 <input type="text" name="fas_tab_posts_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_posts_title" value="<?php echo esc_attr( $tab_posts_title ); ?>" class="regular-text" placeholder="News & Articles" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
-                                <input type="text" name="fas_tab_posts_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_posts_icon" value="<?php echo esc_attr( $tab_posts_icon ); ?>" class="regular-text" placeholder="dashicons-welcome-write-blog" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
+                                <div style="flex:1; display: flex; align-items: center; gap: 8px;">
+                                    <span class="dashicons <?php echo esc_attr( $tab_posts_icon ); ?>" id="fas_tab_posts_icon_preview"></span>
+                                    <input type="text" name="fas_tab_posts_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_posts_icon" value="<?php echo esc_attr( $tab_posts_icon ); ?>" class="regular-text" placeholder="dashicons-welcome-write-blog" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;" oninput="document.getElementById('fas_tab_posts_icon_preview').className = 'dashicons ' + this.value;">
+                                </div>
                             </div>
                             
                             <!-- Custom SVG/PNG Icon Row -->
@@ -533,7 +542,10 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             <span style="font-weight: 700; color: #1e293b; font-size: 13px;"><?php echo esc_html( $i18n['tab_doc_cust'] ); ?></span>
                             <div style="display: flex; gap: 10px; margin-top: 10px;">
                                 <input type="text" name="fas_tab_docs_title<?php echo esc_attr( $suffix ); ?>" id="fas_tab_docs_title" value="<?php echo esc_attr( $tab_docs_title ); ?>" class="regular-text" placeholder="Documentation" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
-                                <input type="text" name="fas_tab_docs_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_docs_icon" value="<?php echo esc_attr( $tab_docs_icon ); ?>" class="regular-text" placeholder="dashicons-book-alt" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;">
+                                <div style="flex:1; display: flex; align-items: center; gap: 8px;">
+                                    <span class="dashicons <?php echo esc_attr( $tab_docs_icon ); ?>" id="fas_tab_docs_icon_preview"></span>
+                                    <input type="text" name="fas_tab_docs_icon<?php echo esc_attr( $suffix ); ?>" id="fas_tab_docs_icon" value="<?php echo esc_attr( $tab_docs_icon ); ?>" class="regular-text" placeholder="dashicons-book-alt" style="flex:1; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px;" oninput="document.getElementById('fas_tab_docs_icon_preview').className = 'dashicons ' + this.value;">
+                                </div>
                             </div>
                             
                             <!-- Custom SVG/PNG Icon Row -->

@@ -44,7 +44,7 @@
 }
 
 /* Glassmorphic inputs and select boxes */
-.fas-admin-wrap input[type="text"], 
+.fas-admin-wrap input[type="text"]:not(.fas-color-picker),
 .fas-admin-wrap input[type="number"], 
 .fas-admin-wrap select {
     background: rgba(255, 255, 255, 0.5) !important;
@@ -59,7 +59,7 @@
     outline: none !important;
 }
 
-.fas-admin-wrap input[type="text"]:focus, 
+.fas-admin-wrap input[type="text"]:not(.fas-color-picker):focus,
 .fas-admin-wrap input[type="number"]:focus, 
 .fas-admin-wrap select:focus {
     background: rgba(255, 255, 255, 0.85) !important;
