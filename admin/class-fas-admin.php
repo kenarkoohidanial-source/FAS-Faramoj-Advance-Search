@@ -124,12 +124,33 @@ class FAS_Admin {
 
         add_submenu_page(
             'faramoj-search',
+            __( 'Settings & Tools', 'faramoj-search' ),
+            __( 'Settings & Tools', 'faramoj-search' ),
+            'manage_options',
+            'fas-tools',
+            array( $this, 'render_tools_page' )
+        );
+
+        add_submenu_page(
+            'faramoj-search',
             __( 'About Us', 'faramoj-search' ),
             __( 'About Us', 'faramoj-search' ),
             'manage_options',
             'fas-about-us',
             array( $this, 'render_about_us_page' )
         );
+    }
+
+    /**
+     * Render the Tools & Import/Export page.
+     */
+    public function render_tools_page() {
+        $view_path = plugin_dir_path( __FILE__ ) . 'views/tools-page.php';
+        if ( file_exists( $view_path ) ) {
+            include $view_path;
+        } else {
+            echo '<div class="wrap"><h2>' . esc_html__( 'Settings & Tools', 'faramoj-search' ) . '</h2><p>' . esc_html__( 'Error: Tools view file not found.', 'faramoj-search' ) . '</p></div>';
+        }
     }
 
     /**
@@ -188,6 +209,28 @@ class FAS_Admin {
                 'type'              => 'integer',
                 'sanitize_callback' => 'intval',
                 'default'           => 24,
+            ) );
+
+            // History Settings
+            register_setting( $group_name, 'fas_history_count' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 5,
+            ) );
+            register_setting( $group_name, 'fas_history_bg' . $suffix, array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default'           => 'rgba(255, 255, 255, 0.1)',
+            ) );
+            register_setting( $group_name, 'fas_history_hover_bg' . $suffix, array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default'           => 'rgba(255, 255, 255, 0.2)',
+            ) );
+            register_setting( $group_name, 'fas_history_text_size' . $suffix, array(
+                'type'              => 'integer',
+                'sanitize_callback' => 'intval',
+                'default'           => 13,
             ) );
 
             register_setting( $group_name, 'fas_floating_offset_y' . $suffix, array(
@@ -418,6 +461,7 @@ class FAS_Admin {
         $pages = array(
             'toplevel_page_faramoj-search',
             'faramoj-search_page_fas-statistics',
+            'faramoj-search_page_fas-tools',
             'faramoj-search_page_fas-about-us'
         );
 
@@ -432,6 +476,11 @@ class FAS_Admin {
         
         // Enqueue WP Media Library so we can upload custom SVG/PNG icons natively!
         wp_enqueue_media();
+
+        // Enqueue Chart.js for Statistics page
+        if ( $hook === 'faramoj-search_page_fas-statistics' ) {
+            wp_enqueue_script( 'chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', array(), '4.4.1', true );
+        }
 
         // Enqueue an empty stylesheet handle so we can safely add inline styles to it
         wp_register_style( 'fas-admin-css', false );

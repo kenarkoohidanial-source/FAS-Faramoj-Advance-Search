@@ -17,7 +17,7 @@ if ( empty( $item ) ) {
     return;
 }
 ?>
-<a href="<?php echo esc_url( $item['permalink'] ); ?>" class="fas-result-item">
+<a href="<?php echo esc_url( $item['permalink'] ); ?>" class="fas-result-item" data-post-id="<?php echo esc_attr( $item['id'] ?? 0 ); ?>" data-post-title="<?php echo esc_attr( $item['title'] ); ?>">
     <?php if ( ! empty( $item['image'] ) ) : ?>
         <img class="fas-result-image" src="<?php echo esc_url( $item['image'] ); ?>" alt="<?php echo esc_attr( $item['title'] ); ?>">
     <?php else : ?>

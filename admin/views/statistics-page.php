@@ -19,28 +19,42 @@ $i18n = array(
     'clear_btn' => $is_rtl ? 'پاکسازی کامل تمامی آمارها' : 'Clear All Statistics',
     'confirm_clear' => $is_rtl ? 'آیا مطمئن هستید که می‌خواهید تمامی آمارهای جستجو را پاک کرده و شمارنده‌ها را صفر کنید؟' : 'Are you sure you want to delete all search logs and reset counters?',
     'total_queries' => $is_rtl ? 'مجموع عبارات ردیابی شده' : 'Total Queries Tracked',
-    'popular_keywords' => $is_rtl ? 'محبوب‌ترین و بیشترین کلمات کلیدی جستجو شده' : 'Most Popular Search Keywords',
+    'popular_keywords' => $is_rtl ? '📊 محبوب‌ترین و بیشترین کلمات کلیدی جستجو شده' : 'Most Popular Search Keywords 📊',
     'no_data' => $is_rtl ? 'هنوز هیچ آمار جستجویی در سیستم ثبت نشده است.' : 'No search query data logged yet.',
     'col_rank' => $is_rtl ? 'رتبه' : 'Rank',
     'col_term' => $is_rtl ? 'کلمه کلیدی جستجو' : 'Search Keyword',
     'col_count' => $is_rtl ? 'تعداد دفعات جستجو' : 'Search Count',
+    'col_click' => $is_rtl ? 'دفعات کلیک' : 'Click Count',
+    'filter_all' => $is_rtl ? 'کل زمان‌ها' : 'All Time',
 );
 
 // Handle statistics clear request
 if ( isset( $_POST['fas_clear_stats'] ) && check_admin_referer( 'fas_clear_stats_nonce', 'fas_stats_nonce' ) ) {
-    update_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [] ) );
+    update_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [], 'clicks' => [] ) );
     echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( $i18n['notice_cleared'] ) . '</p></div>';
 }
 
-$stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [] ) );
+$stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [], 'clicks' => [] ) );
 $total_count = isset( $stats['total_count'] ) ? intval( $stats['total_count'] ) : 0;
 $terms = isset( $stats['terms'] ) && is_array( $stats['terms'] ) ? $stats['terms'] : array();
+$clicks = isset( $stats['clicks'] ) && is_array( $stats['clicks'] ) ? $stats['clicks'] : array();
+$monthly = isset( $stats['monthly'] ) && is_array( $stats['monthly'] ) ? $stats['monthly'] : array();
+
+$selected_month = isset( $_GET['fas_month'] ) ? sanitize_text_field( $_GET['fas_month'] ) : 'all';
+$available_months = array_keys( $monthly );
+rsort( $available_months );
+
+if ( $selected_month !== 'all' && isset( $monthly[ $selected_month ] ) ) {
+    $terms_to_use = $monthly[ $selected_month ]['terms'];
+} else {
+    $terms_to_use = $terms;
+}
 
 // Separate terms by language (Simple check for Persian/Arabic characters)
 $persian_terms = array();
 $english_terms = array();
 
-foreach ( $terms as $term => $data ) {
+foreach ( $terms_to_use as $term => $data ) {
     if ( preg_match('/[\x{0600}-\x{06FF}]/u', $term) ) {
         $persian_terms[$term] = $data;
     } else {
@@ -71,7 +85,9 @@ foreach ( $terms as $term => $data ) {
         }
         $unique_count = count( array_unique( $unique_ips ) );
         if ( $unique_count > 0 ) {
-            $recent_trends[$term] = $unique_count;
+            $click_val = isset($data['click_count']) ? intval($data['click_count']) : 0;
+            // Weigh clicks heavily for content ideas (unique IPs * 1.5 + clicks * 2)
+            $recent_trends[$term] = ($unique_count * 1.5) + ($click_val * 2);
         }
     }
 }
@@ -105,12 +121,23 @@ $recent_trends = array_slice( $recent_trends, 0, 5, true );
         </div>
         
         <?php if ( ! empty( $terms ) || $total_count > 0 ) : ?>
-            <form method="post" action="">
-                <?php wp_nonce_field( 'fas_clear_stats_nonce', 'fas_stats_nonce' ); ?>
-                <button type="submit" name="fas_clear_stats" class="button button-secondary" style="border-radius: 6px; font-weight: 600; padding: 8px 16px; height: auto; border: 1px solid #e11d48; color: #e11d48;" onclick="return confirm('<?php echo esc_js( $i18n['confirm_clear'] ); ?>');">
-                    <?php echo esc_html( $i18n['clear_btn'] ); ?>
-                </button>
-            </form>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <?php if ( ! empty( $available_months ) ) : ?>
+                    <select id="fas_month_filter" onchange="window.location.href = '?page=fas-statistics&fas_month=' + this.value;" style="border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px; font-weight: 600; color: #0f172a; outline: none; background: #f8fafc; cursor: pointer;">
+                        <option value="all"><?php echo esc_html( $i18n['filter_all'] ); ?></option>
+                        <?php foreach ( $available_months as $m ) : ?>
+                            <option value="<?php echo esc_attr( $m ); ?>" <?php selected( $selected_month, $m ); ?>><?php echo esc_html( $m ); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                <?php endif; ?>
+
+                <form method="post" action="">
+                    <?php wp_nonce_field( 'fas_clear_stats_nonce', 'fas_stats_nonce' ); ?>
+                    <button type="submit" name="fas_clear_stats" class="button button-secondary" style="border-radius: 6px; font-weight: 600; padding: 8px 16px; height: auto; border: 1px solid #e11d48; color: #e11d48;" onclick="return confirm('<?php echo esc_js( $i18n['confirm_clear'] ); ?>');">
+                        <?php echo esc_html( $i18n['clear_btn'] ); ?>
+                    </button>
+                </form>
+            </div>
         <?php endif; ?>
     </div>
 
@@ -148,7 +175,7 @@ $recent_trends = array_slice( $recent_trends, 0, 5, true );
                             <li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f1f5f9; margin-bottom: 8px; border-radius: 6px;">
                                 <strong style="color: #0f172a;"><?php echo esc_html($trend_term); ?></strong>
                                 <span style="font-size: 12px; font-weight: 600; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 12px;">
-                                    <?php echo sprintf( $is_rtl ? '%s کاربر یکتا' : '%s unique users', number_format_i18n($ip_count) ); ?>
+                                    <?php echo sprintf( $is_rtl ? 'امتیاز داغ: %s' : 'Hot Score: %s', number_format_i18n(round($ip_count)) ); ?>
                                 </span>
                             </li>
                         <?php endforeach; ?>
@@ -159,11 +186,22 @@ $recent_trends = array_slice( $recent_trends, 0, 5, true );
 
         <!-- Popular Queries Card with Glassmorphism class -->
         <div class="fas-card" style="padding: 24px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-            <div style="display: flex; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.4); padding-bottom: 12px; margin-bottom: 16px;">
-                <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
-                    <span class="dashicons dashicons-awards" style="color: #0066cc;"></span>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.4); padding-bottom: 12px; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
                     <span><?php echo esc_html( $i18n['popular_keywords'] ); ?></span>
                 </h3>
+            </div>
+
+            <!-- Charts Container -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                <div style="background: rgba(255,255,255,0.5); padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <h4 style="margin-top:0; color: #475569; text-align: center;"><?php echo $is_rtl ? 'بیشترین عبارات جستجو شده' : 'Most Searched Terms'; ?></h4>
+                    <canvas id="searchTermsChart" style="max-height: 250px;"></canvas>
+                </div>
+                <div style="background: rgba(255,255,255,0.5); padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <h4 style="margin-top:0; color: #475569; text-align: center;"><?php echo $is_rtl ? 'بیشترین نتایج کلیک شده' : 'Most Clicked Results'; ?></h4>
+                    <canvas id="clickedResultsChart" style="max-height: 250px;"></canvas>
+                </div>
             </div>
 
             <?php if ( empty( $terms ) ) : ?>
@@ -210,6 +248,91 @@ jQuery(document).ready(function($) {
 </script>
 
 <?php
+// Prepare data for Chart.js
+$chart_terms_labels = [];
+$chart_terms_data = [];
+$term_counter = 0;
+foreach ( $persian_terms + $english_terms as $term => $data ) {
+    if ( $term_counter >= 10 ) break; // Top 10 for chart
+    $chart_terms_labels[] = $term;
+    $chart_terms_data[] = is_array($data) ? $data['count'] : $data;
+    $term_counter++;
+}
+
+$chart_clicks_labels = [];
+$chart_clicks_data = [];
+$click_counter = 0;
+foreach ( $clicks as $post_id => $data ) {
+    if ( $click_counter >= 10 ) break;
+    $chart_clicks_labels[] = mb_strimwidth( $data['title'], 0, 30, '...' );
+    $chart_clicks_data[] = $data['count'];
+    $click_counter++;
+}
+?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Chart !== 'undefined') {
+        // Search Terms Chart
+        const termsCtx = document.getElementById('searchTermsChart');
+        if (termsCtx) {
+            new Chart(termsCtx, {
+                type: 'bar',
+                data: {
+                    labels: <?php echo json_encode($chart_terms_labels); ?>,
+                    datasets: [{
+                        label: '<?php echo $is_rtl ? 'تعداد جستجو' : 'Search Count'; ?>',
+                        data: <?php echo json_encode($chart_terms_data); ?>,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Clicked Results Chart
+        const clicksCtx = document.getElementById('clickedResultsChart');
+        if (clicksCtx) {
+            new Chart(clicksCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: <?php echo json_encode($chart_clicks_labels); ?>,
+                    datasets: [{
+                        data: <?php echo json_encode($chart_clicks_data); ?>,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)',
+                            'rgba(255, 159, 64, 0.6)',
+                            'rgba(199, 199, 199, 0.6)',
+                            'rgba(83, 102, 255, 0.6)',
+                            'rgba(255, 99, 255, 0.6)',
+                            'rgba(99, 255, 132, 0.6)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    }
+});
+</script>
+
+<?php
 // Define helper function to render tables to keep code DRY
 // Notice: In real object-oriented design this should be a method, but defining it inline here for context ease.
 function fas_render_stats_table_helper( $terms, $i18n, $is_rtl ) {
@@ -219,12 +342,13 @@ function fas_render_stats_table_helper( $terms, $i18n, $is_rtl ) {
     }
     ?>
     <div style="max-height: 450px; overflow-y: auto; padding-right: 10px;">
-        <table class="wp-list-table widefat fixed striped table-view-list" style="border: none; box-shadow: none; background: transparent;">
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0; background: transparent;">
             <thead>
                 <tr style="text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                    <th style="font-weight: 700; color: #475569; border-bottom: 2px solid rgba(255, 255, 255, 0.4); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>; background: transparent; width: 60px;"><?php echo esc_html( $i18n['col_rank'] ); ?></th>
-                    <th style="font-weight: 700; color: #475569; border-bottom: 2px solid rgba(255, 255, 255, 0.4); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>; background: transparent;"><?php echo esc_html( $i18n['col_term'] ); ?></th>
-                    <th style="font-weight: 700; color: #475569; border-bottom: 2px solid rgba(255, 255, 255, 0.4); text-align: <?php echo $is_rtl ? 'left' : 'right'; ?>; background: transparent; width: 100px;"><?php echo esc_html( $i18n['col_count'] ); ?></th>
+                    <th style="padding: 12px; font-weight: 700; color: #475569; border-bottom: 2px solid #e2e8f0; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>; width: 60px;"><?php echo esc_html( $i18n['col_rank'] ); ?></th>
+                    <th style="padding: 12px; font-weight: 700; color: #475569; border-bottom: 2px solid #e2e8f0; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;"><?php echo esc_html( $i18n['col_term'] ); ?></th>
+                    <th style="padding: 12px; font-weight: 700; color: #475569; border-bottom: 2px solid #e2e8f0; text-align: center; width: 100px;"><?php echo esc_html( $i18n['col_click'] ); ?></th>
+                    <th style="padding: 12px; font-weight: 700; color: #475569; border-bottom: 2px solid #e2e8f0; text-align: <?php echo $is_rtl ? 'left' : 'right'; ?>; width: 100px;"><?php echo esc_html( $i18n['col_count'] ); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -232,11 +356,12 @@ function fas_render_stats_table_helper( $terms, $i18n, $is_rtl ) {
                 $rank = 1;
                 foreach ( $terms as $term => $data ) : 
                     $count = is_array($data) ? $data['count'] : $data;
+                    $clicks = (is_array($data) && isset($data['click_count'])) ? $data['click_count'] : 0;
                     $logs = is_array($data) && isset($data['logs']) ? $data['logs'] : array();
                     $trend_url = 'https://trends.google.com/trends/explore?q=' . urlencode($term);
                 ?>
-                    <tr class="fas-term-row" style="background: transparent;">
-                        <td style="font-weight: 700; color: #0f172a;">
+                    <tr class="fas-term-row" style="background: transparent; border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 12px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9;">
                             <?php if ( $rank === 1 ) : ?>
                                 <span style="background: #f59e0b; color: #ffffff; padding: 2px 8px; border-radius: 12px; font-size: 11px;">1st</span>
                             <?php elseif ( $rank === 2 ) : ?>
@@ -247,21 +372,24 @@ function fas_render_stats_table_helper( $terms, $i18n, $is_rtl ) {
                                 #<?php echo intval( $rank ); ?>
                             <?php endif; ?>
                         </td>
-                        <td style="font-weight: 600; color: #334155;">
-                            <code><?php echo esc_html( $term ); ?></code>
+                        <td style="padding: 12px; font-weight: 600; color: #334155; border-bottom: 1px solid #f1f5f9;">
+                            <span style="font-size: 14px; background: rgba(0,102,204,0.05); padding: 4px 8px; border-radius: 6px;"><?php echo esc_html( $term ); ?></span>
                             <br>
                             <a href="<?php echo esc_url($trend_url); ?>" target="_blank" class="fas-trend-link">
                                 <span class="dashicons dashicons-external" style="font-size: 12px; width: 12px; height: 12px;"></span> Google Trends
                             </a>
                         </td>
-                        <td style="font-weight: 700; text-align: <?php echo $is_rtl ? 'left' : 'right'; ?>; color: #0066cc;">
+                        <td style="padding: 12px; font-weight: 600; text-align: center; color: #10b981; border-bottom: 1px solid #f1f5f9;">
+                            <?php echo esc_html( number_format_i18n( $clicks ) ); ?>
+                        </td>
+                        <td style="padding: 12px; font-weight: 700; text-align: <?php echo $is_rtl ? 'left' : 'right'; ?>; color: #0066cc; border-bottom: 1px solid #f1f5f9;">
                             <?php echo esc_html( number_format_i18n( $count ) ); ?>
                             <span class="dashicons dashicons-arrow-down-alt2" style="font-size: 14px; width: 14px; height: 14px; color: #94a3b8; margin-top: 4px;"></span>
                         </td>
                     </tr>
                     <tr class="fas-logs-panel-tr" style="background: transparent;">
-                        <td colspan="3" style="padding: 0;">
-                            <div class="fas-logs-panel">
+                        <td colspan="4" style="padding: 0;">
+                            <div class="fas-logs-panel" style="background: rgba(241, 245, 249, 0.5); border-radius: 8px; margin: 4px 12px 12px 12px; border: 1px solid #e2e8f0;">
                                 <?php if ( empty($logs) ) : ?>
                                     <p style="margin: 0; font-style: italic;"><?php echo $is_rtl ? 'هیچ لاگ آی‌پی جدیدی ثبت نشده است.' : 'No recent IP logs found.'; ?></p>
                                 <?php else : ?>

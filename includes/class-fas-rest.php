@@ -15,6 +15,265 @@ class FAS_Rest {
             'callback'            => array( $this, 'get_search_results' ),
             'permission_callback' => '__return_true',
         ) );
+
+        register_rest_route( 'fas/v1', '/track-click', array(
+            'methods'             => 'POST',
+            'callback'            => array( $this, 'track_search_click' ),
+            'permission_callback' => '__return_true',
+        ) );
+
+        register_rest_route( 'fas/v1', '/preview', array(
+            'methods'             => 'POST',
+            'callback'            => array( $this, 'render_live_preview' ),
+            'permission_callback' => function() {
+                return current_user_can( 'manage_options' );
+            },
+        ) );
+    }
+
+    public function render_live_preview( WP_REST_Request $request ) {
+        $settings = $request->get_json_params();
+        if ( empty( $settings ) ) {
+            $settings = $request->get_body_params();
+        }
+        $active_lang = isset( $settings['active_lang'] ) ? sanitize_text_field( $settings['active_lang'] ) : 'en';
+        $suffix = '_' . $active_lang;
+
+        // Hook into get_option to override settings dynamically with the POSTed unsaved preview data
+        add_filter( 'pre_option_fas_theme_mode' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_theme_mode'.$suffix] ) ? sanitize_text_field( $settings['fas_theme_mode'.$suffix] ) : 'dark'; } );
+        add_filter( 'pre_option_fas_tabs_order' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tabs_order'.$suffix] ) ? sanitize_text_field( $settings['fas_tabs_order'.$suffix] ) : 'all,products,posts,docs'; } );
+        add_filter( 'pre_option_fas_tab_all_title' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_all_title'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_all_title'.$suffix] ) : 'All Results'; } );
+        add_filter( 'pre_option_fas_tab_all_color' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_all_color'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_all_color'.$suffix] ) : '#0066cc'; } );
+        add_filter( 'pre_option_fas_tab_all_icon' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_all_icon'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_all_icon'.$suffix] ) : 'dashicons-grid-view'; } );
+        add_filter( 'pre_option_fas_tab_all_custom_icon' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_all_custom_icon'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_all_custom_icon'.$suffix] ) : ''; } );
+
+        add_filter( 'pre_option_fas_tab_products_title' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_products_title'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_products_title'.$suffix] ) : 'Products'; } );
+        add_filter( 'pre_option_fas_tab_products_color' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_products_color'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_products_color'.$suffix] ) : '#10b981'; } );
+        add_filter( 'pre_option_fas_tab_products_icon' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_products_icon'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_products_icon'.$suffix] ) : 'dashicons-cart'; } );
+        add_filter( 'pre_option_fas_tab_products_custom_icon' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_products_custom_icon'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_products_custom_icon'.$suffix] ) : ''; } );
+
+        add_filter( 'pre_option_fas_tab_posts_title' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_posts_title'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_posts_title'.$suffix] ) : 'News & Articles'; } );
+        add_filter( 'pre_option_fas_tab_posts_color' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_posts_color'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_posts_color'.$suffix] ) : '#f59e0b'; } );
+        add_filter( 'pre_option_fas_tab_posts_icon' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_posts_icon'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_posts_icon'.$suffix] ) : 'dashicons-welcome-write-blog'; } );
+        add_filter( 'pre_option_fas_tab_posts_custom_icon' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_posts_custom_icon'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_posts_custom_icon'.$suffix] ) : ''; } );
+
+        add_filter( 'pre_option_fas_tab_docs_title' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_docs_title'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_docs_title'.$suffix] ) : 'Documentation'; } );
+        add_filter( 'pre_option_fas_tab_docs_color' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_docs_color'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_docs_color'.$suffix] ) : '#6366f1'; } );
+        add_filter( 'pre_option_fas_tab_docs_icon' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_docs_icon'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_docs_icon'.$suffix] ) : 'dashicons-book-alt'; } );
+        add_filter( 'pre_option_fas_tab_docs_custom_icon' . $suffix, function() use ( $settings, $suffix ) { return isset( $settings['fas_tab_docs_custom_icon'.$suffix] ) ? sanitize_text_field( $settings['fas_tab_docs_custom_icon'.$suffix] ) : ''; } );
+
+        // Generate the exact inline CSS that the frontend would use
+        $floating_bg       = isset( $settings['fas_floating_bg'.$suffix] ) ? sanitize_text_field( $settings['fas_floating_bg'.$suffix] ) : '#0066cc';
+        $popup_width       = isset( $settings['fas_popup_width'.$suffix] ) ? intval( $settings['fas_popup_width'.$suffix] ) : 750;
+        $popup_max_height  = isset( $settings['fas_popup_max_height'.$suffix] ) ? intval( $settings['fas_popup_max_height'.$suffix] ) : 600;
+        $title_size_desktop = isset( $settings['fas_title_size_desktop'.$suffix] ) ? intval( $settings['fas_title_size_desktop'.$suffix] ) : 15;
+        $title_size_mobile  = isset( $settings['fas_title_size_mobile'.$suffix] ) ? intval( $settings['fas_title_size_mobile'.$suffix] ) : 14;
+        $excerpt_size_desktop = isset( $settings['fas_excerpt_size_desktop'.$suffix] ) ? intval( $settings['fas_excerpt_size_desktop'.$suffix] ) : 13;
+        $excerpt_size_mobile  = isset( $settings['fas_excerpt_size_mobile'.$suffix] ) ? intval( $settings['fas_excerpt_size_mobile'.$suffix] ) : 12;
+        $history_bg        = isset( $settings['fas_history_bg'.$suffix] ) ? sanitize_text_field( $settings['fas_history_bg'.$suffix] ) : 'rgba(255, 255, 255, 0.1)';
+        $history_hover_bg  = isset( $settings['fas_history_hover_bg'.$suffix] ) ? sanitize_text_field( $settings['fas_history_hover_bg'.$suffix] ) : 'rgba(255, 255, 255, 0.2)';
+        $history_text_size = isset( $settings['fas_history_text_size'.$suffix] ) ? intval( $settings['fas_history_text_size'.$suffix] ) : 13;
+
+        // Force the get_lang_suffix to return our targeted language for the template
+        add_filter( 'pre_option_fas_forced_lang_suffix', function() use ($suffix) { return $suffix; } );
+
+        ob_start();
+        ?>
+        <!DOCTYPE html>
+        <html dir="<?php echo ( strpos( $suffix, 'fa' ) !== false ) ? 'rtl' : 'ltr'; ?>">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link rel="stylesheet" id="dashicons-css" href="<?php echo esc_url( includes_url( 'css/dashicons.min.css' ) ); ?>" media="all" />
+            <link rel="stylesheet" id="fas-public-css" href="<?php echo esc_url( plugins_url( 'public/css/fas-public.css', dirname( __FILE__ ) ) ); ?>" media="all" />
+            <style>
+                body { margin: 0; background: transparent; overflow: hidden; }
+                .fas-search-overlay {
+                    position: absolute !important;
+                    height: 100vh !important;
+                }
+                :root {
+                    --fas-primary: <?php echo esc_attr( $floating_bg ); ?>;
+                    --fas-popup-width: <?php echo esc_attr( $popup_width ); ?>px;
+                    --fas-popup-max-height: <?php echo esc_attr( $popup_max_height ); ?>px;
+                    --fas-title-size-desktop: <?php echo esc_attr( $title_size_desktop ); ?>px;
+                    --fas-title-size-mobile: <?php echo esc_attr( $title_size_mobile ); ?>px;
+                    --fas-excerpt-size-desktop: <?php echo esc_attr( $excerpt_size_desktop ); ?>px;
+                    --fas-excerpt-size-mobile: <?php echo esc_attr( $excerpt_size_mobile ); ?>px;
+                    --fas-history-bg: <?php echo esc_attr( $history_bg ); ?>;
+                    --fas-history-hover-bg: <?php echo esc_attr( $history_hover_bg ); ?>;
+                    --fas-history-text-size: <?php echo esc_attr( $history_text_size ); ?>px;
+                }
+            </style>
+        </head>
+        <body>
+            <?php
+            // Mock FAS_Core::get_lang_suffix via monkey patching for the template
+            $original_template = locate_template( 'faramoj-advanced-search/search-modal.php' );
+            if ( ! $original_template ) {
+                $original_template = plugin_dir_path( dirname( __FILE__ ) ) . 'templates/search-modal.php';
+            }
+            // Require the file and capture output. The template uses FAS_Core::get_option which we hooked.
+            include $original_template;
+            ?>
+            <script>
+                // Auto-open modal and prevent close
+                document.addEventListener('DOMContentLoaded', function() {
+                    const overlay = document.querySelector('.fas-search-overlay');
+                    if(overlay) {
+                        overlay.classList.add('is-open');
+
+                        // Populate mock history and results based on the tabs layout to demonstrate exact look
+                        const tabs = document.querySelectorAll('.fas-tab-btn');
+                        if (tabs.length > 0) {
+                            const firstTab = tabs[0];
+                            firstTab.classList.add('is-active');
+                            const targetTab = firstTab.getAttribute('data-tab');
+
+                            const content = document.getElementById('fas-tab-' + targetTab);
+                            if (content) {
+                                content.classList.add('is-active');
+                                const isRtl = document.documentElement.dir === 'rtl';
+                                const dirStr = isRtl ? 'row-reverse' : 'row';
+                                const alignStr = isRtl ? 'right' : 'left';
+
+                                let html = '<div class="fas-result-item" style="display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; margin-bottom: 8px; flex-direction: '+dirStr+';">';
+                                html += '<div style="width: 48px; height: 48px; border-radius: 8px; background: rgba(100,116,139,0.1); display:flex; align-items:center; justify-content:center; color:#64748b;">';
+                                html += '<span class="dashicons dashicons-cart" style="font-size: 22px; width:22px; height:22px;"></span>';
+                                html += '</div>';
+                                html += '<div style="text-align: '+alignStr+';">';
+                                html += '<h4 class="fas-result-title">' + (isRtl ? 'آنتن فوق پیشرفته Phase-30ISO' : 'Phase-30ISO Antenna') + '</h4>';
+                                html += '<p class="fas-result-excerpt">' + (isRtl ? 'محصول مخابراتی دو بانده فوق پیشرفته...' : 'Premium dual-band technical product spec...') + '</p>';
+                                html += '</div>';
+                                html += '</div>';
+                                content.innerHTML = html;
+                            }
+                        }
+
+                        // Add mock history items
+                        const histContainer = document.querySelector('.fas-search-history');
+                        if (histContainer) {
+                            const isRtl = document.documentElement.dir === 'rtl';
+                            const titleText = isRtl ? 'تاریخچه جستجو' : 'Search History';
+                            const clearText = isRtl ? 'پاک کردن' : 'Clear';
+                            let html = `
+                                <div class="fas-search-history-header">
+                                    <span class="fas-search-history-title">${titleText}</span>
+                                    <button type="button" class="fas-search-history-clear">${clearText}</button>
+                                </div>
+                                <div class="fas-search-history-items">
+                            `;
+                            const mockTerms = ['phase-30', 'antenna', 'radio'];
+                            const maxHist = parseInt('<?php echo isset($settings['fas_history_count'.$suffix]) ? intval($settings['fas_history_count'.$suffix]) : 5; ?>', 10);
+                            for(let i=0; i < Math.min(mockTerms.length, maxHist); i++) {
+                                html += `<button type="button" class="fas-search-history-item" style="flex-direction: ${isRtl ? 'row-reverse' : 'row'};">
+                                    <span class="fas-search-history-item-text">${mockTerms[i]}</span>
+                                    <span class="fas-search-history-item-remove">&times;</span>
+                                </button>`;
+                            }
+                            html += `</div>`;
+                            histContainer.innerHTML = html;
+                            histContainer.style.display = 'block';
+
+                            // Adjust direction specifically for history elements to ensure perfect alignment
+                            histContainer.style.direction = document.documentElement.dir;
+                            const header = histContainer.querySelector('.fas-search-history-header');
+                            if(header) { header.style.flexDirection = isRtl ? 'row-reverse' : 'row'; }
+                        }
+                    }
+
+                    // Simple tab switching logic for preview
+                    const tabBtns = document.querySelectorAll('.fas-tab-btn');
+                    tabBtns.forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const target = btn.getAttribute('data-tab');
+                            const accentColor = btn.getAttribute('data-accent-color');
+
+                            tabBtns.forEach(b => { b.classList.remove('is-active'); b.style.color = ''; b.style.borderBottomColor = ''; b.style.background = ''; b.style.borderColor = ''; const icon = b.querySelector('.dashicons'); if (icon) icon.style.color = ''; });
+                            document.querySelectorAll('.fas-tab-content').forEach(c => c.classList.remove('is-active'));
+
+                            btn.classList.add('is-active');
+                            btn.style.background = accentColor;
+                            btn.style.borderColor = accentColor;
+
+                            const targetContent = document.getElementById('fas-tab-' + target);
+                            if (targetContent) targetContent.classList.add('is-active');
+                        });
+                    });
+                });
+            </script>
+        </body>
+        </html>
+        <?php
+        $html = ob_get_clean();
+
+        return new WP_REST_Response( array( 'success' => true, 'html' => $html ), 200 );
+    }
+
+    public function track_search_click( WP_REST_Request $request ) {
+        $post_id = intval( $request->get_param( 'post_id' ) );
+        $title   = sanitize_text_field( $request->get_param( 'title' ) );
+        $term    = sanitize_text_field( $request->get_param( 'term' ) );
+        $month   = current_time( 'Y-m' );
+
+        if ( empty( $post_id ) ) {
+            return new WP_REST_Response( array( 'error' => 'Empty post ID' ), 400 );
+        }
+
+        $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [], 'clicks' => [], 'monthly' => [] ) );
+
+        if ( ! isset( $stats['clicks'] ) ) {
+            $stats['clicks'] = array();
+        }
+
+        // Use post_id as key, but store title for display purposes
+        if ( ! isset( $stats['clicks'][ $post_id ] ) ) {
+            $stats['clicks'][ $post_id ] = array(
+                'count' => 0,
+                'title' => $title
+            );
+        }
+
+        $stats['clicks'][ $post_id ]['count']++;
+
+        // Keep top 100 clicked items to protect option storage
+        uasort( $stats['clicks'], function( $a, $b ) {
+            return $b['count'] <=> $a['count'];
+        } );
+
+        if ( count( $stats['clicks'] ) > 100 ) {
+            $stats['clicks'] = array_slice( $stats['clicks'], 0, 100, true );
+        }
+
+        // Track clicks per term
+        if ( ! empty( $term ) ) {
+            $term_clean = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $term ) ) : strtolower( trim( $term ) );
+            if ( isset( $stats['terms'][ $term_clean ] ) && is_array( $stats['terms'][ $term_clean ] ) ) {
+                if ( ! isset( $stats['terms'][ $term_clean ]['click_count'] ) ) {
+                    $stats['terms'][ $term_clean ]['click_count'] = 0;
+                }
+                $stats['terms'][ $term_clean ]['click_count']++;
+            }
+
+            // Monthly stats tracking
+            if ( ! isset( $stats['monthly'] ) ) {
+                $stats['monthly'] = array();
+            }
+            if ( ! isset( $stats['monthly'][ $month ] ) ) {
+                $stats['monthly'][ $month ] = array( 'terms' => array() );
+            }
+            if ( ! isset( $stats['monthly'][ $month ]['terms'][ $term_clean ] ) ) {
+                $stats['monthly'][ $month ]['terms'][ $term_clean ] = array( 'count' => 0, 'click_count' => 0 );
+            }
+            if ( ! isset( $stats['monthly'][ $month ]['terms'][ $term_clean ]['click_count'] ) ) {
+                $stats['monthly'][ $month ]['terms'][ $term_clean ]['click_count'] = 0;
+            }
+            $stats['monthly'][ $month ]['terms'][ $term_clean ]['click_count']++;
+        }
+
+        update_option( 'fas_search_stats', $stats );
+
+        return new WP_REST_Response( array( 'success' => true ), 200 );
     }
 
     public function get_search_results( WP_REST_Request $request ) {
@@ -85,10 +344,11 @@ class FAS_Rest {
 
         // Standardize lowercase matching
         $term_clean = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $term ) ) : strtolower( trim( $term ) );
+        $month = current_time( 'Y-m' );
         
         // Defer database writing to the shutdown hook so it does not block the REST API response
-        add_action( 'shutdown', function() use ( $term_clean, $ip, $timestamp ) {
-            $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [] ) );
+        add_action( 'shutdown', function() use ( $term_clean, $ip, $timestamp, $month ) {
+            $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [], 'clicks' => [], 'monthly' => [] ) );
 
             if ( ! isset( $stats['total_count'] ) ) {
                 $stats['total_count'] = 0;
@@ -115,6 +375,22 @@ class FAS_Rest {
 
             $stats['terms'][ $term_clean ]['count']++;
             
+            if ( ! isset( $stats['terms'][ $term_clean ]['click_count'] ) ) {
+                $stats['terms'][ $term_clean ]['click_count'] = 0;
+            }
+
+            // Monthly Tracking
+            if ( ! isset( $stats['monthly'] ) ) {
+                $stats['monthly'] = array();
+            }
+            if ( ! isset( $stats['monthly'][ $month ] ) ) {
+                $stats['monthly'][ $month ] = array( 'terms' => array() );
+            }
+            if ( ! isset( $stats['monthly'][ $month ]['terms'][ $term_clean ] ) ) {
+                $stats['monthly'][ $month ]['terms'][ $term_clean ] = array( 'count' => 0, 'click_count' => 0 );
+            }
+            $stats['monthly'][ $month ]['terms'][ $term_clean ]['count']++;
+
             // Add IP log, keep max 10 recent logs per term to prevent bloat
             array_unshift( $stats['terms'][ $term_clean ]['logs'], array( 'ip' => $ip, 'time' => $timestamp ) );
             if ( count( $stats['terms'][ $term_clean ]['logs'] ) > 10 ) {
@@ -320,6 +596,7 @@ class FAS_Rest {
                     $excerpt = wp_trim_words( get_the_excerpt(), 15, '...' );
 
                     $item = array(
+                        'id'           => $id,
                         'title'        => $title,
                         'permalink'    => get_permalink(),
                         'image'        => get_the_post_thumbnail_url( $id, 'thumbnail' ) ?: '',
@@ -365,6 +642,51 @@ class FAS_Rest {
         );
         $formatted_results['all'] = array_slice( $all_items, 0, 20 );
 
+        // "Did you mean" logic if no results
+        if ( empty( $formatted_results['all'] ) ) {
+            $formatted_results['did_you_mean'] = $this->get_did_you_mean_suggestion( $term );
+        }
+
         return $formatted_results;
+    }
+
+    /**
+     * Find the closest matching successfully searched term from stats.
+     */
+    private function get_did_you_mean_suggestion( $query ) {
+        $stats = get_option( 'fas_search_stats', array() );
+        if ( empty( $stats['terms'] ) ) {
+            return '';
+        }
+
+        $query_clean = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $query ) ) : strtolower( trim( $query ) );
+        $best_match = '';
+        $shortest_dist = -1;
+
+        foreach ( $stats['terms'] as $term => $data ) {
+            // Levenshtein function limits string length to 255
+            if ( strlen( $query_clean ) > 255 || strlen( $term ) > 255 ) {
+                continue;
+            }
+
+            // Calculate similarity (Levenshtein distance)
+            $dist = levenshtein( $query_clean, $term );
+
+            // Allow for typos (distance up to 3 for longer words, 1 for short words)
+            $max_dist = strlen($query_clean) <= 4 ? 1 : 3;
+
+            // Ensure distance is valid (not -1) and within threshold
+            if ( $dist >= 0 && $dist <= $max_dist ) {
+                if ( $shortest_dist === -1 || $dist < $shortest_dist ) {
+                    // Make sure it's not the exact same query
+                    if ( $query_clean !== $term ) {
+                        $best_match = $term;
+                        $shortest_dist = $dist;
+                    }
+                }
+            }
+        }
+
+        return $best_match;
     }
 }

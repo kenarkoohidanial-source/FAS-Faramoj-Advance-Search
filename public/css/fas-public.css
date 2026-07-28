@@ -145,6 +145,94 @@
     color: #e11d48 !important;
 }
 
+/* Search History Styling */
+.fas-search-history {
+    padding: 10px 24px;
+    border-bottom: 1px solid var(--fas-border);
+}
+
+.fas-search-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.fas-search-history-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fas-text-muted);
+}
+
+.fas-search-history-clear {
+    background: transparent !important;
+    border: none !important;
+    color: #e11d48 !important;
+    font-size: 12px !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.fas-search-history-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.fas-search-history-item {
+    background: var(--fas-history-bg, rgba(255, 255, 255, 0.1)) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid var(--fas-border) !important;
+    color: var(--fas-text-main) !important;
+    padding: 6px 12px !important;
+    border-radius: 16px !important;
+    font-size: var(--fas-history-text-size, 13px) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+    margin: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    line-height: 1 !important;
+}
+
+.fas-search-history-item:hover {
+    background: var(--fas-history-hover-bg, rgba(255, 255, 255, 0.2)) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 8px -2px rgba(0, 0, 0, 0.08) !important;
+}
+
+.fas-search-history-item-text {
+    pointer-events: none;
+}
+
+.fas-search-history-item-remove {
+    background: transparent !important;
+    border: none !important;
+    color: var(--fas-text-muted) !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    transition: color 0.2s !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    box-shadow: none !important;
+}
+
+.fas-search-history-item-remove:hover {
+    color: #e11d48 !important;
+}
+
 /* Category Tab Header styling (Beautiful Glassmorphism pills layout) */ 
 .fas-search-tabs { 
     display: flex; 
