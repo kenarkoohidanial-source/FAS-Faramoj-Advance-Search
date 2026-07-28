@@ -13,6 +13,11 @@ class FAS_Core {
      * Helper to get active language suffix dynamically.
      */
     public static function get_lang_suffix() {
+        $forced = get_option( 'fas_forced_lang_suffix' );
+        if ( ! empty( $forced ) ) {
+            return $forced;
+        }
+
         $lang = 'en'; // default fallback
         if ( function_exists( 'pll_current_language' ) ) {
             $pll_lang = pll_current_language();
@@ -28,7 +33,7 @@ class FAS_Core {
                 $lang = 'fa';
             }
         }
-        return '_' . $lang;
+        return apply_filters( 'fas_lang_suffix', '_' . $lang );
     }
 
     /**
@@ -100,14 +105,14 @@ class FAS_Core {
             'fas-public-css',
             plugins_url( 'public/css/fas-public.css', dirname( __FILE__ ) ),
             array(),
-            '1.1.5'
+            '1.2.0'
         );
 
         wp_enqueue_script(
             'fas-public-js',
             plugins_url( 'public/js/fas-public.js', dirname( __FILE__ ) ),
             array(),
-            '1.1.5',
+            '1.2.0',
             true
         );
 
@@ -162,6 +167,12 @@ class FAS_Core {
         $excerpt_size_desktop = self::get_option( 'fas_excerpt_size_desktop', 13 );
         $excerpt_size_mobile  = self::get_option( 'fas_excerpt_size_mobile', 12 );
 
+        // History UI Options
+        $history_count     = self::get_option( 'fas_history_count', 5 );
+        $history_bg        = self::get_option( 'fas_history_bg', 'rgba(255, 255, 255, 0.1)' );
+        $history_hover_bg  = self::get_option( 'fas_history_hover_bg', 'rgba(255, 255, 255, 0.2)' );
+        $history_text_size = self::get_option( 'fas_history_text_size', 13 );
+
         $custom_inline_css = "
             :root { 
                 --fas-primary: " . esc_attr( $floating_bg ) . "; 
@@ -175,6 +186,9 @@ class FAS_Core {
                 --fas-title-size-mobile: " . esc_attr( $title_size_mobile ) . "px;
                 --fas-excerpt-size-desktop: " . esc_attr( $excerpt_size_desktop ) . "px;
                 --fas-excerpt-size-mobile: " . esc_attr( $excerpt_size_mobile ) . "px;
+                --fas-history-bg: " . esc_attr( $history_bg ) . ";
+                --fas-history-hover-bg: " . esc_attr( $history_hover_bg ) . ";
+                --fas-history-text-size: " . esc_attr( $history_text_size ) . "px;
             }
         ";
         wp_add_inline_style( 'fas-public-css', $custom_inline_css );

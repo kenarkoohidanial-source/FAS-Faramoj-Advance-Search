@@ -61,6 +61,9 @@ $placeholder_text = $is_fa ? 'جستجو در محصولات، مقالات، م
             <span class="fas-modal-close" role="button" aria-label="<?php esc_attr_e( 'Close Search', 'faramoj-search' ); ?>">&times;</span>
         </div>
 
+        <!-- Search History Panel -->
+        <div class="fas-search-history" style="display: none;"></div>
+
         <!-- Category Tabs (Dynamically Ordered & Styled) -->
         <div class="fas-search-tabs">
             <?php 

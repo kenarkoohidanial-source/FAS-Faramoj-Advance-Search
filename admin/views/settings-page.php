@@ -35,6 +35,11 @@ $floating_offset_y      = get_option( 'fas_floating_offset_y' . $suffix, 24 );
 $popup_width            = get_option( 'fas_popup_width' . $suffix, 750 );
 $popup_max_height       = get_option( 'fas_popup_max_height' . $suffix, 600 );
 
+$history_count          = get_option( 'fas_history_count' . $suffix, 5 );
+$history_bg             = get_option( 'fas_history_bg' . $suffix, 'rgba(255, 255, 255, 0.1)' );
+$history_hover_bg       = get_option( 'fas_history_hover_bg' . $suffix, 'rgba(255, 255, 255, 0.2)' );
+$history_text_size      = get_option( 'fas_history_text_size' . $suffix, 13 );
+
 // Fixed Sortable Loading Bug: Check if empty or corrupted, fall back to core tabs
 $tabs_order             = get_option( 'fas_tabs_order' . $suffix );
 if ( empty( $tabs_order ) || strpos( $tabs_order, 'all' ) === false ) {
@@ -309,6 +314,40 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                     </table>
                 </div>
 
+                <!-- Section: History Settings -->
+                <div class="fas-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
+                    <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <span class="dashicons dashicons-backup" style="color: #0066cc;"></span>
+                        <span><?php echo $is_rtl ? 'تنظیمات تاریخچه جستجو' : 'Search History Settings'; ?></span>
+                    </h3>
+                    <table class="form-table fas-form-table" style="margin: 0; width: 100%;">
+                        <tr>
+                            <td style="padding: 10px 0; width: 220px; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'تعداد نمایش' : 'Display Count'; ?></td>
+                            <td style="padding: 10px 0;">
+                                <input type="number" name="fas_history_count<?php echo esc_attr( $suffix ); ?>" id="fas_history_count" value="<?php echo esc_attr( $history_count ); ?>" class="regular-text" min="0" max="20" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'سایز متن' : 'Text Size'; ?></td>
+                            <td style="padding: 10px 0;">
+                                <input type="number" name="fas_history_text_size<?php echo esc_attr( $suffix ); ?>" id="fas_history_text_size" value="<?php echo esc_attr( $history_text_size ); ?>" class="regular-text" min="10" max="24" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'رنگ پس زمینه آیتم' : 'Item Background'; ?></td>
+                            <td style="padding: 10px 0;">
+                                <input type="text" name="fas_history_bg<?php echo esc_attr( $suffix ); ?>" id="fas_history_bg" value="<?php echo esc_attr( $history_bg ); ?>" class="fas-color-picker" data-alpha-enabled="true">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'رنگ هاور آیتم' : 'Item Hover Background'; ?></td>
+                            <td style="padding: 10px 0;">
+                                <input type="text" name="fas_history_hover_bg<?php echo esc_attr( $suffix ); ?>" id="fas_history_hover_bg" value="<?php echo esc_attr( $history_hover_bg ); ?>" class="fas-color-picker" data-alpha-enabled="true">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
                 <!-- Section 3: Floating Trigger Position & Offsets -->
                 <div class="fas-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
                     <h3 style="margin: 0 0 16px 0; font-size: 15px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">
@@ -516,58 +555,144 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
 
                 <!-- Interactive Live Preview placed beautifully under the Category sorting/customization cards -->
                 <div class="fas-card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                    <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                        <span style="background: #e11d48; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 12px; font-weight: 800; text-transform: uppercase;"><?php echo esc_html( $i18n['live'] ); ?></span>
-                        <span><?php echo esc_html( $i18n['live_preview'] ); ?></span>
+                    <h3 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 700; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="background: #e11d48; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 12px; font-weight: 800; text-transform: uppercase;"><?php echo esc_html( $i18n['live'] ); ?></span>
+                            <span><?php echo esc_html( $i18n['live_preview'] ); ?></span>
+                        </div>
+                        
+                        <!-- Preview Mode Selector -->
+                        <div style="display: flex; gap: 6px;">
+                            <button type="button" class="button fas-mode-toggle is-active" data-mode="popup" style="border-radius: 16px; font-size: 11px; font-weight: 700; background: #0066cc; color: white; border: none; padding: 4px 12px; cursor: pointer;"><?php echo $is_rtl ? 'پاپ‌آپ پدیدار شده' : 'Open Popup Mode'; ?></button>
+                            <button type="button" class="button fas-mode-toggle" data-mode="button" style="border-radius: 16px; font-size: 11px; font-weight: 700; padding: 4px 12px; cursor: pointer;"><?php echo $is_rtl ? 'دکمه شناور' : 'Floating Button Mode'; ?></button>
+                        </div>
                     </h3>
                     
-                    <p style="font-size: 13px; color: #64748b; margin-bottom: 24px;">
+                    <p style="font-size: 13px; color: #64748b; margin-bottom: 20px;">
                         <?php echo esc_html( $i18n['live_preview_desc'] ); ?>
                     </p>
 
                     <!-- Device Toggle Controls -->
                     <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 20px;">
-                        <button type="button" class="button fas-preview-toggle is-active" data-device="desktop" style="border-radius: 20px; font-weight: 600; background: #0066cc; color: white; border: none; padding: 5px 15px;">Desktop View</button>
-                        <button type="button" class="button fas-preview-toggle" data-device="mobile" style="border-radius: 20px; font-weight: 600; padding: 5px 15px;">Mobile View</button>
+                        <button type="button" class="button fas-preview-toggle is-active" data-device="desktop" style="border-radius: 20px; font-weight: 600; background: #0066cc; color: white; border: none; padding: 5px 18px; cursor: pointer;">Desktop View</button>
+                        <button type="button" class="button fas-preview-toggle" data-device="mobile" style="border-radius: 20px; font-weight: 600; padding: 5px 18px; cursor: pointer;">Mobile View</button>
                     </div>
 
-                    <!-- Centered live preview container wrapper with generous workspace -->
-                    <div id="fas-mock-modal-wrapper" style="position: relative; background: radial-gradient(circle, #f8fafc 0%, #f1f5f9 100%); padding: 40px 10px; border-radius: 12px; display: flex; justify-content: center; align-items: center; overflow: auto; min-height: 400px; border: 1px solid #cbd5e1;">
-                        
-                        <!-- Mock Floating Button -->
-                        <div id="fas-mock-floating-btn" style="position: absolute; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: white; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);">
-                            <span class="dashicons dashicons-search" style="font-size: 20px;"></span>
-                        </div>
+                    <!-- Scoped CSS Overrides to prevent floating button & overlay from spilling into Admin UI -->
+                    <style>
+                        #fas-mock-preview-area {
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            padding: 20px 0;
+                            background: #f8fafc;
+                            border-radius: 12px;
+                            border: 1px dashed #cbd5e1;
+                            min-height: 540px;
+                        }
+                        #fas-mock-modal-wrapper.fas-desktop-canvas {
+                            width: 100%;
+                            min-height: 520px;
+                            border-radius: 16px;
+                            position: relative !important;
+                            overflow: hidden !important;
+                            background: radial-gradient(circle, #f8fafc 0%, #cbd5e1 100%);
+                            border: 1px solid #cbd5e1;
+                            box-shadow: inset 0 2px 6px rgba(0,0,0,0.04);
+                            transition: all 0.3s ease;
+                        }
+                        #fas-mock-modal-wrapper.fas-phone-bezel {
+                            width: 340px;
+                            height: 560px;
+                            border-radius: 38px;
+                            border: 10px solid #0f172a;
+                            position: relative !important;
+                            overflow: hidden !important;
+                            background: radial-gradient(circle, #f8fafc 0%, #cbd5e1 100%);
+                            box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.35);
+                            transition: all 0.3s ease;
+                        }
+                        #fas-mock-modal-wrapper #fas-preview-floating-btn {
+                            position: absolute !important;
+                            z-index: 5 !important;
+                            margin: 0 !important;
+                            cursor: pointer;
+                        }
+                        #fas-mock-modal-wrapper .fas-search-overlay {
+                            position: absolute !important;
+                            top: 0 !important;
+                            left: 0 !important;
+                            width: 100% !important;
+                            height: 100% !important;
+                            z-index: 10 !important;
+                            padding-top: 50px !important;
+                            box-sizing: border-box !important;
+                        }
+                        #fas-mock-modal-wrapper.fas-phone-bezel .fas-search-overlay {
+                            padding-top: 35px !important;
+                        }
+                        #fas-mock-modal-wrapper.fas-phone-bezel .fas-search-container {
+                            width: 92% !important;
+                            max-width: 320px !important;
+                        }
+                        .fas-phone-notch {
+                            width: 110px;
+                            height: 16px;
+                            background: #0f172a;
+                            border-bottom-left-radius: 10px;
+                            border-bottom-right-radius: 10px;
+                            position: absolute;
+                            top: 0;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            z-index: 40;
+                        }
+                    </style>
 
-                        <div id="fas-preview-container" class="fas-search-container" style="display: none; width: 100%; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden; <?php echo $dir_style; ?>">
+                    <!-- Main Preview Workspace -->
+                    <div id="fas-mock-preview-area">
+                        <div id="fas-mock-modal-wrapper" class="fas-desktop-canvas">
                             
-                            <!-- Input wrapper -->
-                            <div class="fas-search-input-wrapper" style="display: flex; align-items: center; padding: 18px 24px; flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
-                                <span class="dashicons dashicons-search" style="color: #64748b; margin: <?php echo $is_rtl ? '0 0 0 12px' : '0 12px 0 0'; ?>; font-size: 20px; width: 20px; height: 20px;"></span>
-                                <input id="fas-mock-preview-input" type="text" placeholder="<?php echo esc_attr( $i18n['type_search'] ); ?>" style="border:none; outline:none; background:transparent; width:100%; font-size:18px; color:#1e293b; font-weight:500; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                                
-                                <!-- Close button in preview -->
-                                <button class="fas-modal-close" style="background: rgba(100, 116, 139, 0.1); border: none !important; color: #64748b; width: 34px; height: 34px; border-radius: 50% !important; margin: <?php echo $is_rtl ? '0 14px 0 0' : '0 0 0 14px'; ?>; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                            </div>
+                            <!-- Phone Notch (Visible only in Mobile View) -->
+                            <div id="fas-phone-notch-el" class="fas-phone-notch" style="display: none;"></div>
 
-                            <!-- Tabs (Dynamic pills layout) -->
-                            <div id="fas-preview-tabs" class="fas-search-tabs" style="flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
-                                <!-- Loaded dynamically via javascript -->
-                            </div>
+                            <!-- Floating Trigger Button Mockup -->
+                            <button type="button" id="fas-preview-floating-btn" class="fas-search-trigger fas-floating-trigger" style="display: none;">
+                                <svg class="fas-search-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block !important; width: 22px !important; height: 22px !important; visibility: visible !important;">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </button>
 
-                            <!-- Results box mock -->
-                            <div id="fas-preview-results" style="padding: 20px 24px; min-height: 140px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                                <!-- Will be injected via JS -->
+                            <!-- Search Modal Overlay Mockup -->
+                            <div id="fas-preview-modal-overlay" class="fas-search-overlay fas-mock-overlay is-open">
+                                <div class="fas-search-container" id="fas-preview-search-container">
+                                    <!-- Input Wrapper -->
+                                    <div class="fas-search-input-wrapper">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                        </svg>
+                                        <input type="text" class="fas-search-input" id="fas-preview-mock-input" placeholder="<?php echo esc_attr( $i18n['type_search'] ); ?>" readonly style="cursor: pointer;">
+                                        <span class="fas-modal-close" id="fas-preview-modal-close-btn" role="button" aria-label="Close Search">&times;</span>
+                                    </div>
+
+                                    <!-- Search History Panel -->
+                                    <div class="fas-search-history" id="fas-preview-search-history" style="display: block;"></div>
+
+                                    <!-- Category Tabs -->
+                                    <div class="fas-search-tabs" id="fas-preview-search-tabs"></div>
+
+                                    <!-- Results Panel -->
+                                    <div class="fas-results-panel" id="fas-preview-results-panel">
+                                        <div class="fas-tab-content is-active" id="fas-preview-tab-content"></div>
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
-
                     </div>
+
                 </div>
 
             </div>
@@ -581,12 +706,33 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
 <script>
 jQuery(document).ready(function($) {
     var activeDevice = 'desktop';
+    var activeMode   = 'popup'; // 'popup' or 'button'
+
+    var suffix = '<?php echo esc_js( $suffix ); ?>';
+    var isRtl  = <?php echo $is_rtl ? 'true' : 'false'; ?>;
+
+    // Helper to extract option value across suffix variants
+    function getVal(key, fallback) {
+        var el = $('[name="' + key + suffix + '"]');
+        if (!el.length || el.val() === null || el.val() === '') {
+            el = $('[name="' + key + '"]');
+        }
+        if (!el.length || el.val() === null || el.val() === '') {
+            el = $('#' + key);
+        }
+        if (el.length && el.val() !== null && el.val() !== '') {
+            return el.val();
+        }
+        return fallback;
+    }
 
     // Initialize standard WP color pickers
     $('.fas-color-picker').wpColorPicker({
         change: function(event, ui) {
-            // Trigger live preview update on color change
-            setTimeout(updateLivePreview, 50);
+            setTimeout(updateLivePreview, 20);
+        },
+        clear: function() {
+            setTimeout(updateLivePreview, 20);
         }
     });
 
@@ -598,7 +744,7 @@ jQuery(document).ready(function($) {
                 order.push($(this).data('key'));
             });
             $('#fas_tabs_order').val(order.join(','));
-            // Update Live Preview immediately
+            $('#fas_tabs_order' + suffix).val(order.join(','));
             updateLivePreview();
         }
     });
@@ -630,7 +776,7 @@ jQuery(document).ready(function($) {
         }
     });
 
-    // Device Toggle
+    // Device Toggle (Desktop / Mobile)
     $('.fas-preview-toggle').on('click', function() {
         $('.fas-preview-toggle').removeClass('is-active').css({ 'background': '', 'color': '' });
         $(this).addClass('is-active').css({ 'background': '#0066cc', 'color': 'white' });
@@ -638,214 +784,262 @@ jQuery(document).ready(function($) {
         updateLivePreview();
     });
 
-    // Mock Floating Button Click
-    $('#fas-mock-floating-btn').on('click', function() {
-        $(this).hide();
-        $('#fas-preview-container').fadeIn(200);
+    // Mode Toggle (Popup / Button)
+    $('.fas-mode-toggle').on('click', function() {
+        $('.fas-mode-toggle').removeClass('is-active').css({ 'background': '', 'color': '' });
+        $(this).addClass('is-active').css({ 'background': '#0066cc', 'color': 'white' });
+        activeMode = $(this).data('mode');
+        updateLivePreview();
     });
 
-    // Mock Close Button
-    $('.fas-modal-close').on('click', function(e) {
+    // Floating Button Click in Preview opens Modal
+    $(document).on('click', '#fas-preview-floating-btn', function() {
+        activeMode = 'popup';
+        $('.fas-mode-toggle').removeClass('is-active').css({ 'background': '', 'color': '' });
+        $('.fas-mode-toggle[data-mode="popup"]').addClass('is-active').css({ 'background': '#0066cc', 'color': 'white' });
+        updateLivePreview();
+    });
+
+    // Close Modal button in Preview closes Modal
+    $(document).on('click', '#fas-preview-modal-close-btn', function(e) {
         e.preventDefault();
-        $('#fas-preview-container').fadeOut(200, function() {
-            $('#fas-mock-floating-btn').show();
+        activeMode = 'button';
+        $('.fas-mode-toggle').removeClass('is-active').css({ 'background': '', 'color': '' });
+        $('.fas-mode-toggle[data-mode="button"]').addClass('is-active').css({ 'background': '#0066cc', 'color': 'white' });
+        updateLivePreview();
+    });
+
+    // Tab Switcher inside Preview Modal
+    $(document).on('click', '#fas-preview-search-tabs .fas-tab-btn', function() {
+        var key = $(this).data('tab');
+        $('#fas-preview-search-tabs .fas-tab-btn').removeClass('is-active').each(function() {
+            $(this).css({ 'background': '', 'border-color': '', 'color': '' });
         });
+        
+        var accentColor = $(this).data('color');
+        $(this).addClass('is-active').css({
+            'background': accentColor,
+            'border-color': accentColor,
+            'color': '#ffffff'
+        });
+        
+        renderMockResultForTab(key, accentColor);
     });
 
-    // Mock Input typing
-    $('#fas-mock-preview-input').prop('disabled', false).on('input', function() {
-        var val = $(this).val();
-        if (val.length > 0) {
-            renderMockResults();
-        } else {
-            $('#fas-preview-results').html('');
-        }
-    });
-
-    // Re-render live preview on settings modification
-    $('#fas-settings-form input, #fas-settings-form select').on('input change', updateLivePreview);
-
+    // Pure Client-side Instant Live Preview Engine
     function updateLivePreview() {
-        // Dimensions & Device
-        var width = $('#fas_popup_width').val() || 750;
-        var maxH  = $('#fas_popup_max_height').val() || 600;
-        
+        var themeMode         = getVal('fas_theme_mode', 'dark');
+        var popupWidth        = parseInt(getVal('fas_popup_width', 750), 10);
+        var popupMaxHeight     = parseInt(getVal('fas_popup_max_height', 600), 10);
+        var titleSizeDesktop   = getVal('fas_title_size_desktop', 15);
+        var titleSizeMobile    = getVal('fas_title_size_mobile', 14);
+        var excerptSizeDesktop = getVal('fas_excerpt_size_desktop', 13);
+        var excerptSizeMobile  = getVal('fas_excerpt_size_mobile', 12);
+        var historyCount       = parseInt(getVal('fas_history_count', 5), 10);
+        var historyBg          = getVal('fas_history_bg', 'rgba(255, 255, 255, 0.1)');
+        var historyHoverBg     = getVal('fas_history_hover_bg', 'rgba(255, 255, 255, 0.2)');
+        var historyTextSize    = getVal('fas_history_text_size', 13);
+        var floatingBg         = getVal('fas_floating_bg', '#0066cc');
+        var btnSizeDesktop     = getVal('fas_btn_size_desktop', 56);
+        var btnSizeMobile      = getVal('fas_btn_size_mobile', 48);
+        var floatingPos        = getVal('fas_floating_position', 'bottom-right');
+        var floatingOffsetX    = parseInt(getVal('fas_floating_offset_x', 24), 10);
+        var floatingOffsetY    = parseInt(getVal('fas_floating_offset_y', 24), 10);
+        var enableFloating     = getVal('fas_enable_floating', 'yes');
+
         var isMobile = (activeDevice === 'mobile');
-        var containerWidth = isMobile ? '360px' : width + 'px';
-        var containerHeight = isMobile ? '640px' : maxH + 'px';
-        
-        $('#fas-preview-container').css({
-            'max-width': containerWidth,
-            'max-height': containerHeight,
-            'height': isMobile ? '640px' : 'auto'
+
+        // Apply device framing (Desktop vs Mobile Bezel)
+        var wrapper = $('#fas-mock-modal-wrapper');
+        var notch = $('#fas-phone-notch-el');
+        if (isMobile) {
+            wrapper.removeClass('fas-desktop-canvas').addClass('fas-phone-bezel');
+            notch.show();
+        } else {
+            wrapper.removeClass('fas-phone-bezel').addClass('fas-desktop-canvas');
+            notch.hide();
+        }
+
+        // Apply dynamic CSS variables on mock wrapper
+        wrapper.css({
+            '--fas-primary': floatingBg,
+            '--fas-popup-width': (isMobile ? '320px' : popupWidth + 'px'),
+            '--fas-popup-max-height': (isMobile ? '460px' : popupMaxHeight + 'px'),
+            '--fas-title-size-desktop': (isMobile ? titleSizeMobile : titleSizeDesktop) + 'px',
+            '--fas-excerpt-size-desktop': (isMobile ? excerptSizeMobile : excerptSizeDesktop) + 'px',
+            '--fas-history-bg': historyBg,
+            '--fas-history-hover-bg': historyHoverBg,
+            '--fas-history-text-size': historyTextSize + 'px'
         });
 
-        // Floating Button
-        var btnSize = isMobile ? ($('#fas_btn_size_mobile').val() || 48) : ($('#fas_btn_size_desktop').val() || 56);
-        var btnColor = $('#fas_floating_bg').val() || '#0066cc';
-        var btnPos = $('#fas_floating_position').val() || 'bottom-right';
-        var offsetX = $('#fas_floating_offset_x').val() || 24;
-        var offsetY = $('#fas_floating_offset_y').val() || 24;
-        
-        var posCss = {
-            'width': btnSize + 'px',
-            'height': btnSize + 'px',
-            'background': btnColor,
-            'top': 'auto',
-            'bottom': 'auto',
-            'left': 'auto',
-            'right': 'auto'
+        // Overlay Theme Mode
+        var overlay = $('#fas-preview-modal-overlay');
+        overlay.removeClass('fas-theme-dark fas-theme-light').addClass('fas-theme-' + themeMode);
+
+        // Adjust visibility according to activeMode
+        var floatBtn = $('#fas-preview-floating-btn');
+
+        if (activeMode === 'button') {
+            overlay.hide().css('display', 'none').removeClass('is-open');
+
+            if (enableFloating === 'no') {
+                floatBtn.hide().css('display', 'none');
+            } else {
+                floatBtn.show().css('display', 'flex');
+                var btnSize = isMobile ? btnSizeMobile : btnSizeDesktop;
+                floatBtn.css({
+                    'background-color': floatingBg,
+                    'width': btnSize + 'px',
+                    'height': btnSize + 'px',
+                    'border-radius': '50%',
+                    'align-items': 'center',
+                    'justify-content': 'center',
+                    'color': '#ffffff'
+                });
+
+                // Clamp offsets so floating button stays strictly inside mock wrapper
+                floatBtn.css({ 'top': 'auto', 'bottom': 'auto', 'left': 'auto', 'right': 'auto' });
+                var offX = Math.min(floatingOffsetX, 35) + 'px';
+                var offY = Math.min(floatingOffsetY, 35) + 'px';
+
+                if (floatingPos === 'bottom-right') {
+                    floatBtn.css({ bottom: offY, right: offX });
+                } else if (floatingPos === 'bottom-left') {
+                    floatBtn.css({ bottom: offY, left: offX });
+                } else if (floatingPos === 'top-right') {
+                    floatBtn.css({ top: offY, right: offX });
+                } else if (floatingPos === 'top-left') {
+                    floatBtn.css({ top: offY, left: offX });
+                }
+            }
+        } else {
+            // Open Popup Mode
+            overlay.show().css('display', 'flex').addClass('is-open');
+            floatBtn.hide().css('display', 'none');
+        }
+
+        // Tabs order & details
+        var tabsOrderStr = getVal('fas_tabs_order', 'all,products,posts,docs');
+        var tabsOrderArr = tabsOrderStr.split(',').map(function(s){ return s.trim(); });
+
+        var tabDetails = {
+            'all': {
+                title: getVal('fas_tab_all_title', 'All Results'),
+                color: getVal('fas_tab_all_color', '#0066cc'),
+                icon: getVal('fas_tab_all_icon', 'dashicons-grid-view'),
+                custom_icon: getVal('fas_tab_all_custom_icon', '')
+            },
+            'products': {
+                title: getVal('fas_tab_products_title', 'Products'),
+                color: getVal('fas_tab_products_color', '#10b981'),
+                icon: getVal('fas_tab_products_icon', 'dashicons-cart'),
+                custom_icon: getVal('fas_tab_products_custom_icon', '')
+            },
+            'posts': {
+                title: getVal('fas_tab_posts_title', 'News & Articles'),
+                color: getVal('fas_tab_posts_color', '#f59e0b'),
+                icon: getVal('fas_tab_posts_icon', 'dashicons-welcome-write-blog'),
+                custom_icon: getVal('fas_tab_posts_custom_icon', '')
+            },
+            'docs': {
+                title: getVal('fas_tab_docs_title', 'Documentation'),
+                color: getVal('fas_tab_docs_color', '#6366f1'),
+                icon: getVal('fas_tab_docs_icon', 'dashicons-book-alt'),
+                custom_icon: getVal('fas_tab_docs_custom_icon', '')
+            }
         };
 
-        if (btnPos === 'bottom-right') {
-            posCss['bottom'] = offsetY + 'px';
-            posCss['right'] = offsetX + 'px';
-        } else if (btnPos === 'bottom-left') {
-            posCss['bottom'] = offsetY + 'px';
-            posCss['left'] = offsetX + 'px';
-        } else if (btnPos === 'top-right') {
-            posCss['top'] = offsetY + 'px';
-            posCss['right'] = offsetX + 'px';
-        } else if (btnPos === 'top-left') {
-            posCss['top'] = offsetY + 'px';
-            posCss['left'] = offsetX + 'px';
-        }
-
-        $('#fas-mock-floating-btn').css(posCss);
-
-        // Theme Accent Mode
-        var mode = $('#fas_theme_mode').val();
-        if (mode === 'dark') {
-            $('#fas-preview-container').css({
-                'background-color': '#0f172a',
-                'border-color': '#1e293b'
-            });
-            $('#fas-preview-results').css('background-color', '#0f172a');
-            $('#fas-preview-results .fas-result-item').css({
-                'background-color': '#1e293b',
-                'border-color': 'transparent'
-            });
-            $('#fas-preview-results h4').css('color', '#f8fafc');
-            $('#fas-preview-results p').css('color', '#94a3b8');
-            $('#fas-preview-container input').css('color', '#f8fafc');
-            $('#fas-preview-container .fas-search-input-wrapper').css('border-bottom-color', '#1e293b');
-        } else {
-            $('#fas-preview-container').css({
-                'background-color': '#ffffff',
-                'border-color': '#e2e8f0'
-            });
-            $('#fas-preview-results').css('background-color', '#ffffff');
-            $('#fas-preview-results .fas-result-item').css({
-                'background-color': '#f8fafc',
-                'border-color': 'transparent'
-            });
-            $('#fas-preview-results h4').css('color', '#0f172a');
-            $('#fas-preview-results p').css('color', '#64748b');
-            $('#fas-preview-container input').css('color', '#0f172a');
-            $('#fas-preview-container .fas-search-input-wrapper').css('border-bottom-color', '#e2e8f0');
-        }
-
-        // Live preview of Farsi placeholder when editing Farsi settings
-        var placeholderVal = '<?php echo esc_js( $i18n['type_search'] ); ?>';
-        $('#fas-mock-preview-input').attr('placeholder', placeholderVal);
-
-        // Parse Tabs Configuration & Order
-        var orderRaw = $('#fas_tabs_order').val() || 'all,products,posts,docs';
-        var orderArr = orderRaw.split(',').map(function(item) { return item.trim(); });
-
         var tabsHtml = '';
-        var activeClassAdded = false;
-
-        orderArr.forEach(function(key) {
-            var title = '';
-            var color = '';
-            var icon  = '';
-            var customIcon = '';
-
-            if (key === 'all') {
-                title = $('#fas_tab_all_title').val() || 'All Results';
-                color = $('#fas_tab_all_color').val() || '#0066cc';
-                icon  = $('#fas_tab_all_icon').val() || 'dashicons-grid-view';
-                customIcon = $('#fas_tab_all_custom_icon').val() || '';
-            } else if (key === 'products') {
-                title = $('#fas_tab_products_title').val() || 'Products';
-                color = $('#fas_tab_products_color').val() || '#10b981';
-                icon  = $('#fas_tab_products_icon').val() || 'dashicons-cart';
-                customIcon = $('#fas_tab_products_custom_icon').val() || '';
-            } else if (key === 'posts') {
-                title = $('#fas_tab_posts_title').val() || 'News & Articles';
-                color = $('#fas_tab_posts_color').val() || '#f59e0b';
-                icon  = $('#fas_tab_posts_icon').val() || 'dashicons-welcome-write-blog';
-                customIcon = $('#fas_tab_posts_custom_icon').val() || '';
-            } else if (key === 'docs') {
-                title = $('#fas_tab_docs_title').val() || 'Documentation';
-                color = $('#fas_tab_docs_color').val() || '#6366f1';
-                icon  = $('#fas_tab_docs_icon').val() || 'dashicons-book-alt';
-                customIcon = $('#fas_tab_docs_custom_icon').val() || '';
-            } else {
-                return; // skip unknown keys
-            }
-
-            var isActive = !activeClassAdded;
-            activeClassAdded = true;
-
-            var tabStyle = 'display: flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1px solid '+(isActive ? color : 'transparent')+'; background: '+(isActive ? color : 'rgba(100, 116, 139, 0.05)')+'; font-weight: 600; font-size:13px; cursor: pointer; color: ' + (isActive ? '#ffffff' : '#64748b') + '; border-radius: 20px; transition: all 0.3s ease; white-space: nowrap;';
-            
-            var iconHtml = '';
-            if (customIcon) {
-                iconHtml = '<img src="' + customIcon + '" style="width:16px; height:16px; object-fit:contain; flex-shrink:0;">';
-            } else {
-                iconHtml = '<span class="dashicons ' + icon + '" style="font-size:18px; width:18px; height:18px; color:' + (isActive ? '#ffffff' : '#64748b') + ';"></span>';
-            }
-
-            tabsHtml += '<button type="button" style="' + tabStyle + '">' +
-                        iconHtml +
-                        '<span>' + title + '</span>' +
-                        '</button>';
-        });
-
-        $('#fas-preview-tabs').html(tabsHtml).css({
-            'display': 'flex',
-            'background-color': 'transparent',
-            'border-bottom-width': '1px',
-            'border-bottom-style': 'solid',
-            'border-bottom-color': (mode === 'dark' ? '#1e293b' : '#e2e8f0'),
-            'padding': '10px 16px',
-            'gap': '12px'
-        });
-
-        if ($('#fas-mock-preview-input').val() !== '') {
-            renderMockResults();
+        var currentActiveKey = $('#fas-preview-search-tabs .fas-tab-btn.is-active').data('tab');
+        if (!currentActiveKey || !tabDetails[currentActiveKey]) {
+            currentActiveKey = tabsOrderArr[0] || 'all';
         }
+
+        tabsOrderArr.forEach(function(key) {
+            if (!tabDetails[key]) return;
+            var t = tabDetails[key];
+            var isActive = (key === currentActiveKey);
+            var activeClass = isActive ? 'is-active' : '';
+            var activeStyle = isActive ? ('background:' + t.color + '; border-color:' + t.color + '; color:#ffffff;') : '';
+
+            tabsHtml += '<button type="button" class="fas-tab-btn ' + activeClass + '" data-tab="' + key + '" data-color="' + t.color + '" style="--tab-accent:' + t.color + ';' + activeStyle + '">';
+            if (t.custom_icon) {
+                tabsHtml += '<img src="' + t.custom_icon + '" style="width:16px; height:16px; object-fit:contain; flex-shrink:0;">';
+            } else {
+                tabsHtml += '<span class="dashicons ' + t.icon + '"></span>';
+            }
+            tabsHtml += '<span>' + t.title + '</span></button>';
+        });
+
+        $('#fas-preview-search-tabs').html(tabsHtml);
+
+        // History Panel
+        var histContainer = $('#fas-preview-search-history');
+        if (historyCount > 0) {
+            var titleText = isRtl ? 'تاریخچه جستجو' : 'Search History';
+            var clearText = isRtl ? 'پاک کردن' : 'Clear';
+            var mockTerms = ['phase-30', 'antenna', 'radio', 'modem', 'wifi'];
+            var histHtml = '<div class="fas-search-history-header" style="flex-direction:' + (isRtl ? 'row-reverse' : 'row') + ';">';
+            histHtml += '<span class="fas-search-history-title">' + titleText + '</span>';
+            histHtml += '<button type="button" class="fas-search-history-clear">' + clearText + '</button>';
+            histHtml += '</div><div class="fas-search-history-items">';
+
+            for (var i = 0; i < Math.min(mockTerms.length, historyCount); i++) {
+                histHtml += '<button type="button" class="fas-search-history-item" style="flex-direction:' + (isRtl ? 'row-reverse' : 'row') + '; background:' + historyBg + '; font-size:' + historyTextSize + 'px;">';
+                histHtml += '<span class="fas-search-history-item-text">' + mockTerms[i] + '</span>';
+                histHtml += '<span class="fas-search-history-item-remove">&times;</span>';
+                histHtml += '</button>';
+            }
+            histHtml += '</div>';
+            histContainer.html(histHtml).show();
+        } else {
+            histContainer.hide();
+        }
+
+        renderMockResultForTab(currentActiveKey, tabDetails[currentActiveKey] ? tabDetails[currentActiveKey].color : '#0066cc');
     }
 
-    function renderMockResults() {
+    function renderMockResultForTab(tabKey, accentColor) {
         var isMobile = (activeDevice === 'mobile');
-        var titleSize = isMobile ? ($('#fas_title_size_mobile').val() || 14) : ($('#fas_title_size_desktop').val() || 15);
-        var excerptSize = isMobile ? ($('#fas_excerpt_size_mobile').val() || 12) : ($('#fas_excerpt_size_desktop').val() || 13);
-        
-        var mode = $('#fas_theme_mode').val();
-        var itemBg = (mode === 'dark') ? '#1e293b' : '#f8fafc';
-        var titleColor = (mode === 'dark') ? '#f8fafc' : '#0f172a';
-        var excerptColor = (mode === 'dark') ? '#94a3b8' : '#64748b';
-        var isRtl = <?php echo $is_rtl ? 'true' : 'false'; ?>;
+        var titleSizeDesktop   = getVal('fas_title_size_desktop', 15);
+        var titleSizeMobile    = getVal('fas_title_size_mobile', 14);
+        var excerptSizeDesktop = getVal('fas_excerpt_size_desktop', 13);
+        var excerptSizeMobile  = getVal('fas_excerpt_size_mobile', 12);
+
+        var titleSize = isMobile ? titleSizeMobile : titleSizeDesktop;
+        var excerptSize = isMobile ? excerptSizeMobile : excerptSizeDesktop;
+
         var dirStr = isRtl ? 'row-reverse' : 'row';
         var alignStr = isRtl ? 'right' : 'left';
-        
-        var html = '<div class="fas-result-item" style="display: flex; align-items: center; gap: 16px; padding: 12px; border-radius: 12px; margin-bottom: 8px; flex-direction: '+dirStr+'; background: '+itemBg+';">';
-        html += '<div style="width: 48px; height: 48px; border-radius: 8px; background: rgba(100,116,139,0.1); display:flex; align-items:center; justify-content:center; color:#64748b;">';
-        html += '<span class="dashicons dashicons-cart" style="font-size: 22px; width:22px; height:22px;"></span>';
+
+        var titleMap = {
+            'all': isRtl ? 'آنتن فوق پیشرفته Phase-30ISO' : 'Phase-30ISO Antenna',
+            'products': isRtl ? 'رادیو وای‌فای پرقدرت Faramoj Wave' : 'Faramoj Wave High-Power Radio',
+            'posts': isRtl ? 'راهنمای کامل پیکربندی شبکه فراموج' : 'Complete Faramoj Network Config Guide',
+            'docs': isRtl ? 'مستندات فنی و راهنمای نصب افزونه' : 'Technical Specs & Installation Docs'
+        };
+
+        var itemTitle = titleMap[tabKey] || (isRtl ? 'نتیجه مربوط به این بخش' : 'Sample Search Result');
+
+        var html = '<div class="fas-result-item" style="display:flex; align-items:center; gap:16px; padding:12px; border-radius:12px; margin-bottom:8px; flex-direction:' + dirStr + ';">';
+        html += '<div style="width:44px; height:44px; border-radius:8px; background:rgba(100,116,139,0.15); display:flex; align-items:center; justify-content:center; color:' + accentColor + '; flex-shrink:0;">';
+        html += '<span class="dashicons dashicons-search" style="font-size:22px; width:22px; height:22px; color:' + accentColor + ';"></span>';
         html += '</div>';
-        html += '<div style="text-align: '+alignStr+';">';
-        html += '<h4 style="margin: 0 0 4px 0; font-size: '+titleSize+'px; font-weight:600; color: '+titleColor+';">' + (isRtl ? 'آنتن فوق پیشرفته Phase-30ISO' : 'Phase-30ISO Antenna') + '</h4>';
-        html += '<p style="margin:0; font-size: '+excerptSize+'px; color: '+excerptColor+'; line-height:1.4;">' + (isRtl ? 'محصول مخابراتی دو بانده فوق پیشرفته...' : 'Premium dual-band technical product spec...') + '</p>';
+        html += '<div style="text-align:' + alignStr + '; flex-grow:1;">';
+        html += '<h4 class="fas-result-title" style="font-size:' + titleSize + 'px; margin:0 0 4px 0; color:var(--fas-text-main); font-weight:700;">' + itemTitle + '</h4>';
+        html += '<p class="fas-result-excerpt" style="font-size:' + excerptSize + 'px; margin:0; color:var(--fas-text-muted);">' + (isRtl ? 'توضیحات و مشخصات فنی محصول/مطلب اختصاصی سیستم فراموج...' : 'Technical specs and details snippet for Faramoj search engine...') + '</p>';
         html += '</div>';
         html += '</div>';
 
-        $('#fas-preview-results').html(html);
+        $('#fas-preview-tab-content').html(html);
     }
 
-    // Initial load
+    // Attach listeners to ALL inputs for instant zero-latency updates
+    $('#fas-settings-form input, #fas-settings-form select, #fas-settings-form textarea').on('input change keyup', function() {
+        updateLivePreview();
+    });
+
+    // Initial render
     updateLivePreview();
 });
 </script>
