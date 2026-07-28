@@ -21,6 +21,7 @@ $suffix = '_' . $active_lang;
 $group_name = 'fas_settings_group_' . $active_lang;
 
 // Retrieve options specific to the selected language context
+$synonyms               = get_option( 'fas_synonyms' . $suffix, '' );
 $cache_duration         = get_option( 'fas_cache_duration' . $suffix, HOUR_IN_SECONDS );
 $theme_mode             = get_option( 'fas_theme_mode' . $suffix, 'dark' );
 $enable_floating        = get_option( 'fas_enable_floating' . $suffix, 'yes' );
@@ -246,6 +247,13 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             <td style="padding: 10px 0;">
                                 <input type="number" name="fas_cache_duration<?php echo esc_attr( $suffix ); ?>" id="fas_cache_duration" value="<?php echo esc_attr( $cache_duration ); ?>" class="regular-text" min="0" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
                                 <span class="fas-description" style="margin-top: 6px; font-size: 11px; color: #64748b; display: block;"><?php echo esc_html( $i18n['cache_duration_desc'] ); ?></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; width: 220px; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'مدیریت مترادف‌ها و غلط‌های املایی' : 'Synonyms & Misspelling Mappings'; ?></td>
+                            <td style="padding: 10px 0;">
+                                <textarea name="fas_synonyms<?php echo esc_attr( $suffix ); ?>" id="fas_synonyms" class="large-text" rows="4" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="<?php echo $is_rtl ? "آنتن => اتن, انتی\nموبایل => گوشی" : "phone => mobile, cell\ntv => television"; ?>"><?php echo esc_textarea( $synonyms ); ?></textarea>
+                                <span class="fas-description" style="margin-top: 6px; font-size: 11px; color: #64748b; display: block;"><?php echo $is_rtl ? 'هر عبارت و مترادف‌های آن را در یک خط وارد کنید. از ساختار <code>عبارت اصلی => کلمه1, کلمه2</code> استفاده کنید. این کلمات در آمار جستجوها تجمیع می‌شوند.' : 'Enter each keyword and its synonyms on a new line using format: <code>primary => alias1, alias2</code>. Used for consolidating search analytics.'; ?></span>
                             </td>
                         </tr>
                     </table>

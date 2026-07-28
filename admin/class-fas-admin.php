@@ -163,6 +163,12 @@ class FAS_Admin {
             $suffix = '_' . $lang_code;
             $group_name = 'fas_settings_group_' . $lang_code;
 
+            register_setting( $group_name, 'fas_synonyms' . $suffix, array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_textarea_field',
+                'default'           => '',
+            ) );
+
             register_setting( $group_name, 'fas_cache_duration' . $suffix, array(
                 'type'              => 'integer',
                 'sanitize_callback' => 'intval',
@@ -504,5 +510,112 @@ class FAS_Admin {
         $custom_css = preg_replace( '/^<\?php.*?\?>/s', '', $custom_css );
 
         wp_add_inline_style( 'fas-admin-css', $custom_css );
+    }
+
+    /**
+     * Handle CSV export of search statistics.
+     */
+    public function handle_csv_export() {
+        if ( isset( $_GET['page'] ) && $_GET['page'] === 'fas-statistics' && isset( $_GET['action'] ) && $_GET['action'] === 'export_csv' ) {
+            if ( ! current_user_can( 'manage_options' ) ) {
+                wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'faramoj-search' ) );
+            }
+
+            if ( ! isset( $_GET['fas_export_nonce'] ) || ! wp_verify_nonce( $_GET['fas_export_nonce'], 'fas_export_csv_nonce' ) ) {
+                wp_die( esc_html__( 'Security check failed.', 'faramoj-search' ) );
+            }
+
+            $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [], 'clicks' => [], 'monthly' => [] ) );
+            $terms = isset( $stats['terms'] ) && is_array( $stats['terms'] ) ? $stats['terms'] : array();
+
+            // Handle Aliases merging before exporting
+            $admin_locale = $this->get_admin_display_locale();
+            $active_lang = isset( $_GET['fas_lang'] ) ? sanitize_text_field( $_GET['fas_lang'] ) : $admin_locale;
+            $suffix = '_' . $active_lang;
+            $group_name = 'fas_settings_group_' . $active_lang;
+            $synonyms_raw = get_option( 'fas_synonyms' . $suffix, '' );
+
+            $alias_map = array();
+            if ( ! empty( $synonyms_raw ) ) {
+                $lines = explode( "\n", $synonyms_raw );
+                foreach ( $lines as $line ) {
+                    $parts = explode( '=>', $line );
+                    if ( count( $parts ) == 2 ) {
+                        $primary = trim( $parts[0] );
+                        $aliases = array_map( 'trim', explode( ',', $parts[1] ) );
+                        foreach ( $aliases as $alias ) {
+                            if ( ! empty( $alias ) ) {
+                                $alias_map[ $alias ] = $primary;
+                            }
+                        }
+                    }
+                }
+            }
+
+            $aggregated_terms = array();
+            foreach ( $terms as $term => $data ) {
+                $count = is_array( $data ) ? $data['count'] : $data;
+                $clicks = ( is_array( $data ) && isset( $data['click_count'] ) ) ? $data['click_count'] : 0;
+
+                $primary_term = isset( $alias_map[ $term ] ) ? $alias_map[ $term ] : $term;
+
+                if ( ! isset( $aggregated_terms[ $primary_term ] ) ) {
+                    $aggregated_terms[ $primary_term ] = array(
+                        'count' => 0,
+                        'click_count' => 0,
+                        'is_alias' => isset( $alias_map[ $term ] ),
+                        'aliases_included' => array()
+                    );
+                }
+
+                $aggregated_terms[ $primary_term ]['count'] += $count;
+                $aggregated_terms[ $primary_term ]['click_count'] += $clicks;
+                if ( isset( $alias_map[ $term ] ) ) {
+                     $aggregated_terms[ $primary_term ]['aliases_included'][] = $term;
+                }
+            }
+
+            // Custom sort function to sort by count
+            uasort( $aggregated_terms, function( $a, $b ) {
+                return $b['count'] <=> $a['count'];
+            } );
+
+            header( 'Content-Type: text/csv; charset=utf-8' );
+            header( 'Content-Disposition: attachment; filename=fas-search-statistics-' . date( 'Y-m-d' ) . '.csv' );
+
+            $output = fopen( 'php://output', 'w' );
+
+            // Add UTF-8 BOM for correct rendering of Persian characters in Excel
+            fprintf( $output, chr(0xEF).chr(0xBB).chr(0xBF) );
+
+            fputcsv( $output, array(
+                'رتبه (Rank)',
+                'کلمه کلیدی (Keyword)',
+                'تعداد جستجو (Search Count)',
+                'تعداد کلیک (Click Count)',
+                'نرخ کلیک (CTR %)',
+                'مترادف‌های شامل شده (Included Aliases)'
+            ) );
+
+            $rank = 1;
+            foreach ( $aggregated_terms as $term => $data ) {
+                $ctr = ( $data['count'] > 0 ) ? ( $data['click_count'] / $data['count'] ) * 100 : 0;
+                $ctr_formatted = number_format( $ctr, 2 ) . '%';
+                $aliases_str = implode( '، ', $data['aliases_included'] );
+
+                fputcsv( $output, array(
+                    $rank,
+                    $term,
+                    $data['count'],
+                    $data['click_count'],
+                    $ctr_formatted,
+                    $aliases_str
+                ) );
+                $rank++;
+            }
+
+            fclose( $output );
+            exit;
+        }
     }
 }

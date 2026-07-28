@@ -276,9 +276,6 @@ class FAS_Rest {
             return new WP_REST_Response( array( 'error' => 'Empty search term' ), 400 );
         }
 
-        // Log search query metrics dynamically for our Statistics submenu
-        $this->log_search_stats( $term );
-
         // Switch language context if WPML is active
         if ( function_exists( 'wpml_object_id_filter' ) && ! empty( $lang ) ) {
             do_action( 'wpml_switch_language', $lang );
@@ -311,13 +308,27 @@ class FAS_Rest {
             }
         }
 
+        // Determine if there are zero results
+        $is_zero_results = true;
+        if ( ! empty( $results ) && is_array( $results ) ) {
+            foreach ( $results as $key => $items ) {
+                if ( $key !== 'all' && ! empty( $items ) ) {
+                    $is_zero_results = false;
+                    break;
+                }
+            }
+        }
+
+        // Log search query metrics dynamically for our Statistics submenu
+        $this->log_search_stats( $term, $is_zero_results );
+
         return new WP_REST_Response( $results, 200 );
     }
 
     /**
      * Log search queries statistics (total count & popular terms tracking)
      */
-    private function log_search_stats( $term ) {
+    private function log_search_stats( $term, $is_zero_results = false ) {
         if ( empty( $term ) || strlen( $term ) < 3 ) {
             return;
         }
@@ -339,8 +350,8 @@ class FAS_Rest {
         $month = current_time( 'Y-m' );
         
         // Defer database writing to the shutdown hook so it does not block the REST API response
-        add_action( 'shutdown', function() use ( $term_clean, $ip, $timestamp, $month ) {
-            $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [], 'clicks' => [], 'monthly' => [] ) );
+        add_action( 'shutdown', function() use ( $term_clean, $ip, $timestamp, $month, $is_zero_results ) {
+            $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [], 'clicks' => [], 'monthly' => [], 'zero_results' => [] ) );
 
             if ( ! isset( $stats['total_count'] ) ) {
                 $stats['total_count'] = 0;
@@ -349,6 +360,10 @@ class FAS_Rest {
 
             if ( ! isset( $stats['terms'] ) ) {
                 $stats['terms'] = array();
+            }
+
+            if ( ! isset( $stats['zero_results'] ) ) {
+                $stats['zero_results'] = array();
             }
 
             if ( ! isset( $stats['terms'][ $term_clean ] ) ) {
@@ -369,6 +384,14 @@ class FAS_Rest {
             
             if ( ! isset( $stats['terms'][ $term_clean ]['click_count'] ) ) {
                 $stats['terms'][ $term_clean ]['click_count'] = 0;
+            }
+
+            // Record Zero Results
+            if ( $is_zero_results ) {
+                if ( ! isset( $stats['zero_results'][ $term_clean ] ) ) {
+                    $stats['zero_results'][ $term_clean ] = array( 'count' => 0 );
+                }
+                $stats['zero_results'][ $term_clean ]['count']++;
             }
 
             // Monthly Tracking
@@ -396,9 +419,17 @@ class FAS_Rest {
                 return $count_b <=> $count_a;
             } );
 
+            uasort( $stats['zero_results'], function( $a, $b ) {
+                return $b['count'] <=> $a['count'];
+            } );
+
             // Keep top 100 popular terms to protect option storage
             if ( count( $stats['terms'] ) > 100 ) {
                 $stats['terms'] = array_slice( $stats['terms'], 0, 100, true );
+            }
+
+            if ( count( $stats['zero_results'] ) > 100 ) {
+                $stats['zero_results'] = array_slice( $stats['zero_results'], 0, 100, true );
             }
 
             update_option( 'fas_search_stats', $stats );
