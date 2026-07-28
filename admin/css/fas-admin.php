@@ -131,3 +131,79 @@
     font-size: 14px;
     letter-spacing: 0.5px;
 }
+
+/* Modern Tooltip System */
+.fas-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fas-tooltip-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: help;
+}
+
+.fas-info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background: #e2e8f0;
+    color: #64748b;
+    border-radius: 50%;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.fas-tooltip-wrapper:hover .fas-info-icon {
+    background: #0066cc;
+    color: #fff;
+}
+
+.fas-tooltip-content {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 50%; /* For RTL, adjust transform */
+    transform: translateX(50%) translateY(4px);
+    width: 180px;
+    background: rgba(15, 23, 42, 0.95);
+    color: #f8fafc;
+    text-align: center;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 11px;
+    line-height: 1.5;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.fas-tooltip-content::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    right: 50%;
+    transform: translateX(50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(15, 23, 42, 0.95) transparent transparent transparent;
+}
+
+.fas-tooltip-wrapper:hover .fas-tooltip-content {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(50%) translateY(0);
+}
+
+/* Adjust Number Inputs */
+.fas-admin-wrap input[type="number"] {
+    max-width: 100px !important;
+    text-align: center;
+}

@@ -244,8 +244,13 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                         <tr>
                             <td style="padding: 10px 0; width: 220px; font-weight: 600; color: #475569;"><?php echo esc_html( $i18n['cache_duration'] ); ?></td>
                             <td style="padding: 10px 0;">
-                                <input type="number" name="fas_cache_duration<?php echo esc_attr( $suffix ); ?>" id="fas_cache_duration" value="<?php echo esc_attr( $cache_duration ); ?>" class="regular-text" min="0" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                <span class="fas-description" style="margin-top: 6px; font-size: 11px; color: #64748b; display: block;"><?php echo esc_html( $i18n['cache_duration_desc'] ); ?></span>
+                                <div class="fas-input-row">
+                                    <input type="number" name="fas_cache_duration<?php echo esc_attr( $suffix ); ?>" id="fas_cache_duration" value="<?php echo esc_attr( $cache_duration ); ?>" class="regular-text" min="0" style="border-radius: 6px; border: 1px solid #cbd5e1;">
+                                    <div class="fas-tooltip-wrapper">
+                                        <span class="fas-info-icon">!</span>
+                                        <div class="fas-tooltip-content"><?php echo esc_html( $i18n['cache_duration_desc'] ); ?> (مجاز: 0 به بالا)</div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     </table>
@@ -270,15 +275,25 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                         <tr>
                             <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo esc_html( $i18n['popup_width'] ); ?></td>
                             <td style="padding: 10px 0;">
-                                <input type="number" name="fas_popup_width<?php echo esc_attr( $suffix ); ?>" id="fas_popup_width" value="<?php echo esc_attr( $popup_width ); ?>" class="regular-text" min="300" max="2000" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                <span class="fas-description" style="margin-top: 4px; font-size: 11px; color: #64748b; display: block;"><?php echo esc_html( $i18n['popup_width_desc'] ); ?></span>
+                                <div class="fas-input-row">
+                                    <input type="number" name="fas_popup_width<?php echo esc_attr( $suffix ); ?>" id="fas_popup_width" value="<?php echo esc_attr( $popup_width ); ?>" class="regular-text" min="400" max="1200" style="border-radius: 6px; border: 1px solid #cbd5e1;">
+                                    <div class="fas-tooltip-wrapper">
+                                        <span class="fas-info-icon">!</span>
+                                        <div class="fas-tooltip-content"><?php echo esc_html( $i18n['popup_width_desc'] ); ?> (مجاز: 400 تا 1200)</div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo esc_html( $i18n['popup_height'] ); ?></td>
                             <td style="padding: 10px 0;">
-                                <input type="number" name="fas_popup_max_height<?php echo esc_attr( $suffix ); ?>" id="fas_popup_max_height" value="<?php echo esc_attr( $popup_max_height ); ?>" class="regular-text" min="300" max="1500" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                <span class="fas-description" style="margin-top: 4px; font-size: 11px; color: #64748b; display: block;"><?php echo esc_html( $i18n['popup_height_desc'] ); ?></span>
+                                <div class="fas-input-row">
+                                    <input type="number" name="fas_popup_max_height<?php echo esc_attr( $suffix ); ?>" id="fas_popup_max_height" value="<?php echo esc_attr( $popup_max_height ); ?>" class="regular-text" min="300" max="900" style="border-radius: 6px; border: 1px solid #cbd5e1;">
+                                    <div class="fas-tooltip-wrapper">
+                                        <span class="fas-info-icon">!</span>
+                                        <div class="fas-tooltip-content"><?php echo esc_html( $i18n['popup_height_desc'] ); ?> (مجاز: 300 تا 900)</div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     </table>
@@ -385,15 +400,25 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                         <tr>
                             <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo esc_html( $i18n['offset_x'] ); ?></td>
                             <td style="padding: 10px 0;">
-                                <input type="number" name="fas_floating_offset_x<?php echo esc_attr( $suffix ); ?>" id="fas_floating_offset_x" value="<?php echo esc_attr( $floating_offset_x ); ?>" class="regular-text" min="0" max="300" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                <span class="fas-description" style="margin-top: 4px; font-size: 11px; color: #64748b; display: block;"><?php echo esc_html( $i18n['offset_x_desc'] ); ?></span>
+                                <div class="fas-input-row">
+                                    <input type="number" name="fas_floating_offset_x<?php echo esc_attr( $suffix ); ?>" id="fas_floating_offset_x" value="<?php echo esc_attr( $floating_offset_x ); ?>" class="regular-text" min="0" max="100" style="border-radius: 6px; border: 1px solid #cbd5e1;">
+                                    <div class="fas-tooltip-wrapper">
+                                        <span class="fas-info-icon">!</span>
+                                        <div class="fas-tooltip-content"><?php echo esc_html( $i18n['offset_x_desc'] ); ?> (مجاز: 0 تا 100)</div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo esc_html( $i18n['offset_y'] ); ?></td>
                             <td style="padding: 10px 0;">
-                                <input type="number" name="fas_floating_offset_y<?php echo esc_attr( $suffix ); ?>" id="fas_floating_offset_y" value="<?php echo esc_attr( $floating_offset_y ); ?>" class="regular-text" min="0" max="300" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                <span class="fas-description" style="margin-top: 4px; font-size: 11px; color: #64748b; display: block;"><?php echo esc_html( $i18n['offset_y_desc'] ); ?></span>
+                                <div class="fas-input-row">
+                                    <input type="number" name="fas_floating_offset_y<?php echo esc_attr( $suffix ); ?>" id="fas_floating_offset_y" value="<?php echo esc_attr( $floating_offset_y ); ?>" class="regular-text" min="0" max="100" style="border-radius: 6px; border: 1px solid #cbd5e1;">
+                                    <div class="fas-tooltip-wrapper">
+                                        <span class="fas-info-icon">!</span>
+                                        <div class="fas-tooltip-content"><?php echo esc_html( $i18n['offset_y_desc'] ); ?> (مجاز: 0 تا 100)</div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         <tr>
