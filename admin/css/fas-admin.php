@@ -33,7 +33,7 @@
     background: rgba(255, 255, 255, 0.75) !important;
     box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.07), inset 0 1px 1px rgba(255, 255, 255, 0.6) !important;
     transform: translateY(-2px) !important;
-    z-index: 99 !important;
+    z-index: 100 !important;
 }
 
 /* Card titles alignment and line */
