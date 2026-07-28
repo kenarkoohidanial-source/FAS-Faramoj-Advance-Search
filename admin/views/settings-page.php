@@ -111,9 +111,9 @@ $i18n = array(
     'theme_accent' => $is_rtl ? 'حالت رنگی و تم پاپ‌آپ' : 'Theme Accent Mode',
     'dark_mode' => $is_rtl ? 'تم زغالی تیره پاپ‌آپ (Deep Slate)' : 'Deep Slate Dark Mode Overlay',
     'light_mode' => $is_rtl ? 'تم روشن شرکتی پاپ‌آپ (Clean Corporate)' : 'Clean Corporate Light Mode Overlay',
-    'popup_width' => $is_rtl ? 'عرض پاپ‌آپ (پیکسل)' : 'Popup Width (px)',
+    'popup_width' => $is_rtl ? 'عرض پاپ‌آپ<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(پیکسل)</span>' : 'Popup Width<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(px)</span>',
     'popup_width_desc' => $is_rtl ? 'عرض کادر پاپ‌آپ پدیدار شده (محدوده مجاز: ۳۰۰ تا ۲۰۰۰ پیکسل)' : 'Width constraint (range: 300px - 2000px).',
-    'popup_height' => $is_rtl ? 'حداکثر ارتفاع پاپ‌آپ (پیکسل)' : 'Popup Max Height (px)',
+    'popup_height' => $is_rtl ? 'حداکثر ارتفاع پاپ‌آپ<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(پیکسل)</span>' : 'Popup Max Height<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(px)</span>',
     'popup_height_desc' => $is_rtl ? 'حداکثر ارتفاع کادر نتایج جستجو (محدوده مجاز: ۳۰۰ تا ۱۵۰۰ پیکسل)' : 'Max result pane height (range: 300px - 1500px).',
     'floating_settings' => $is_rtl ? 'تنظیمات دکمه شناور جستجو' : 'Floating Search Trigger Settings',
     'enable_floating' => $is_rtl ? 'فعال‌سازی دکمه شناور' : 'Enable Floating Button',
@@ -124,9 +124,9 @@ $i18n = array(
     'bottom_left' => $is_rtl ? 'پایین چپ' : 'Bottom Left',
     'top_right' => $is_rtl ? 'بالا راست' : 'Top Right',
     'top_left' => $is_rtl ? 'بالا چپ' : 'Top Left',
-    'offset_x' => $is_rtl ? 'فاصله افقی دکمه (X پیکسل)' : 'Horizontal Offset (X px)',
+    'offset_x' => $is_rtl ? 'فاصله افقی دکمه<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(X پیکسل)</span>' : 'Horizontal Offset<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(X px)</span>',
     'offset_x_desc' => $is_rtl ? 'فاصله از لبه کناری صفحه وب.' : 'Distance from side edge of the screen.',
-    'offset_y' => $is_rtl ? 'فاصله عمودی دکمه (Y پیکسل)' : 'Vertical Offset (Y px)',
+    'offset_y' => $is_rtl ? 'فاصله عمودی دکمه<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(Y پیکسل)</span>' : 'Vertical Offset<br><span style="font-size: 11px; font-weight: normal; color: #64748b; margin-top: 4px; display: inline-block;">(Y px)</span>',
     'offset_y_desc' => $is_rtl ? 'فاصله از لبه بالا یا پایین صفحه وب.' : 'Distance from top or bottom edge of the screen.',
     'display_pages' => $is_rtl ? 'صفحات وب قابل نمایش' : 'Display Pages',
     'show_all' => $is_rtl ? 'نمایش در تمام صفحات وب' : 'Show on All Pages',
@@ -273,7 +273,7 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo esc_html( $i18n['popup_width'] ); ?></td>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $i18n['popup_width']; ?></td>
                             <td style="padding: 10px 0;">
                                 <div class="fas-input-row">
                                     <input type="number" name="fas_popup_width<?php echo esc_attr( $suffix ); ?>" id="fas_popup_width" value="<?php echo esc_attr( $popup_width ); ?>" class="regular-text" min="400" max="1200" style="border-radius: 6px; border: 1px solid #cbd5e1;">
@@ -285,7 +285,7 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo esc_html( $i18n['popup_height'] ); ?></td>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $i18n['popup_height']; ?></td>
                             <td style="padding: 10px 0;">
                                 <div class="fas-input-row">
                                     <input type="number" name="fas_popup_max_height<?php echo esc_attr( $suffix ); ?>" id="fas_popup_max_height" value="<?php echo esc_attr( $popup_max_height ); ?>" class="regular-text" min="300" max="900" style="border-radius: 6px; border: 1px solid #cbd5e1;">
@@ -398,7 +398,7 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo esc_html( $i18n['offset_x'] ); ?></td>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $i18n['offset_x']; ?></td>
                             <td style="padding: 10px 0;">
                                 <div class="fas-input-row">
                                     <input type="number" name="fas_floating_offset_x<?php echo esc_attr( $suffix ); ?>" id="fas_floating_offset_x" value="<?php echo esc_attr( $floating_offset_x ); ?>" class="regular-text" min="0" max="100" style="border-radius: 6px; border: 1px solid #cbd5e1;">
@@ -410,7 +410,7 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo esc_html( $i18n['offset_y'] ); ?></td>
+                            <td style="padding: 10px 0; font-weight: 600; color: #475569;"><?php echo $i18n['offset_y']; ?></td>
                             <td style="padding: 10px 0;">
                                 <div class="fas-input-row">
                                     <input type="number" name="fas_floating_offset_y<?php echo esc_attr( $suffix ); ?>" id="fas_floating_offset_y" value="<?php echo esc_attr( $floating_offset_y ); ?>" class="regular-text" min="0" max="100" style="border-radius: 6px; border: 1px solid #cbd5e1;">
