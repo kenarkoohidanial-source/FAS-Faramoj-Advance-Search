@@ -24,6 +24,7 @@ $group_name = 'fas_settings_group_' . $active_lang;
 $cache_duration         = get_option( 'fas_cache_duration' . $suffix, HOUR_IN_SECONDS );
 $theme_mode             = get_option( 'fas_theme_mode' . $suffix, 'dark' );
 $enable_floating        = get_option( 'fas_enable_floating' . $suffix, 'yes' );
+$enable_voice_search    = get_option( 'fas_enable_voice_search' . $suffix, 'yes' );
 $floating_position      = get_option( 'fas_floating_position' . $suffix, 'bottom-right' );
 $display_pages_type     = get_option( 'fas_display_pages_type' . $suffix, 'all' );
 $display_specific_pages = get_option( 'fas_display_specific_pages' . $suffix, '' );
@@ -263,6 +264,21 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                                     <div class="fas-tooltip-wrapper">
                                         <span class="fas-info-icon">!</span>
                                         <div class="fas-tooltip-content"><?php echo esc_html( $i18n['search_aliases_desc'] ); ?></div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; width: 220px; font-weight: 600; color: #475569;"><?php echo $is_rtl ? 'جستجوی صوتی (Voice Search)' : 'Voice Search'; ?></td>
+                            <td style="padding: 10px 0;">
+                                <div class="fas-input-row">
+                                    <select name="fas_enable_voice_search<?php echo esc_attr( $suffix ); ?>" id="fas_enable_voice_search" class="regular-text" style="width: 100%; border-radius: 6px; border: 1px solid #cbd5e1; height: 35px;">
+                                        <option value="yes" <?php selected( $enable_voice_search, 'yes' ); ?>><?php echo esc_html( $i18n['enabled'] ); ?></option>
+                                        <option value="no" <?php selected( $enable_voice_search, 'no' ); ?>><?php echo esc_html( $i18n['disabled'] ); ?></option>
+                                    </select>
+                                    <div class="fas-tooltip-wrapper">
+                                        <span class="fas-info-icon">!</span>
+                                        <div class="fas-tooltip-content"><?php echo $is_rtl ? 'فعال‌سازی دکمه میکروفون برای جستجوی صوتی.' : 'Enable microphone button for voice search.'; ?></div>
                                     </div>
                                 </div>
                             </td>

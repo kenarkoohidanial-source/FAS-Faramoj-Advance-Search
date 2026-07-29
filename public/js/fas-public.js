@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Modal Interaction
     const triggerButtons = document.querySelectorAll('.fas-search-trigger');
     const closeButton = document.querySelector('.fas-modal-close');
+    const voiceButton = document.querySelector('.fas-voice-search-btn');
     const tabButtons = document.querySelectorAll('.fas-tab-btn');
     const tabContents = document.querySelectorAll('.fas-tab-content');
     const historyContainer = document.querySelector('.fas-search-history');
@@ -160,6 +161,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (closeButton) {
         closeButton.addEventListener('click', closeModal);
+    }
+
+    if (voiceButton) {
+        voiceButton.addEventListener('click', () => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert('Your browser does not support Voice Search. Please use a modern browser like Chrome or Safari.');
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = currentLang === 'fa' ? 'fa-IR' : 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = function() {
+                voiceButton.classList.add('fas-listening');
+            };
+
+            recognition.onresult = function(event) {
+                const speechResult = event.results[0][0].transcript;
+                if (searchInput) {
+                    searchInput.value = speechResult;
+                    // Trigger input event manually to fire the search logic
+                    searchInput.dispatchEvent(new Event('input'));
+                }
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                voiceButton.classList.remove('fas-listening');
+            };
+
+            recognition.onend = function() {
+                voiceButton.classList.remove('fas-listening');
+            };
+
+            recognition.start();
+        });
     }
 
     if (searchOverlay) {

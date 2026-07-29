@@ -239,50 +239,88 @@ $recent_trends = array_slice( $recent_trends, 0, 5, true );
         <?php endif; ?>
     </div>
 
-    <!-- Cards Row -->
-    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; margin-bottom: 30px;">
-        
-        <div style="display: flex; flex-direction: column; gap: 30px;">
-            <!-- Total Queries Card -->
-            <div class="fas-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 200px;">
-                <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(0,102,204,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-                    <span class="dashicons dashicons-search" style="font-size: 32px; width: 32px; height: 32px; color: #0066cc;"></span>
-                </div>
-                <span style="font-size: 14px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;"><?php echo esc_html( $i18n['total_queries'] ); ?></span>
-                <h3 style="margin: 10px 0 0 0; font-size: 48px; font-weight: 900; color: #0f172a; line-height: 1; border: none; padding: 0; background: transparent;"><?php echo esc_html( number_format_i18n( $total_count ) ); ?></h3>
-            </div>
+    <!-- Popular Queries Card (Moved to top) -->
+    <div class="fas-card" style="padding: 24px; margin-bottom: 30px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.4); padding-bottom: 12px; margin-bottom: 16px;">
+            <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <span><?php echo esc_html( $i18n['popular_keywords'] ); ?></span>
+            </h3>
+        </div>
 
-            <!-- Content Ideas / Trend Analytics Card -->
-            <div class="fas-card" style="padding: 24px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.4); padding-bottom: 12px; margin-bottom: 16px;">
-                    <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                        <span class="dashicons dashicons-lightbulb" style="color: #f59e0b;"></span>
-                        <span><?php echo $is_rtl ? 'تحلیل و پیشنهادات تولید محتوا' : 'Content Ideas & Analytics'; ?></span>
-                    </h3>
-                </div>
-                <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">
-                    <?php echo $is_rtl ? 'واژگان زیر در ۲۴ ساعت گذشته توسط بیشترین افراد (آی‌پی‌های یکتا) جستجو شده‌اند. نوشتن مقاله درباره این کلمات به شدت توصیه می‌شود:' : 'These keywords were searched by the most unique individuals (unique IPs) in the last 24 hours. Writing articles about them is highly recommended:'; ?>
-                </p>
-                <?php if ( empty($recent_trends) ) : ?>
-                    <div style="padding: 16px; background: #f8fafc; border-radius: 8px; text-align: center; color: #94a3b8; font-size: 13px;">
-                        <?php echo $is_rtl ? 'در ۲۴ ساعت گذشته جستجوی یکتایی ثبت نشده است.' : 'No unique searches recorded in the last 24 hours.'; ?>
-                    </div>
-                <?php else: ?>
-                    <ul style="margin: 0; padding: 0; list-style: none;">
-                        <?php foreach ( $recent_trends as $trend_term => $ip_count ) : ?>
-                            <li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f1f5f9; margin-bottom: 8px; border-radius: 6px;">
-                                <strong style="color: #0f172a;"><?php echo esc_html($trend_term); ?></strong>
-                                <span style="font-size: 12px; font-weight: 600; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 12px;">
-                                    <?php echo sprintf( $is_rtl ? 'امتیاز داغ: %s' : 'Hot Score: %s', number_format_i18n(round($ip_count)) ); ?>
-                                </span>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php endif; ?>
+        <!-- Charts Container -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+            <div style="background: rgba(255,255,255,0.5); padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <h4 style="margin-top:0; color: #475569; text-align: center;"><?php echo $is_rtl ? 'بیشترین عبارات جستجو شده' : 'Most Searched Terms'; ?></h4>
+                <canvas id="searchTermsChart" style="max-height: 250px;"></canvas>
+            </div>
+            <div style="background: rgba(255,255,255,0.5); padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <h4 style="margin-top:0; color: #475569; text-align: center;"><?php echo $is_rtl ? 'بیشترین نتایج کلیک شده' : 'Most Clicked Results'; ?></h4>
+                <canvas id="clickedResultsChart" style="max-height: 250px;"></canvas>
             </div>
         </div>
 
-        <!-- Popular Queries Card with Glassmorphism class -->
+        <?php if ( empty( $terms ) ) : ?>
+            <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+                <span class="dashicons dashicons-database" style="font-size: 48px; width: 48px; height: 48px; color: #94a3b8; margin-bottom: 12px;"></span>
+                <p style="margin: 0; font-size: 14px; font-weight: 500;"><?php echo esc_html( $i18n['no_data'] ); ?></p>
+            </div>
+        <?php else : ?>
+            <div class="fas-tab-nav" style="flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
+                <button type="button" class="active" data-target="fas-persian-terms"><?php echo $is_rtl ? 'عبارات فارسی / عربی' : 'Persian / Arabic'; ?></button>
+                <button type="button" data-target="fas-english-terms"><?php echo $is_rtl ? 'عبارات انگلیسی' : 'English'; ?></button>
+            </div>
+
+            <div class="fas-stats-tab-content active" id="fas-persian-terms">
+                <?php fas_render_stats_table_helper( $persian_terms, $i18n, $is_rtl ); ?>
+            </div>
+
+            <div class="fas-stats-tab-content" id="fas-english-terms" style="display: none;">
+                <?php fas_render_stats_table_helper( $english_terms, $i18n, $is_rtl ); ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Cards Row -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+
+        <!-- Total Queries Card -->
+        <div class="fas-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 200px;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(0,102,204,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                <span class="dashicons dashicons-search" style="font-size: 32px; width: 32px; height: 32px; color: #0066cc;"></span>
+            </div>
+            <span style="font-size: 14px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;"><?php echo esc_html( $i18n['total_queries'] ); ?></span>
+            <h3 style="margin: 10px 0 0 0; font-size: 48px; font-weight: 900; color: #0f172a; line-height: 1; border: none; padding: 0; background: transparent;"><?php echo esc_html( number_format_i18n( $total_count ) ); ?></h3>
+        </div>
+
+        <!-- Content Ideas / Trend Analytics Card -->
+        <div class="fas-card" style="padding: 24px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.4); padding-bottom: 12px; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                    <span class="dashicons dashicons-lightbulb" style="color: #f59e0b;"></span>
+                    <span><?php echo $is_rtl ? 'تحلیل و پیشنهادات تولید محتوا' : 'Content Ideas & Analytics'; ?></span>
+                </h3>
+            </div>
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">
+                <?php echo $is_rtl ? 'واژگان زیر در ۲۴ ساعت گذشته توسط بیشترین افراد (آی‌پی‌های یکتا) جستجو شده‌اند. نوشتن مقاله درباره این کلمات به شدت توصیه می‌شود:' : 'These keywords were searched by the most unique individuals (unique IPs) in the last 24 hours. Writing articles about them is highly recommended:'; ?>
+            </p>
+            <?php if ( empty($recent_trends) ) : ?>
+                <div style="padding: 16px; background: #f8fafc; border-radius: 8px; text-align: center; color: #94a3b8; font-size: 13px;">
+                    <?php echo $is_rtl ? 'در ۲۴ ساعت گذشته جستجوی یکتایی ثبت نشده است.' : 'No unique searches recorded in the last 24 hours.'; ?>
+                </div>
+            <?php else: ?>
+                <ul style="margin: 0; padding: 0; list-style: none;">
+                    <?php foreach ( $recent_trends as $trend_term => $ip_count ) : ?>
+                        <li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f1f5f9; margin-bottom: 8px; border-radius: 6px;">
+                            <strong style="color: #0f172a;"><?php echo esc_html($trend_term); ?></strong>
+                            <span style="font-size: 12px; font-weight: 600; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 12px;">
+                                <?php echo sprintf( $is_rtl ? 'امتیاز داغ: %s' : 'Hot Score: %s', number_format_i18n(round($ip_count)) ); ?>
+                            </span>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
+
         <!-- Zero-Result Searches Card -->
         <div class="fas-card" style="padding: 24px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.4); padding-bottom: 12px; margin-bottom: 16px;">
@@ -321,48 +359,6 @@ $recent_trends = array_slice( $recent_trends, 0, 5, true );
                 </div>
             <?php endif; ?>
         </div>
-
-        <!-- Popular Queries Card with Glassmorphism class -->
-        <div class="fas-card" style="padding: 24px; text-align: <?php echo $is_rtl ? 'right' : 'left'; ?>; grid-column: 1 / -1;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.4); padding-bottom: 12px; margin-bottom: 16px;">
-                <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                    <span><?php echo esc_html( $i18n['popular_keywords'] ); ?></span>
-                </h3>
-            </div>
-
-            <!-- Charts Container -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-                <div style="background: rgba(255,255,255,0.5); padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                    <h4 style="margin-top:0; color: #475569; text-align: center;"><?php echo $is_rtl ? 'بیشترین عبارات جستجو شده' : 'Most Searched Terms'; ?></h4>
-                    <canvas id="searchTermsChart" style="max-height: 250px;"></canvas>
-                </div>
-                <div style="background: rgba(255,255,255,0.5); padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                    <h4 style="margin-top:0; color: #475569; text-align: center;"><?php echo $is_rtl ? 'بیشترین نتایج کلیک شده' : 'Most Clicked Results'; ?></h4>
-                    <canvas id="clickedResultsChart" style="max-height: 250px;"></canvas>
-                </div>
-            </div>
-
-            <?php if ( empty( $terms ) ) : ?>
-                <div style="text-align: center; padding: 40px 20px; color: #64748b;">
-                    <span class="dashicons dashicons-database" style="font-size: 48px; width: 48px; height: 48px; color: #94a3b8; margin-bottom: 12px;"></span>
-                    <p style="margin: 0; font-size: 14px; font-weight: 500;"><?php echo esc_html( $i18n['no_data'] ); ?></p>
-                </div>
-            <?php else : ?>
-                <div class="fas-tab-nav" style="flex-direction: <?php echo $is_rtl ? 'row-reverse' : 'row'; ?>;">
-                    <button type="button" class="active" data-target="fas-persian-terms"><?php echo $is_rtl ? 'عبارات فارسی / عربی' : 'Persian / Arabic'; ?></button>
-                    <button type="button" data-target="fas-english-terms"><?php echo $is_rtl ? 'عبارات انگلیسی' : 'English'; ?></button>
-                </div>
-
-                <div class="fas-stats-tab-content active" id="fas-persian-terms">
-                    <?php fas_render_stats_table_helper( $persian_terms, $i18n, $is_rtl ); ?>
-                </div>
-
-                <div class="fas-stats-tab-content" id="fas-english-terms" style="display: none;">
-                    <?php fas_render_stats_table_helper( $english_terms, $i18n, $is_rtl ); ?>
-                </div>
-            <?php endif; ?>
-        </div>
-
     </div>
 
 </div>

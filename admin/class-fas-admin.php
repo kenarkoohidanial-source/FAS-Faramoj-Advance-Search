@@ -181,6 +181,12 @@ class FAS_Admin {
                 'default'           => 'yes',
             ) );
 
+            register_setting( $group_name, 'fas_enable_voice_search' . $suffix, array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default'           => 'yes',
+            ) );
+
             register_setting( $group_name, 'fas_floating_position' . $suffix, array(
                 'type'              => 'string',
                 'sanitize_callback' => 'sanitize_text_field',
