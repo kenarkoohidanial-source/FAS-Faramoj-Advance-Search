@@ -183,7 +183,15 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const recognition = new SpeechRecognition();
                 activeRecognition = recognition;
-                recognition.lang = currentLang === 'fa' ? 'fa-IR' : 'en-US';
+
+                // Fallback for Safari/iOS that strongly prefers explicit basic language codes sometimes
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                if (currentLang === 'fa') {
+                    recognition.lang = isIOS ? 'fa' : 'fa-IR';
+                } else {
+                    recognition.lang = 'en-US';
+                }
+
                 recognition.interimResults = false;
                 recognition.maxAlternatives = 1;
 
