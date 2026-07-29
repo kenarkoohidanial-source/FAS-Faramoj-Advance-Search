@@ -515,11 +515,20 @@ class FAS_Rest {
             }
             $search = '';
             foreach ( $search_terms as $term ) {
-                $like = '%' . $wpdb->esc_like( $term ) . '%';
-                $search .= $wpdb->prepare( " OR ({$wpdb->posts}.post_title LIKE %s) OR ({$wpdb->posts}.post_content LIKE %s)", $like, $like );
+                $words = array_filter( explode( ' ', $term ) );
+                $term_sql = '';
+                foreach ( $words as $word ) {
+                    $like = '%' . $wpdb->esc_like( $word ) . '%';
+                    $term_sql .= $wpdb->prepare( " AND (({$wpdb->posts}.post_title LIKE %s) OR ({$wpdb->posts}.post_content LIKE %s))", $like, $like );
+                }
+                if ( ! empty( $term_sql ) ) {
+                    // Strip the leading AND
+                    $term_sql = preg_replace( '/^\s*AND\s*/', '', $term_sql );
+                    $search .= " OR ({$term_sql})";
+                }
             }
             if ( ! empty( $search ) ) {
-                $search = ' AND (' . ltrim( $search, ' OR' ) . ') ';
+                $search = ' AND (' . preg_replace( '/^\s*OR\s*/', '', $search ) . ') ';
             }
             return $search;
         };
