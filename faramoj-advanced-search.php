@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Faramoj Advanced Search
  * Description: A highly optimized, modern multilingual search engine with ACF support.
- * Version: 1.2.0
+ * Version: 1.2.6
  * Author: Danial Kenarkoohi
  * Text Domain: faramoj-search
  */

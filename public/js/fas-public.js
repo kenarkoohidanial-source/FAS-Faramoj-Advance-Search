@@ -26,9 +26,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyContainer = document.querySelector('.fas-search-history');
     
     // History Logic
+    const historyKey = 'fas_search_history_' + currentLang;
+
+    // Backward compatibility migration for older unified history
+    try {
+        const oldHistory = localStorage.getItem('fas_search_history');
+        if (oldHistory) {
+            if (!localStorage.getItem(historyKey)) {
+                localStorage.setItem(historyKey, oldHistory);
+            }
+            localStorage.removeItem('fas_search_history');
+        }
+    } catch(e) {}
+
     const getHistory = () => {
         try {
-            const history = localStorage.getItem('fas_search_history');
+            const history = localStorage.getItem(historyKey);
             return history ? JSON.parse(history) : [];
         } catch (e) {
             return [];
@@ -43,13 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const maxHistory = (typeof fas_params !== 'undefined' && fas_params.history_count) ? parseInt(fas_params.history_count, 10) : 5;
         if (history.length > maxHistory) history.pop(); // keep dynamic limit
         try {
-            localStorage.setItem('fas_search_history', JSON.stringify(history));
+            localStorage.setItem(historyKey, JSON.stringify(history));
         } catch (e) {}
     };
 
     const clearHistory = () => {
         try {
-            localStorage.removeItem('fas_search_history');
+            localStorage.removeItem(historyKey);
             renderHistory();
         } catch (e) {}
     };
@@ -58,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let history = getHistory();
         history = history.filter(t => t !== term);
         try {
-            localStorage.setItem('fas_search_history', JSON.stringify(history));
+            localStorage.setItem(historyKey, JSON.stringify(history));
             renderHistory();
         } catch (e) {}
     };

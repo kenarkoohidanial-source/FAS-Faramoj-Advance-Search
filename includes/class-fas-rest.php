@@ -269,15 +269,19 @@ class FAS_Rest {
     }
 
     public function get_search_results( WP_REST_Request $request ) {
-        $term = sanitize_text_field( $request->get_param( 's' ) );
+        $raw_term = sanitize_text_field( $request->get_param( 's' ) );
         $lang = sanitize_text_field( $request->get_param( 'lang' ) );
 
-        if ( empty( $term ) ) {
+        if ( empty( $raw_term ) ) {
             return new WP_REST_Response( array( 'error' => 'Empty search term' ), 400 );
         }
 
-        // Log search query metrics dynamically for our Statistics submenu
-        $this->log_search_stats( $term );
+        // Normalize term for less strict caching and searching
+        $term = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $raw_term ) ) : strtolower( trim( $raw_term ) );
+        $term = preg_replace( '/\s+/', ' ', $term );
+
+        // Log search query metrics dynamically for our Statistics submenu using raw term for accurate logging
+        $this->log_search_stats( $raw_term );
 
         // Switch language context if WPML is active
         if ( function_exists( 'wpml_object_id_filter' ) && ! empty( $lang ) ) {
@@ -553,12 +557,17 @@ class FAS_Rest {
     }
 
     private function execute_db_query( $term, $lang ) {
+        // Normalize common punctuation to space for less strict English matching (e.g., "Wi-Fi" -> "Wi Fi")
+        $term_no_punct = str_replace( array( '-', '_', '.', ',' ), ' ', $term );
+        $term_no_punct = preg_replace( '/\s+/', ' ', trim( $term_no_punct ) );
+
         // Smart regex: add a space between numbers and letters if they are adjacent (e.g., "آنتن25" -> "آنتن 25")
-        $term_spaced = preg_replace( '/([a-zA-Z\x{0600}-\x{06FF}])(\d+)/u', '$1 $2', $term );
+        $term_spaced = preg_replace( '/([a-zA-Z\x{0600}-\x{06FF}])(\d+)/u', '$1 $2', $term_no_punct );
         $term_spaced = preg_replace( '/(\d+)([a-zA-Z\x{0600}-\x{06FF}])/u', '$1 $2', $term_spaced );
 
         $normalized_terms = array_unique( array_filter( array(
             $term,
+            $term_no_punct,
             $term_spaced,
             $this->convert_persian_to_english_digits( $term ),
             $this->convert_english_to_persian_digits( $term ),
