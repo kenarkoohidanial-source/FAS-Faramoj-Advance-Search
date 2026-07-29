@@ -164,6 +164,70 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let activeRecognition = null;
+    let audioContext = null;
+    let microphoneStream = null;
+    let reqAnimFrameId = null;
+
+    const stopAudioContext = () => {
+        if (reqAnimFrameId) cancelAnimationFrame(reqAnimFrameId);
+        if (microphoneStream) {
+            microphoneStream.getTracks().forEach(track => track.stop());
+            microphoneStream = null;
+        }
+        if (audioContext && audioContext.state !== 'closed') {
+            audioContext.close();
+            audioContext = null;
+        }
+        if (voiceButton) {
+            voiceButton.classList.remove('fas-listening', 'fas-fallback-pulse');
+            voiceButton.style.setProperty('--volume-scale', 1);
+            voiceButton.style.setProperty('--volume-opacity', 0);
+        }
+    };
+
+    const startAudioContext = async () => {
+        try {
+            microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioContext.createAnalyser();
+            const microphone = audioContext.createMediaStreamSource(microphoneStream);
+            microphone.connect(analyser);
+            analyser.fftSize = 256;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            const checkVolume = () => {
+                if (!audioContext) return;
+                analyser.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i];
+                }
+                let average = sum / bufferLength;
+
+                // Map average (0-100 typical speaking range) to scale (1 to 1.6)
+                let scale = 1 + (average / 100) * 0.6;
+                // Map opacity: higher volume = more opaque
+                let opacity = 0.4 + (average / 100) * 0.5;
+
+                // Cap values
+                scale = Math.min(Math.max(scale, 1), 1.6);
+                opacity = Math.min(Math.max(opacity, 0.2), 0.9);
+
+                voiceButton.style.setProperty('--volume-scale', scale);
+                voiceButton.style.setProperty('--volume-opacity', opacity);
+
+                reqAnimFrameId = requestAnimationFrame(checkVolume);
+            };
+            checkVolume();
+        } catch (err) {
+            console.warn('Audio visualization not available (microphone permission or context issue). Falling back to CSS pulse.', err);
+            if (voiceButton) {
+                voiceButton.classList.add('fas-fallback-pulse');
+            }
+        }
+    };
+
     if (voiceButton) {
         voiceButton.addEventListener('click', () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -176,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (activeRecognition) {
                     activeRecognition.stop();
                 }
-                voiceButton.classList.remove('fas-listening');
+                stopAudioContext();
                 return;
             }
 
@@ -197,6 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 recognition.onstart = function() {
                     voiceButton.classList.add('fas-listening');
+                    startAudioContext();
                 };
 
                 recognition.onresult = function(event) {
@@ -209,22 +274,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 recognition.onerror = function(event) {
                     console.error('Speech recognition error:', event.error);
-                    voiceButton.classList.remove('fas-listening');
+                    stopAudioContext();
                     if (event.error === 'not-allowed') {
                         alert(currentLang === 'fa' ? 'دسترسی به میکروفون رد شد. لطفاً اجازه دسترسی را در مرورگر خود بدهید.' : 'Microphone access denied. Please allow microphone access in your browser settings.');
+                    } else if (event.error === 'language-not-supported') {
+                        alert(currentLang === 'fa' ? 'زبان فارسی در جستجوی صوتی این مرورگر پشتیبانی نمی‌شود (در آیفون کیبورد فارسی و قابلیت Dictation را فعال کنید).' : 'Language not supported for voice search on this device.');
+                    } else if (event.error !== 'no-speech') {
+                        alert(currentLang === 'fa' ? 'خطای جستجوی صوتی: ' + event.error : 'Voice search error: ' + event.error);
                     }
                 };
 
                 recognition.onend = function() {
-                    voiceButton.classList.remove('fas-listening');
+                    stopAudioContext();
                     activeRecognition = null;
                 };
 
                 recognition.start();
             } catch (error) {
                 console.error('Voice search failed to start:', error);
-                voiceButton.classList.remove('fas-listening');
+                stopAudioContext();
                 activeRecognition = null;
+                alert(currentLang === 'fa' ? 'خطا در اجرای جستجوی صوتی مرورگر: ' + error.message : 'Error starting voice search: ' + error.message);
             }
         });
     }

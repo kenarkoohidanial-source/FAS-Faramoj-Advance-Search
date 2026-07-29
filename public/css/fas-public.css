@@ -130,13 +130,16 @@
 }
 
 .fas-voice-search-btn:hover {
-    color: var(--fas-accent) !important;
-    background: rgba(100, 116, 139, 0.1) !important;
+    color: #e11d48 !important;
+    background: transparent !important;
 }
 
 .fas-voice-search-btn.fas-listening {
     color: #ef4444 !important;
     position: relative !important;
+    /* dynamic css variables for js manipulation */
+    --volume-scale: 1;
+    --volume-opacity: 0.8;
 }
 
 .fas-voice-search-btn.fas-listening::after {
@@ -148,13 +151,22 @@
     height: 100% !important;
     background-color: rgba(239, 68, 68, 0.4) !important;
     border-radius: 50% !important;
-    transform: translate(-50%, -50%) scale(1) !important;
-    animation: fas-ripple 1.5s infinite ease-out !important;
+    /* transition for smooth JS updates */
+    transition: transform 0.05s ease-out, opacity 0.05s ease-out !important;
+    transform: translate(-50%, -50%) scale(var(--volume-scale)) !important;
+    opacity: var(--volume-opacity) !important;
     z-index: -1 !important;
 }
 
+/* Fallback animation if audio context isn't used */
+.fas-voice-search-btn.fas-fallback-pulse::after {
+    animation: fas-ripple 1.5s infinite ease-out !important;
+    transition: none !important;
+    transform: translate(-50%, -50%) scale(1) !important;
+}
+
 @keyframes fas-ripple {
-    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
     100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
 }
 
