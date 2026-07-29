@@ -146,6 +146,8 @@ $i18n = array(
     'live_preview' => $is_rtl ? 'پیش‌نمایش زنده چیدمان پاپ‌آپ' : 'Modal Overlay Live Preview',
     'live_preview_desc' => $is_rtl ? 'پیش‌نمایش تعاملی زیر به طور زنده تغییرات چیدمان پاپ‌آپ، ابعاد پیکسل، و حالت‌های تیره/روشن تنظیم شده در بالا را نمایش می‌دهد.' : 'The live preview below renders without any layout constraints. Resize your popup width and max-height freely using the dimension controls above to see the layout changes in real-time.',
     'type_search' => $is_rtl ? 'جستجو در محصولات، مقالات، مستندات...' : 'Search products, articles, docs...',
+    'search_aliases' => $is_rtl ? 'تعریف کلمات هم‌خانواده (Aliases/Typos)' : 'Search Synonyms & Aliases',
+    'search_aliases_desc' => $is_rtl ? 'هر هم‌خانواده را در یک خط وارد کنید: کلمه_اصلی => هم‌خانواده_اول, هم‌خانواده_دوم' : 'Enter one primary mapping per line: primary_keyword => alias1, alias2',
 );
 
 $settings_saved = isset( $_GET['settings-updated'] ) && 'true' === $_GET['settings-updated'];
@@ -249,6 +251,18 @@ $btn_bg   = $settings_saved ? '#10b981' : '#0066cc';
                                     <div class="fas-tooltip-wrapper">
                                         <span class="fas-info-icon">!</span>
                                         <div class="fas-tooltip-content"><?php echo esc_html( $i18n['cache_duration_desc'] ); ?> (مجاز: 0 به بالا)</div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; width: 220px; font-weight: 600; color: #475569;"><?php echo esc_html( $i18n['search_aliases'] ); ?></td>
+                            <td style="padding: 10px 0;">
+                                <div class="fas-input-row" style="align-items: flex-start;">
+                                    <textarea name="fas_search_aliases<?php echo esc_attr( $suffix ); ?>" id="fas_search_aliases" class="large-text" rows="4" style="border-radius: 6px; border: 1px solid #cbd5e1;" placeholder="آنتن => اتن, انتی"><?php $val = get_option('fas_search_aliases' . $suffix, ''); echo esc_textarea($val); ?></textarea>
+                                    <div class="fas-tooltip-wrapper">
+                                        <span class="fas-info-icon">!</span>
+                                        <div class="fas-tooltip-content"><?php echo esc_html( $i18n['search_aliases_desc'] ); ?></div>
                                     </div>
                                 </div>
                             </td>

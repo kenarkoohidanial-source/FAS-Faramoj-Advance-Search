@@ -311,7 +311,44 @@ class FAS_Rest {
             }
         }
 
+        // Check for Zero-Result Search
+        if ( empty( $results['all'] ) ) {
+            $this->log_zero_result_stats( $term );
+        }
+
         return new WP_REST_Response( $results, 200 );
+    }
+
+    /**
+     * Log zero-result search queries
+     */
+    private function log_zero_result_stats( $term ) {
+        if ( empty( $term ) || strlen( $term ) < 3 ) {
+            return;
+        }
+
+        $term_clean = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $term ) ) : strtolower( trim( $term ) );
+
+        add_action( 'shutdown', function() use ( $term_clean ) {
+            $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [], 'clicks' => [], 'monthly' => [], 'zero_terms' => [] ) );
+
+            if ( ! isset( $stats['zero_terms'] ) ) {
+                $stats['zero_terms'] = array();
+            }
+
+            if ( ! isset( $stats['zero_terms'][ $term_clean ] ) ) {
+                $stats['zero_terms'][ $term_clean ] = 0;
+            }
+            $stats['zero_terms'][ $term_clean ]++;
+
+            arsort( $stats['zero_terms'] );
+
+            if ( count( $stats['zero_terms'] ) > 100 ) {
+                $stats['zero_terms'] = array_slice( $stats['zero_terms'], 0, 100, true );
+            }
+
+            update_option( 'fas_search_stats', $stats );
+        } );
     }
 
     /**

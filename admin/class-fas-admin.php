@@ -383,6 +383,13 @@ class FAS_Admin {
                 'sanitize_callback' => 'sanitize_text_field',
                 'default'           => '',
             ) );
+
+            // Aliases Setting
+            register_setting( $group_name, 'fas_search_aliases' . $suffix, array(
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_textarea_field',
+                'default'           => '',
+            ) );
         }
 
         // Flush cached transients whenever admin settings are saved to database
