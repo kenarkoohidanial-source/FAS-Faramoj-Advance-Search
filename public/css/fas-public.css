@@ -121,7 +121,9 @@
     align-items: center !important;
     justify-content: center !important;
     color: var(--fas-text-muted) !important;
-    padding: 8px !important;
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
     margin: 0 4px !important;
     border-radius: 50% !important;
     transition: all 0.2s ease !important;
@@ -140,6 +142,11 @@
     /* dynamic css variables for js manipulation */
     --volume-scale: 1;
     --volume-opacity: 0.8;
+}
+
+.fas-voice-search-btn.fas-listening svg {
+    color: #ef4444 !important;
+    stroke: #ef4444 !important;
 }
 
 .fas-voice-search-btn.fas-listening::after {
