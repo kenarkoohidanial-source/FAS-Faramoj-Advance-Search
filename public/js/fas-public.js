@@ -163,42 +163,61 @@ document.addEventListener('DOMContentLoaded', () => {
         closeButton.addEventListener('click', closeModal);
     }
 
+    let activeRecognition = null;
     if (voiceButton) {
         voiceButton.addEventListener('click', () => {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                alert('Your browser does not support Voice Search. Please use a modern browser like Chrome or Safari.');
+                alert(currentLang === 'fa' ? 'مرورگر شما از جستجوی صوتی پشتیبانی نمی‌کند.' : 'Your browser does not support Voice Search. Please use a modern browser like Chrome or Safari.');
                 return;
             }
 
-            const recognition = new SpeechRecognition();
-            recognition.lang = currentLang === 'fa' ? 'fa-IR' : 'en-US';
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
-
-            recognition.onstart = function() {
-                voiceButton.classList.add('fas-listening');
-            };
-
-            recognition.onresult = function(event) {
-                const speechResult = event.results[0][0].transcript;
-                if (searchInput) {
-                    searchInput.value = speechResult;
-                    // Trigger input event manually to fire the search logic
-                    searchInput.dispatchEvent(new Event('input'));
+            if (voiceButton.classList.contains('fas-listening')) {
+                if (activeRecognition) {
+                    activeRecognition.stop();
                 }
-            };
-
-            recognition.onerror = function(event) {
-                console.error('Speech recognition error:', event.error);
                 voiceButton.classList.remove('fas-listening');
-            };
+                return;
+            }
 
-            recognition.onend = function() {
+            try {
+                const recognition = new SpeechRecognition();
+                activeRecognition = recognition;
+                recognition.lang = currentLang === 'fa' ? 'fa-IR' : 'en-US';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                recognition.onstart = function() {
+                    voiceButton.classList.add('fas-listening');
+                };
+
+                recognition.onresult = function(event) {
+                    const speechResult = event.results[0][0].transcript;
+                    if (searchInput) {
+                        searchInput.value = speechResult;
+                        searchInput.dispatchEvent(new Event('input'));
+                    }
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    voiceButton.classList.remove('fas-listening');
+                    if (event.error === 'not-allowed') {
+                        alert(currentLang === 'fa' ? 'دسترسی به میکروفون رد شد. لطفاً اجازه دسترسی را در مرورگر خود بدهید.' : 'Microphone access denied. Please allow microphone access in your browser settings.');
+                    }
+                };
+
+                recognition.onend = function() {
+                    voiceButton.classList.remove('fas-listening');
+                    activeRecognition = null;
+                };
+
+                recognition.start();
+            } catch (error) {
+                console.error('Voice search failed to start:', error);
                 voiceButton.classList.remove('fas-listening');
-            };
-
-            recognition.start();
+                activeRecognition = null;
+            }
         });
     }
 

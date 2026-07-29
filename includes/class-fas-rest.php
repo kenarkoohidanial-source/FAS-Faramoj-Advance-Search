@@ -493,84 +493,59 @@ class FAS_Rest {
     }
 
     /**
-     * Fetch all unique post IDs matching search terms in content or metadata.
+     * Fetch all unique post IDs matching search terms across title, content, and specified metadata.
+     * Re-written for performance using $wpdb and smart cross-field matching.
      */
     private function get_matched_post_ids( $post_type, $search_terms, $meta_keys = [] ) {
+        global $wpdb;
         $all_ids = array();
 
-        // Build combined arguments for keyword search
-        $keyword_args = array(
-            'post_type'      => $post_type,
-            'posts_per_page' => 50,
-            'post_status'    => 'publish',
-            'fields'         => 'ids',
-        );
-        
-        // Add a single custom filter to modify the SQL for the 's' parameter
-        // to use OR logic on the different normalized terms.
-        $search_filter = function( $search, $wp_query ) use ( $search_terms ) {
-            global $wpdb;
-            if ( empty( $search ) ) {
-                return $search;
+        $post_type_sql = $wpdb->prepare( "post_type = %s", $post_type );
+
+        // Generate query for each normalized term format (Original, English digits, Persian digits)
+        foreach ( $search_terms as $term ) {
+            $words = array_filter( explode( ' ', $term ) );
+            if ( empty( $words ) ) {
+                continue;
             }
-            $search = '';
-            foreach ( $search_terms as $term ) {
-                $words = array_filter( explode( ' ', $term ) );
-                $term_sql = '';
-                foreach ( $words as $word ) {
-                    $like = '%' . $wpdb->esc_like( $word ) . '%';
-                    $term_sql .= $wpdb->prepare( " AND (({$wpdb->posts}.post_title LIKE %s) OR ({$wpdb->posts}.post_content LIKE %s))", $like, $like );
-                }
-                if ( ! empty( $term_sql ) ) {
-                    // Strip the leading AND
-                    $term_sql = preg_replace( '/^\s*AND\s*/', '', $term_sql );
-                    $search .= " OR ({$term_sql})";
-                }
-            }
-            if ( ! empty( $search ) ) {
-                $search = ' AND (' . preg_replace( '/^\s*OR\s*/', '', $search ) . ') ';
-            }
-            return $search;
-        };
-        add_filter( 'posts_search', $search_filter, 10, 2 );
 
-        // This single WP_Query replaces the keyword N+1 queries.
-        // We set 's' to an arbitrary string to trigger the posts_search filter
-        $keyword_args['s'] = 'FAS_MAGIC_SEARCH_STRING';
-        $query1 = new WP_Query( $keyword_args );
-        if ( ! empty( $query1->posts ) ) {
-            $all_ids = array_merge( $all_ids, $query1->posts );
-        }
+            $word_queries = array();
+            foreach ( $words as $word ) {
+                $like = '%' . $wpdb->esc_like( $word ) . '%';
 
-        // Clean up our filter
-        remove_filter( 'posts_search', $search_filter, 10 );
+                $title_content_sql = $wpdb->prepare( "(p.post_title LIKE %s OR p.post_content LIKE %s)", $like, $like );
 
+                if ( ! empty( $meta_keys ) ) {
+                    $meta_keys_in = "'" . implode( "','", array_map( 'esc_sql', $meta_keys ) ) . "'";
+                    $meta_sql = $wpdb->prepare( "
+                        OR EXISTS (
+                            SELECT 1 FROM {$wpdb->postmeta} pm
+                            WHERE pm.post_id = p.ID
+                            AND pm.meta_key IN ($meta_keys_in)
+                            AND pm.meta_value LIKE %s
+                        )", $like );
 
-        // Build combined arguments for ACF / metadata search
-        if ( ! empty( $meta_keys ) ) {
-            $meta_query = array( 'relation' => 'OR' );
-            
-            foreach ( $search_terms as $t ) {
-                foreach ( $meta_keys as $key ) {
-                    $meta_query[] = array(
-                        'key'     => $key,
-                        'value'   => $t,
-                        'compare' => 'LIKE',
-                    );
+                    $word_queries[] = "($title_content_sql $meta_sql)";
+                } else {
+                    $word_queries[] = $title_content_sql;
                 }
             }
 
-            $meta_args = array(
-                'post_type'      => $post_type,
-                'posts_per_page' => 50,
-                'post_status'    => 'publish',
-                'fields'         => 'ids',
-                'meta_query'     => $meta_query,
-            );
-            
-            $query2 = new WP_Query( $meta_args );
-            if ( ! empty( $query2->posts ) ) {
-                $all_ids = array_merge( $all_ids, $query2->posts );
+            // All words must match *somewhere* (title, content, or meta)
+            $term_query = implode( " AND ", $word_queries );
+
+            $sql = "
+                SELECT p.ID
+                FROM {$wpdb->posts} p
+                WHERE p.post_status = 'publish'
+                AND $post_type_sql
+                AND ($term_query)
+                LIMIT 50
+            ";
+
+            $results = $wpdb->get_col( $sql );
+            if ( ! empty( $results ) ) {
+                $all_ids = array_merge( $all_ids, $results );
             }
         }
 
@@ -578,10 +553,17 @@ class FAS_Rest {
     }
 
     private function execute_db_query( $term, $lang ) {
+        // Smart regex: add a space between numbers and letters if they are adjacent (e.g., "آنتن25" -> "آنتن 25")
+        $term_spaced = preg_replace( '/([a-zA-Z\x{0600}-\x{06FF}])(\d+)/u', '$1 $2', $term );
+        $term_spaced = preg_replace( '/(\d+)([a-zA-Z\x{0600}-\x{06FF}])/u', '$1 $2', $term_spaced );
+
         $normalized_terms = array_unique( array_filter( array(
             $term,
+            $term_spaced,
             $this->convert_persian_to_english_digits( $term ),
-            $this->convert_english_to_persian_digits( $term )
+            $this->convert_english_to_persian_digits( $term ),
+            $this->convert_persian_to_english_digits( $term_spaced ),
+            $this->convert_english_to_persian_digits( $term_spaced )
         ) ) );
 
         // Split queries exactly by post type to isolate products (WooCommerce) vs posts vs pages
