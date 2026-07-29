@@ -561,6 +561,9 @@ class FAS_Rest {
         $term_no_punct = str_replace( array( '-', '_', '.', ',' ), ' ', $term );
         $term_no_punct = preg_replace( '/\s+/', ' ', trim( $term_no_punct ) );
 
+        // Stripped spaces entirely for loose matching against mis-spaced products (e.g., "25 dbi" -> "25dbi")
+        $term_no_space = str_replace( ' ', '', $term_no_punct );
+
         // Smart regex: add a space between numbers and letters if they are adjacent (e.g., "آنتن25" -> "آنتن 25")
         $term_spaced = preg_replace( '/([a-zA-Z\x{0600}-\x{06FF}])(\d+)/u', '$1 $2', $term_no_punct );
         $term_spaced = preg_replace( '/(\d+)([a-zA-Z\x{0600}-\x{06FF}])/u', '$1 $2', $term_spaced );
@@ -568,9 +571,12 @@ class FAS_Rest {
         $normalized_terms = array_unique( array_filter( array(
             $term,
             $term_no_punct,
+            $term_no_space,
             $term_spaced,
             $this->convert_persian_to_english_digits( $term ),
             $this->convert_english_to_persian_digits( $term ),
+            $this->convert_persian_to_english_digits( $term_no_space ),
+            $this->convert_english_to_persian_digits( $term_no_space ),
             $this->convert_persian_to_english_digits( $term_spaced ),
             $this->convert_english_to_persian_digits( $term_spaced )
         ) ) );
