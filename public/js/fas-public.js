@@ -180,8 +180,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let audioContext = null;
     let microphoneStream = null;
     let reqAnimFrameId = null;
+    let voiceSilenceTimer = null;
+
+    const clearSilenceTimer = () => {
+        if (voiceSilenceTimer) {
+            clearTimeout(voiceSilenceTimer);
+            voiceSilenceTimer = null;
+        }
+    };
 
     const stopAudioContext = () => {
+        clearSilenceTimer();
         if (reqAnimFrameId) cancelAnimationFrame(reqAnimFrameId);
         if (microphoneStream) {
             microphoneStream.getTracks().forEach(track => track.stop());
@@ -269,20 +278,35 @@ document.addEventListener('DOMContentLoaded', () => {
                     recognition.lang = 'en-US';
                 }
 
-                recognition.interimResults = false;
+                recognition.interimResults = true;
+                recognition.continuous = true;
                 recognition.maxAlternatives = 1;
 
                 recognition.onstart = function() {
                     voiceButton.classList.add('fas-listening');
                     startAudioContext();
+                    clearSilenceTimer();
+                    voiceSilenceTimer = setTimeout(() => {
+                        if (activeRecognition) activeRecognition.stop();
+                    }, 4000); // initial silence timeout
                 };
 
                 recognition.onresult = function(event) {
-                    const speechResult = event.results[0][0].transcript;
+                    clearSilenceTimer();
+
+                    let finalTranscript = '';
+                    for (let i = 0; i < event.results.length; i++) {
+                        finalTranscript += event.results[i][0].transcript;
+                    }
+
                     if (searchInput) {
-                        searchInput.value = speechResult;
+                        searchInput.value = finalTranscript;
                         searchInput.dispatchEvent(new Event('input'));
                     }
+
+                    voiceSilenceTimer = setTimeout(() => {
+                        if (activeRecognition) activeRecognition.stop();
+                    }, 2000); // User stopped speaking for 2 seconds
                 };
 
                 recognition.onerror = function(event) {
