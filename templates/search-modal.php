@@ -13,6 +13,8 @@ $suffix = FAS_Core::get_lang_suffix();
 $theme_mode    = FAS_Core::get_option( 'fas_theme_mode', 'dark' );
 $overlay_class = ( 'light' === $theme_mode ) ? 'fas-theme-light' : 'fas-theme-dark';
 
+$enable_voice_search = FAS_Core::get_option( 'fas_enable_voice_search', 'yes' );
+
 $tabs_order     = FAS_Core::get_option( 'fas_tabs_order', 'all,products,posts,docs' );
 $tabs_order_arr = array_map( 'trim', explode( ',', $tabs_order ) );
 
@@ -57,6 +59,16 @@ $placeholder_text = $is_fa ? 'جستجو در محصولات، مقالات، م
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
             <input type="text" class="fas-search-input" placeholder="<?php echo esc_attr( $placeholder_text ); ?>" aria-label="<?php esc_attr_e( 'Live Search', 'faramoj-search' ); ?>">
+            <?php if ( 'yes' === $enable_voice_search ) : ?>
+                <span class="fas-voice-search-btn" role="button" aria-label="<?php esc_attr_e( 'Voice Search', 'faramoj-search' ); ?>" title="<?php echo $is_fa ? 'جستجوی صوتی' : 'Voice Search'; ?>">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                </span>
+            <?php endif; ?>
             <!-- Standardized Close Span Element to totally bypass theme-level button overrides -->
             <span class="fas-modal-close" role="button" aria-label="<?php esc_attr_e( 'Close Search', 'faramoj-search' ); ?>">&times;</span>
         </div>

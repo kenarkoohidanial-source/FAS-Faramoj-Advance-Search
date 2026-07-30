@@ -20,14 +20,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // Modal Interaction
     const triggerButtons = document.querySelectorAll('.fas-search-trigger');
     const closeButton = document.querySelector('.fas-modal-close');
+    const voiceButton = document.querySelector('.fas-voice-search-btn');
     const tabButtons = document.querySelectorAll('.fas-tab-btn');
     const tabContents = document.querySelectorAll('.fas-tab-content');
     const historyContainer = document.querySelector('.fas-search-history');
     
     // History Logic
+    const historyKey = 'fas_search_history_' + currentLang;
+
+    // Backward compatibility migration for older unified history
+    try {
+        const oldHistory = localStorage.getItem('fas_search_history');
+        if (oldHistory) {
+            if (!localStorage.getItem(historyKey)) {
+                localStorage.setItem(historyKey, oldHistory);
+            }
+            localStorage.removeItem('fas_search_history');
+        }
+    } catch(e) {}
+
     const getHistory = () => {
         try {
-            const history = localStorage.getItem('fas_search_history');
+            const history = localStorage.getItem(historyKey);
             return history ? JSON.parse(history) : [];
         } catch (e) {
             return [];
@@ -42,13 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const maxHistory = (typeof fas_params !== 'undefined' && fas_params.history_count) ? parseInt(fas_params.history_count, 10) : 5;
         if (history.length > maxHistory) history.pop(); // keep dynamic limit
         try {
-            localStorage.setItem('fas_search_history', JSON.stringify(history));
+            localStorage.setItem(historyKey, JSON.stringify(history));
         } catch (e) {}
     };
 
     const clearHistory = () => {
         try {
-            localStorage.removeItem('fas_search_history');
+            localStorage.removeItem(historyKey);
             renderHistory();
         } catch (e) {}
     };
@@ -57,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let history = getHistory();
         history = history.filter(t => t !== term);
         try {
-            localStorage.setItem('fas_search_history', JSON.stringify(history));
+            localStorage.setItem(historyKey, JSON.stringify(history));
             renderHistory();
         } catch (e) {}
     };
@@ -160,6 +174,166 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (closeButton) {
         closeButton.addEventListener('click', closeModal);
+    }
+
+    let activeRecognition = null;
+    let audioContext = null;
+    let microphoneStream = null;
+    let reqAnimFrameId = null;
+    let voiceSilenceTimer = null;
+
+    const clearSilenceTimer = () => {
+        if (voiceSilenceTimer) {
+            clearTimeout(voiceSilenceTimer);
+            voiceSilenceTimer = null;
+        }
+    };
+
+    const stopAudioContext = () => {
+        clearSilenceTimer();
+        if (reqAnimFrameId) cancelAnimationFrame(reqAnimFrameId);
+        if (microphoneStream) {
+            microphoneStream.getTracks().forEach(track => track.stop());
+            microphoneStream = null;
+        }
+        if (audioContext && audioContext.state !== 'closed') {
+            audioContext.close();
+            audioContext = null;
+        }
+        if (voiceButton) {
+            voiceButton.classList.remove('fas-listening', 'fas-fallback-pulse');
+            voiceButton.style.setProperty('--volume-scale', 1);
+            voiceButton.style.setProperty('--volume-opacity', 0);
+        }
+    };
+
+    const startAudioContext = async () => {
+        try {
+            microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioContext.createAnalyser();
+            const microphone = audioContext.createMediaStreamSource(microphoneStream);
+            microphone.connect(analyser);
+            analyser.fftSize = 256;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            const checkVolume = () => {
+                if (!audioContext) return;
+                analyser.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i];
+                }
+                let average = sum / bufferLength;
+
+                // Map average (0-100 typical speaking range) to scale (1 to 1.6)
+                let scale = 1 + (average / 100) * 0.6;
+                // Map opacity: higher volume = more opaque
+                let opacity = 0.4 + (average / 100) * 0.5;
+
+                // Cap values
+                scale = Math.min(Math.max(scale, 1), 1.6);
+                opacity = Math.min(Math.max(opacity, 0.2), 0.9);
+
+                voiceButton.style.setProperty('--volume-scale', scale);
+                voiceButton.style.setProperty('--volume-opacity', opacity);
+
+                reqAnimFrameId = requestAnimationFrame(checkVolume);
+            };
+            checkVolume();
+        } catch (err) {
+            console.warn('Audio visualization not available (microphone permission or context issue). Falling back to CSS pulse.', err);
+            if (voiceButton) {
+                voiceButton.classList.add('fas-fallback-pulse');
+            }
+        }
+    };
+
+    if (voiceButton) {
+        voiceButton.addEventListener('click', () => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert(currentLang === 'fa' ? 'مرورگر شما از جستجوی صوتی پشتیبانی نمی‌کند.' : 'Your browser does not support Voice Search. Please use a modern browser like Chrome or Safari.');
+                return;
+            }
+
+            if (voiceButton.classList.contains('fas-listening')) {
+                if (activeRecognition) {
+                    activeRecognition.stop();
+                }
+                stopAudioContext();
+                return;
+            }
+
+            try {
+                const recognition = new SpeechRecognition();
+                activeRecognition = recognition;
+
+                // Fallback for Safari/iOS that strongly prefers explicit basic language codes sometimes
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                if (currentLang === 'fa') {
+                    recognition.lang = isIOS ? 'fa' : 'fa-IR';
+                } else {
+                    recognition.lang = 'en-US';
+                }
+
+                recognition.interimResults = true;
+                recognition.continuous = true;
+                recognition.maxAlternatives = 1;
+
+                recognition.onstart = function() {
+                    voiceButton.classList.add('fas-listening');
+                    startAudioContext();
+                    clearSilenceTimer();
+                    voiceSilenceTimer = setTimeout(() => {
+                        if (activeRecognition) activeRecognition.stop();
+                    }, 4000); // initial silence timeout
+                };
+
+                recognition.onresult = function(event) {
+                    clearSilenceTimer();
+
+                    let finalTranscript = '';
+                    for (let i = 0; i < event.results.length; i++) {
+                        finalTranscript += event.results[i][0].transcript;
+                    }
+
+                    if (searchInput) {
+                        searchInput.value = finalTranscript;
+                        searchInput.dispatchEvent(new Event('input'));
+                    }
+
+                    voiceSilenceTimer = setTimeout(() => {
+                        if (activeRecognition) activeRecognition.stop();
+                    }, 2000); // User stopped speaking for 2 seconds
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    stopAudioContext();
+                    if (event.error === 'not-allowed') {
+                        alert(currentLang === 'fa' ? 'دسترسی به میکروفون رد شد. لطفاً اجازه دسترسی را در مرورگر خود بدهید.' : 'Microphone access denied. Please allow microphone access in your browser settings.');
+                    } else if (event.error === 'language-not-supported') {
+                        alert(currentLang === 'fa' ? 'زبان فارسی در جستجوی صوتی این مرورگر پشتیبانی نمی‌شود (در آیفون کیبورد فارسی و قابلیت Dictation را فعال کنید).' : 'Language not supported for voice search on this device.');
+                    } else if (event.error !== 'no-speech') {
+                        alert(currentLang === 'fa' ? 'خطای جستجوی صوتی: ' + event.error : 'Voice search error: ' + event.error);
+                    }
+                };
+
+                recognition.onend = function() {
+                    stopAudioContext();
+                    activeRecognition = null;
+                };
+
+                recognition.start();
+            } catch (error) {
+                console.error('Voice search failed to start:', error);
+                stopAudioContext();
+                activeRecognition = null;
+                alert(currentLang === 'fa' ? 'خطا در اجرای جستجوی صوتی مرورگر: ' + error.message : 'Error starting voice search: ' + error.message);
+            }
+        });
     }
 
     if (searchOverlay) {

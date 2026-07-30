@@ -269,15 +269,19 @@ class FAS_Rest {
     }
 
     public function get_search_results( WP_REST_Request $request ) {
-        $term = sanitize_text_field( $request->get_param( 's' ) );
+        $raw_term = sanitize_text_field( $request->get_param( 's' ) );
         $lang = sanitize_text_field( $request->get_param( 'lang' ) );
 
-        if ( empty( $term ) ) {
+        if ( empty( $raw_term ) ) {
             return new WP_REST_Response( array( 'error' => 'Empty search term' ), 400 );
         }
 
-        // Log search query metrics dynamically for our Statistics submenu
-        $this->log_search_stats( $term );
+        // Normalize term for less strict caching and searching
+        $term = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $raw_term ) ) : strtolower( trim( $raw_term ) );
+        $term = preg_replace( '/\s+/', ' ', $term );
+
+        // Log search query metrics dynamically for our Statistics submenu using raw term for accurate logging
+        $this->log_search_stats( $raw_term );
 
         // Switch language context if WPML is active
         if ( function_exists( 'wpml_object_id_filter' ) && ! empty( $lang ) ) {
@@ -311,7 +315,44 @@ class FAS_Rest {
             }
         }
 
+        // Check for Zero-Result Search
+        if ( empty( $results['all'] ) ) {
+            $this->log_zero_result_stats( $term );
+        }
+
         return new WP_REST_Response( $results, 200 );
+    }
+
+    /**
+     * Log zero-result search queries
+     */
+    private function log_zero_result_stats( $term ) {
+        if ( empty( $term ) || strlen( $term ) < 3 ) {
+            return;
+        }
+
+        $term_clean = function_exists( 'mb_strtolower' ) ? mb_strtolower( trim( $term ) ) : strtolower( trim( $term ) );
+
+        add_action( 'shutdown', function() use ( $term_clean ) {
+            $stats = get_option( 'fas_search_stats', array( 'total_count' => 0, 'terms' => [], 'clicks' => [], 'monthly' => [], 'zero_terms' => [] ) );
+
+            if ( ! isset( $stats['zero_terms'] ) ) {
+                $stats['zero_terms'] = array();
+            }
+
+            if ( ! isset( $stats['zero_terms'][ $term_clean ] ) ) {
+                $stats['zero_terms'][ $term_clean ] = 0;
+            }
+            $stats['zero_terms'][ $term_clean ]++;
+
+            arsort( $stats['zero_terms'] );
+
+            if ( count( $stats['zero_terms'] ) > 100 ) {
+                $stats['zero_terms'] = array_slice( $stats['zero_terms'], 0, 100, true );
+            }
+
+            update_option( 'fas_search_stats', $stats );
+        } );
     }
 
     /**
@@ -428,25 +469,36 @@ class FAS_Rest {
     }
 
     /**
-     * Helper to highlight the query in a text safely.
+     * Helper to highlight the query tokens in a text safely.
+     * Uses FAS_Tokenizer to extract tokens and applies highlighting robustly.
      */
     private function highlight_text( $text, $term ) {
         $escaped = esc_html( $text );
-        if ( empty( $term ) ) {
+        $tokens = FAS_Tokenizer::tokenize( $term );
+
+        if ( empty( $tokens ) ) {
             return $escaped;
         }
 
-        // Generate highlight patterns for raw, English, and Persian digit normalized variations
-        $terms = array_unique( array_filter( array(
-            $term,
-            $this->convert_persian_to_english_digits( $term ),
-            $this->convert_english_to_persian_digits( $term )
-        ) ) );
+        // Add digit variations for highlighting to match how the user might type it natively vs how it's stored
+        $highlight_tokens = array();
+        foreach ( $tokens as $t ) {
+            $highlight_tokens[] = $t;
+            $highlight_tokens[] = $this->convert_persian_to_english_digits( $t );
+            $highlight_tokens[] = $this->convert_english_to_persian_digits( $t );
+        }
+        $highlight_tokens = array_unique( array_filter( $highlight_tokens ) );
 
-        foreach ( $terms as $t ) {
+        // Sort by length descending to prevent substring highlighting overlap
+        usort( $highlight_tokens, function( $a, $b ) {
+            return mb_strlen( $b ) - mb_strlen( $a );
+        } );
+
+        foreach ( $highlight_tokens as $t ) {
             $quoted_term = preg_quote( $t, '/' );
+            // Use negative lookahead/lookbehind to prevent highlighting already highlighted text (i.e. inside <mark>)
             $escaped = preg_replace(
-                '/(' . $quoted_term . ')/i',
+                '/(?![^<]*>)' . '(?i)(' . $quoted_term . ')/u',
                 '<mark class="fas-highlight">$1</mark>',
                 $escaped
             );
@@ -455,93 +507,53 @@ class FAS_Rest {
         return $escaped;
     }
 
-    /**
-     * Fetch all unique post IDs matching search terms in content or metadata.
-     */
-    private function get_matched_post_ids( $post_type, $search_terms, $meta_keys = [] ) {
-        $all_ids = array();
-
-        // Build combined arguments for keyword search
-        $keyword_args = array(
-            'post_type'      => $post_type,
-            'posts_per_page' => 50,
-            'post_status'    => 'publish',
-            'fields'         => 'ids',
-        );
-        
-        // Add a single custom filter to modify the SQL for the 's' parameter
-        // to use OR logic on the different normalized terms.
-        $search_filter = function( $search, $wp_query ) use ( $search_terms ) {
-            global $wpdb;
-            if ( empty( $search ) ) {
-                return $search;
-            }
-            $search = '';
-            foreach ( $search_terms as $term ) {
-                $like = '%' . $wpdb->esc_like( $term ) . '%';
-                $search .= $wpdb->prepare( " OR ({$wpdb->posts}.post_title LIKE %s) OR ({$wpdb->posts}.post_content LIKE %s)", $like, $like );
-            }
-            if ( ! empty( $search ) ) {
-                $search = ' AND (' . ltrim( $search, ' OR' ) . ') ';
-            }
-            return $search;
-        };
-        add_filter( 'posts_search', $search_filter, 10, 2 );
-
-        // This single WP_Query replaces the keyword N+1 queries.
-        // We set 's' to an arbitrary string to trigger the posts_search filter
-        $keyword_args['s'] = 'FAS_MAGIC_SEARCH_STRING';
-        $query1 = new WP_Query( $keyword_args );
-        if ( ! empty( $query1->posts ) ) {
-            $all_ids = array_merge( $all_ids, $query1->posts );
-        }
-
-        // Clean up our filter
-        remove_filter( 'posts_search', $search_filter, 10 );
-
-
-        // Build combined arguments for ACF / metadata search
-        if ( ! empty( $meta_keys ) ) {
-            $meta_query = array( 'relation' => 'OR' );
-            
-            foreach ( $search_terms as $t ) {
-                foreach ( $meta_keys as $key ) {
-                    $meta_query[] = array(
-                        'key'     => $key,
-                        'value'   => $t,
-                        'compare' => 'LIKE',
-                    );
-                }
-            }
-
-            $meta_args = array(
-                'post_type'      => $post_type,
-                'posts_per_page' => 50,
-                'post_status'    => 'publish',
-                'fields'         => 'ids',
-                'meta_query'     => $meta_query,
-            );
-            
-            $query2 = new WP_Query( $meta_args );
-            if ( ! empty( $query2->posts ) ) {
-                $all_ids = array_merge( $all_ids, $query2->posts );
-            }
-        }
-
-        return array_unique( $all_ids );
-    }
-
     private function execute_db_query( $term, $lang ) {
-        $normalized_terms = array_unique( array_filter( array(
-            $term,
-            $this->convert_persian_to_english_digits( $term ),
-            $this->convert_english_to_persian_digits( $term )
-        ) ) );
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'fas_search_index';
 
-        // Split queries exactly by post type to isolate products (WooCommerce) vs posts vs pages
-        $product_ids = $this->get_matched_post_ids( 'product', $normalized_terms, array( 'technical_specifications', 'frequency_range' ) );
-        $post_ids    = $this->get_matched_post_ids( 'post', $normalized_terms );
-        $page_ids    = $this->get_matched_post_ids( 'page', $normalized_terms );
+        $tokens = FAS_Tokenizer::tokenize( $term );
+        if ( empty( $tokens ) ) {
+            return array( 'all' => [], 'products' => [], 'posts' => [], 'docs' => [] );
+        }
+
+        // Generate strict AND condition for the tokens against our custom index
+        $token_queries = array();
+        foreach ( $tokens as $token ) {
+            $like = '%' . $wpdb->esc_like( $token ) . '%';
+            $token_queries[] = $wpdb->prepare( "(normalized_title LIKE %s OR normalized_content LIKE %s OR normalized_meta LIKE %s)", $like, $like, $like );
+        }
+        $where_clause = implode( " AND ", $token_queries );
+
+        // Optional exact phrase ranking mechanism (Exact title > Title tokens > other)
+        $exact_like = '%' . $wpdb->esc_like( FAS_Tokenizer::tokenize_to_string( $term ) ) . '%';
+
+        $sql = "
+            SELECT post_id, post_type,
+                   (CASE WHEN normalized_title LIKE %s THEN 2
+                         WHEN normalized_title LIKE %s THEN 1
+                         ELSE 0 END) as rank_score
+            FROM {$table_name}
+            WHERE $where_clause
+            ORDER BY rank_score DESC, id DESC
+            LIMIT 150
+        ";
+
+        // Query the index! Hyper-fast, no table scanning.
+        $results = $wpdb->get_results( $wpdb->prepare( $sql, $exact_like, '%' . $wpdb->esc_like( $tokens[0] ) . '%' ) );
+
+        $product_ids = array();
+        $post_ids    = array();
+        $page_ids    = array();
+
+        foreach ( $results as $row ) {
+            if ( $row->post_type === 'product' ) {
+                $product_ids[] = $row->post_id;
+            } elseif ( $row->post_type === 'post' ) {
+                $post_ids[] = $row->post_id;
+            } elseif ( $row->post_type === 'page' ) {
+                $page_ids[] = $row->post_id;
+            }
+        }
 
         $formatted_results = array(
             'all'      => [], // Combined list of all matches

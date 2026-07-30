@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Faramoj Advanced Search
  * Description: A highly optimized, modern multilingual search engine with ACF support.
- * Version: 1.2.0
+ * Version: 1.2.6
  * Author: Danial Kenarkoohi
  * Text Domain: faramoj-search
  */
@@ -14,6 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Autoload Classes
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-fas-core.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-fas-i18n.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-fas-tokenizer.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-fas-indexer.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-fas-rest.php';
 require_once plugin_dir_path( __FILE__ ) . 'admin/class-fas-admin.php';
 
