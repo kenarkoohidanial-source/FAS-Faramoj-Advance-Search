@@ -78,18 +78,73 @@ class FAS_Core {
         $indexer = new FAS_Indexer();
         add_action( 'save_post', array( $indexer, 'index_post' ) );
         add_action( 'deleted_post', array( $indexer, 'remove_post' ) );
+        add_action( 'wp_ajax_fas_sync_chunk', array( $indexer, 'ajax_sync_chunk' ) );
 
         // Admin Panel Settings & Indexer Init
         if ( is_admin() ) {
             $admin = new FAS_Admin();
             add_action( 'admin_menu', array( $admin, 'add_admin_menu' ) );
             add_action( 'admin_init', array( $admin, 'register_settings' ) );
+
+            // Only create schema on init if needed, never sync syncronously
             add_action( 'admin_init', function() use ( $indexer ) {
                 $db_version = get_option( 'fas_index_db_version', '0' );
                 if ( $db_version !== '1.0.0' ) {
                     $indexer->create_table();
-                    $indexer->sync_all();
                     update_option( 'fas_index_db_version', '1.0.0' );
+                }
+            } );
+
+            // Admin UI Sync Trigger
+            add_action( 'admin_notices', function() {
+                if ( ! get_option( 'fas_index_built' ) ) {
+                    $ajax_url = admin_url( 'admin-ajax.php' );
+                    ?>
+                    <div class="notice notice-warning is-dismissible" id="fas-indexer-notice">
+                        <p><strong>Faramoj Advanced Search:</strong> The high-performance search index needs to be built.</p>
+                        <p>
+                            <button id="fas-trigger-sync" class="button button-primary">Build Index Now</button>
+                            <span id="fas-sync-progress" style="margin-left:10px; font-weight:bold; color:#007cba;"></span>
+                        </p>
+                    </div>
+                    <script>
+                        document.getElementById('fas-trigger-sync').addEventListener('click', function(e) {
+                            e.preventDefault();
+                            var btn = this;
+                            var progress = document.getElementById('fas-sync-progress');
+                            btn.disabled = true;
+                            progress.innerText = 'Initializing sync...';
+
+                            function syncChunk(offset) {
+                                var xhr = new XMLHttpRequest();
+                                xhr.open('POST', '<?php echo esc_url( $ajax_url ); ?>', true);
+                                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+                                xhr.onload = function() {
+                                    if (xhr.status >= 200 && xhr.status < 400) {
+                                        var res = JSON.parse(xhr.responseText);
+                                        if (res.success) {
+                                            if (res.data.done) {
+                                                progress.innerText = 'Index built successfully! (' + res.data.total + ' items)';
+                                                setTimeout(function() {
+                                                    document.getElementById('fas-indexer-notice').style.display = 'none';
+                                                }, 3000);
+                                            } else {
+                                                var perc = Math.round((res.data.offset / res.data.total) * 100);
+                                                progress.innerText = 'Syncing... ' + perc + '% (' + res.data.offset + '/' + res.data.total + ')';
+                                                syncChunk(res.data.offset);
+                                            }
+                                        } else {
+                                            progress.innerText = 'Error syncing. Check console.';
+                                            btn.disabled = false;
+                                        }
+                                    }
+                                };
+                                xhr.send('action=fas_sync_chunk&offset=' + offset);
+                            }
+                            syncChunk(0);
+                        });
+                    </script>
+                    <?php
                 }
             } );
         }

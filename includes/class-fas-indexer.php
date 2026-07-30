@@ -100,34 +100,114 @@ class FAS_Indexer {
     }
 
     /**
-     * Full sync to process all existing published posts into the index.
+     * Process a chunk of posts into the index.
      */
-    public function sync_all() {
+    public function sync_chunk( $offset, $limit ) {
         global $wpdb;
-        // Truncate first to avoid duplication issues
-        $wpdb->query( "TRUNCATE TABLE {$this->table_name}" );
+        $posts = $wpdb->get_results( $wpdb->prepare( "
+            SELECT ID FROM {$wpdb->posts}
+            WHERE post_status = 'publish'
+            AND post_type IN ('product', 'post', 'page')
+            ORDER BY ID ASC
+            LIMIT %d OFFSET %d
+        ", $limit, $offset ) );
 
-        // Process in chunks to prevent memory exhaustion
-        $offset = 0;
-        $limit = 100;
+        if ( empty( $posts ) ) {
+            return 0;
+        }
 
-        while ( true ) {
-            $posts = $wpdb->get_results( $wpdb->prepare( "
-                SELECT ID FROM {$wpdb->posts}
-                WHERE post_status = 'publish'
-                AND post_type IN ('product', 'post', 'page')
-                LIMIT %d OFFSET %d
-            ", $limit, $offset ) );
+        foreach ( $posts as $p ) {
+            $this->index_post( $p->ID );
+        }
 
-            if ( empty( $posts ) ) {
-                break;
-            }
+        return count( $posts );
+    }
 
-            foreach ( $posts as $p ) {
-                $this->index_post( $p->ID );
-            }
+    /**
+     * Helper to get total indexable posts count.
+     */
+    public function get_total_indexable_posts() {
+        global $wpdb;
+        return (int) $wpdb->get_var( "
+            SELECT COUNT(ID) FROM {$wpdb->posts}
+            WHERE post_status = 'publish'
+            AND post_type IN ('product', 'post', 'page')
+        " );
+    }
 
-            $offset += $limit;
+    /**
+     * AJAX handler for safe chunked synchronization.
+     */
+    public function ajax_sync_chunk() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( 'Unauthorized' );
+        }
+
+        $offset = isset( $_POST['offset'] ) ? intval( $_POST['offset'] ) : 0;
+        $limit  = 50; // Safe chunk limit per request
+
+        global $wpdb;
+        // If starting fresh, truncate the table
+        if ( $offset === 0 ) {
+            $wpdb->query( "TRUNCATE TABLE {$this->table_name}" );
+        }
+
+        $processed = $this->sync_chunk( $offset, $limit );
+        $total     = $this->get_total_indexable_posts();
+
+        if ( $processed === 0 || ( $offset + $processed ) >= $total ) {
+            update_option( 'fas_index_built', '1' );
+            wp_send_json_success( array( 'done' => true, 'total' => $total ) );
+        } else {
+            wp_send_json_success( array(
+                'done'   => false,
+                'offset' => $offset + $processed,
+                'total'  => $total
+            ) );
         }
     }
+}
+
+/**
+ * WP-CLI Support for FAS Indexer
+ */
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+    class FAS_CLI_Indexer {
+        /**
+         * Rebuild the Faramoj Advanced Search Index.
+         *
+         * ## EXAMPLES
+         *
+         *     wp fas index --sync
+         *
+         * @when after_wp_load
+         */
+        public function index( $args, $assoc_args ) {
+            if ( isset( $assoc_args['sync'] ) ) {
+                WP_CLI::line( 'Starting FAS Index Sync...' );
+                $indexer = new FAS_Indexer();
+
+                global $wpdb;
+                $wpdb->query( "TRUNCATE TABLE " . $wpdb->prefix . "fas_search_index" );
+
+                $total = $indexer->get_total_indexable_posts();
+                $progress = \WP_CLI\Utils\make_progress_bar( 'Indexing Posts', $total );
+
+                $offset = 0;
+                $limit = 100;
+                while ( true ) {
+                    $processed = $indexer->sync_chunk( $offset, $limit );
+                    if ( $processed === 0 ) {
+                        break;
+                    }
+                    $progress->tick( $processed );
+                    $offset += $processed;
+                }
+                $progress->finish();
+                update_option( 'fas_index_built', '1' );
+                WP_CLI::success( "Search index built successfully!" );
+            }
+        }
+    }
+    WP_CLI::add_command( 'fas', 'FAS_CLI_Indexer' );
 }
