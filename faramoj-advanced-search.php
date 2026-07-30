@@ -14,6 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Autoload Classes
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-fas-core.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-fas-i18n.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-fas-tokenizer.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-fas-indexer.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-fas-rest.php';
 require_once plugin_dir_path( __FILE__ ) . 'admin/class-fas-admin.php';
 

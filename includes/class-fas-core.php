@@ -74,11 +74,24 @@ class FAS_Core {
         $rest = new FAS_Rest();
         add_action( 'rest_api_init', array( $rest, 'register_routes' ) );
 
-        // Admin Panel Settings
+        // Initialize Indexer
+        $indexer = new FAS_Indexer();
+        add_action( 'save_post', array( $indexer, 'index_post' ) );
+        add_action( 'deleted_post', array( $indexer, 'remove_post' ) );
+
+        // Admin Panel Settings & Indexer Init
         if ( is_admin() ) {
             $admin = new FAS_Admin();
             add_action( 'admin_menu', array( $admin, 'add_admin_menu' ) );
             add_action( 'admin_init', array( $admin, 'register_settings' ) );
+            add_action( 'admin_init', function() use ( $indexer ) {
+                $db_version = get_option( 'fas_index_db_version', '0' );
+                if ( $db_version !== '1.0.0' ) {
+                    $indexer->create_table();
+                    $indexer->sync_all();
+                    update_option( 'fas_index_db_version', '1.0.0' );
+                }
+            } );
         }
 
         // Frontend Styles & Scripts

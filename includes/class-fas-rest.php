@@ -469,25 +469,36 @@ class FAS_Rest {
     }
 
     /**
-     * Helper to highlight the query in a text safely.
+     * Helper to highlight the query tokens in a text safely.
+     * Uses FAS_Tokenizer to extract tokens and applies highlighting robustly.
      */
     private function highlight_text( $text, $term ) {
         $escaped = esc_html( $text );
-        if ( empty( $term ) ) {
+        $tokens = FAS_Tokenizer::tokenize( $term );
+
+        if ( empty( $tokens ) ) {
             return $escaped;
         }
 
-        // Generate highlight patterns for raw, English, and Persian digit normalized variations
-        $terms = array_unique( array_filter( array(
-            $term,
-            $this->convert_persian_to_english_digits( $term ),
-            $this->convert_english_to_persian_digits( $term )
-        ) ) );
+        // Add digit variations for highlighting to match how the user might type it natively vs how it's stored
+        $highlight_tokens = array();
+        foreach ( $tokens as $t ) {
+            $highlight_tokens[] = $t;
+            $highlight_tokens[] = $this->convert_persian_to_english_digits( $t );
+            $highlight_tokens[] = $this->convert_english_to_persian_digits( $t );
+        }
+        $highlight_tokens = array_unique( array_filter( $highlight_tokens ) );
 
-        foreach ( $terms as $t ) {
+        // Sort by length descending to prevent substring highlighting overlap
+        usort( $highlight_tokens, function( $a, $b ) {
+            return mb_strlen( $b ) - mb_strlen( $a );
+        } );
+
+        foreach ( $highlight_tokens as $t ) {
             $quoted_term = preg_quote( $t, '/' );
+            // Use negative lookahead/lookbehind to prevent highlighting already highlighted text (i.e. inside <mark>)
             $escaped = preg_replace(
-                '/(' . $quoted_term . ')/i',
+                '/(?![^<]*>)' . '(?i)(' . $quoted_term . ')/u',
                 '<mark class="fas-highlight">$1</mark>',
                 $escaped
             );
@@ -496,95 +507,53 @@ class FAS_Rest {
         return $escaped;
     }
 
-    /**
-     * Fetch all unique post IDs matching search terms across title, content, and specified metadata.
-     * Re-written for performance using $wpdb and smart cross-field matching.
-     */
-    private function get_matched_post_ids( $post_type, $search_terms, $meta_keys = [] ) {
+    private function execute_db_query( $term, $lang ) {
         global $wpdb;
-        $all_ids = array();
+        $table_name = $wpdb->prefix . 'fas_search_index';
 
-        $post_type_sql = $wpdb->prepare( "post_type = %s", $post_type );
-
-        // Generate query for each normalized term format (Original, English digits, Persian digits)
-        foreach ( $search_terms as $term ) {
-            $words = array_filter( explode( ' ', $term ) );
-            if ( empty( $words ) ) {
-                continue;
-            }
-
-            $word_queries = array();
-            foreach ( $words as $word ) {
-                $like = '%' . $wpdb->esc_like( $word ) . '%';
-
-                $title_content_sql = $wpdb->prepare( "(p.post_title LIKE %s OR p.post_content LIKE %s)", $like, $like );
-
-                if ( ! empty( $meta_keys ) ) {
-                    $meta_keys_in = "'" . implode( "','", array_map( 'esc_sql', $meta_keys ) ) . "'";
-                    $meta_sql = $wpdb->prepare( "
-                        OR EXISTS (
-                            SELECT 1 FROM {$wpdb->postmeta} pm
-                            WHERE pm.post_id = p.ID
-                            AND pm.meta_key IN ($meta_keys_in)
-                            AND pm.meta_value LIKE %s
-                        )", $like );
-
-                    $word_queries[] = "($title_content_sql $meta_sql)";
-                } else {
-                    $word_queries[] = $title_content_sql;
-                }
-            }
-
-            // All words must match *somewhere* (title, content, or meta)
-            $term_query = implode( " AND ", $word_queries );
-
-            $sql = "
-                SELECT p.ID
-                FROM {$wpdb->posts} p
-                WHERE p.post_status = 'publish'
-                AND $post_type_sql
-                AND ($term_query)
-                LIMIT 50
-            ";
-
-            $results = $wpdb->get_col( $sql );
-            if ( ! empty( $results ) ) {
-                $all_ids = array_merge( $all_ids, $results );
-            }
+        $tokens = FAS_Tokenizer::tokenize( $term );
+        if ( empty( $tokens ) ) {
+            return array( 'all' => [], 'products' => [], 'posts' => [], 'docs' => [] );
         }
 
-        return array_unique( $all_ids );
-    }
+        // Generate strict AND condition for the tokens against our custom index
+        $token_queries = array();
+        foreach ( $tokens as $token ) {
+            $like = '%' . $wpdb->esc_like( $token ) . '%';
+            $token_queries[] = $wpdb->prepare( "(normalized_title LIKE %s OR normalized_content LIKE %s OR normalized_meta LIKE %s)", $like, $like, $like );
+        }
+        $where_clause = implode( " AND ", $token_queries );
 
-    private function execute_db_query( $term, $lang ) {
-        // Normalize common punctuation to space for less strict English matching (e.g., "Wi-Fi" -> "Wi Fi")
-        $term_no_punct = str_replace( array( '-', '_', '.', ',' ), ' ', $term );
-        $term_no_punct = preg_replace( '/\s+/', ' ', trim( $term_no_punct ) );
+        // Optional exact phrase ranking mechanism (Exact title > Title tokens > other)
+        $exact_like = '%' . $wpdb->esc_like( FAS_Tokenizer::tokenize_to_string( $term ) ) . '%';
 
-        // Stripped spaces entirely for loose matching against mis-spaced products (e.g., "25 dbi" -> "25dbi")
-        $term_no_space = str_replace( ' ', '', $term_no_punct );
+        $sql = "
+            SELECT post_id, post_type,
+                   (CASE WHEN normalized_title LIKE %s THEN 2
+                         WHEN normalized_title LIKE %s THEN 1
+                         ELSE 0 END) as rank_score
+            FROM {$table_name}
+            WHERE $where_clause
+            ORDER BY rank_score DESC, id DESC
+            LIMIT 150
+        ";
 
-        // Smart regex: add a space between numbers and letters if they are adjacent (e.g., "آنتن25" -> "آنتن 25")
-        $term_spaced = preg_replace( '/([a-zA-Z\x{0600}-\x{06FF}])(\d+)/u', '$1 $2', $term_no_punct );
-        $term_spaced = preg_replace( '/(\d+)([a-zA-Z\x{0600}-\x{06FF}])/u', '$1 $2', $term_spaced );
+        // Query the index! Hyper-fast, no table scanning.
+        $results = $wpdb->get_results( $wpdb->prepare( $sql, $exact_like, '%' . $wpdb->esc_like( $tokens[0] ) . '%' ) );
 
-        $normalized_terms = array_unique( array_filter( array(
-            $term,
-            $term_no_punct,
-            $term_no_space,
-            $term_spaced,
-            $this->convert_persian_to_english_digits( $term ),
-            $this->convert_english_to_persian_digits( $term ),
-            $this->convert_persian_to_english_digits( $term_no_space ),
-            $this->convert_english_to_persian_digits( $term_no_space ),
-            $this->convert_persian_to_english_digits( $term_spaced ),
-            $this->convert_english_to_persian_digits( $term_spaced )
-        ) ) );
+        $product_ids = array();
+        $post_ids    = array();
+        $page_ids    = array();
 
-        // Split queries exactly by post type to isolate products (WooCommerce) vs posts vs pages
-        $product_ids = $this->get_matched_post_ids( 'product', $normalized_terms, array( 'technical_specifications', 'frequency_range' ) );
-        $post_ids    = $this->get_matched_post_ids( 'post', $normalized_terms );
-        $page_ids    = $this->get_matched_post_ids( 'page', $normalized_terms );
+        foreach ( $results as $row ) {
+            if ( $row->post_type === 'product' ) {
+                $product_ids[] = $row->post_id;
+            } elseif ( $row->post_type === 'post' ) {
+                $post_ids[] = $row->post_id;
+            } elseif ( $row->post_type === 'page' ) {
+                $page_ids[] = $row->post_id;
+            }
+        }
 
         $formatted_results = array(
             'all'      => [], // Combined list of all matches
